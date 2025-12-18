@@ -24,7 +24,9 @@ builder.Services.AddScoped<IServiceService, ServiceService>();
 builder.Services.AddScoped(typeof(IApiMessage<>), typeof(ApiMessage<>));
 
 //Repository Registration
+
 builder.Services.AddScoped(typeof(IRepositary<>), typeof(Repository<>));
+builder.Services.AddScoped<ICategoryService, CategoryService>();
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
