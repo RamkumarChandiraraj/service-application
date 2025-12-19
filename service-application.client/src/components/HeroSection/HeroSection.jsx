@@ -1,7 +1,8 @@
 import React, { useEffect } from "react";
 import { Link } from "react-router-dom";
 import heroBg from "./hero-bg-abstract.jpg";
-const HeroSection = () => {
+const HeroSection = () =>
+{
   // Smooth scroll to Hero when this page loads
   useEffect(() => {
     const hero = document.getElementById("hero");
