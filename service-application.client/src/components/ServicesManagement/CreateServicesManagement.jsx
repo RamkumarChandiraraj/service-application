@@ -1,84 +1,107 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
+import {
+    createService,
+    updateService,
+    getServiceById,
+} from "../../api/serviceList";
 
 function CreateServiceManagement() {
+    const { id } = useParams(); // if id exists ? EDIT MODE
     const navigate = useNavigate();
 
+    const isEditMode = Boolean(id);
+
     const [formData, setFormData] = useState({
+        id: 0,
         name: "",
-        description: ""
+        description: "",
     });
 
     const [errors, setErrors] = useState({});
     const [loading, setLoading] = useState(false);
+    const [pageLoading, setPageLoading] = useState(false);
+    const [error, setError] = useState(null);
 
-    // Handle input change
+    // Load service data in EDIT mode
+    useEffect(() => {
+        if (!isEditMode) return;
+
+        const fetchService = async () => {
+            setPageLoading(true);
+            try {
+                const res = await getServiceById(id);
+                setFormData({
+                    id: Number(res.data.id),
+                    name: res.data.name,
+                    description: res.data.description,
+                });
+            } catch (err) {
+                setError("Failed to load service details");
+            } finally {
+                setPageLoading(false);
+            }
+        };
+
+        fetchService();
+    }, [id, isEditMode]);
+
+    // Input change
     const handleChange = (e) => {
         const { name, value } = e.target;
-
-        setFormData({
-            ...formData,
-            [name]: value
-        });
-
-        // Clear error while typing
-        setErrors({
-            ...errors,
-            [name]: ""
-        });
+        setFormData({ ...formData, [name]: value });
+        setErrors({ ...errors, [name]: "" });
     };
 
-    // Validation logic (matches backend)
+    // Validation
     const validate = () => {
-        let tempErrors = {};
+        let temp = {};
+        if (!formData.name.trim()) temp.name = "Service name is required";
+        if (!formData.description.trim())
+            temp.description = "Description is required";
 
-        if (!formData.name || formData.name.trim() === "") {
-            tempErrors.name = "Service name is required";
-        }
-
-        if (!formData.description || formData.description.trim() === "") {
-            tempErrors.description = "Description is required";
-        }
-
-        setErrors(tempErrors);
-        return Object.keys(tempErrors).length === 0;
+        setErrors(temp);
+        return Object.keys(temp).length === 0;
     };
 
-    // Submit handler
+    // Submit (Create / Update)
     const handleSubmit = async (e) => {
         e.preventDefault();
-
         if (!validate()) return;
 
         setLoading(true);
+        setError(null);
 
         try {
-            await axios.post(
-                "https://localhost:44351/api/Service",
-                {
-                    name: formData.name,
-                    description: formData.description
-                }
-            );
-
-            alert("Service created successfully");
-            navigate("/servicelist"); // back to service list
-        } catch (error) {
-            if (error.response && error.response.data?.message) {
-                alert(error.response.data.message);
+            if (isEditMode) {
+                await updateService(formData);
+                alert("Service updated successfully");
             } else {
-                alert("Something went wrong. Please try again.");
+                await createService(formData);
+                alert("Service created successfully");
             }
+            navigate("/servicelist");
+        } catch (err) {
+            setError(
+                err.response?.data?.message ||
+                "Something went wrong. Please try again."
+            );
         } finally {
             setLoading(false);
         }
     };
 
+    if (pageLoading) return <p className="text-center mt-5">Loading...</p>;
+
     return (
         <div className="d-flex justify-content-center align-items-center bg-light vh-100">
             <div className="w-50 rounded bg-white border shadow p-4">
-                <h3 className="text-center mb-4">Create Service</h3>
+                <h3 className="text-center mb-4">
+                    {isEditMode ? "Update Service" : "Create Service"}
+                </h3>
+
+                {error && <div className="alert alert-danger">{error}</div>}
 
                 <form onSubmit={handleSubmit}>
                     {/* Service Name */}
@@ -88,16 +111,14 @@ function CreateServiceManagement() {
                         </label>
                         <input
                             type="text"
-                            className={`form-control ${errors.name ? "is-invalid" : ""}`}
                             name="name"
                             value={formData.name}
                             onChange={handleChange}
-                            placeholder="Enter service name"
+                            className={`form-control ${errors.name ? "is-invalid" : ""
+                                }`}
                         />
                         {errors.name && (
-                            <div className="invalid-feedback">
-                                {errors.name}
-                            </div>
+                            <div className="invalid-feedback">{errors.name}</div>
                         )}
                     </div>
 
@@ -107,13 +128,13 @@ function CreateServiceManagement() {
                             Description <span className="text-danger">*</span>
                         </label>
                         <textarea
-                            className={`form-control ${errors.description ? "is-invalid" : ""}`}
                             name="description"
                             value={formData.description}
                             onChange={handleChange}
-                            placeholder="Enter description"
+                            className={`form-control ${errors.description ? "is-invalid" : ""
+                                }`}
                             rows="3"
-                        ></textarea>
+                        />
                         {errors.description && (
                             <div className="invalid-feedback">
                                 {errors.description}
@@ -131,7 +152,13 @@ function CreateServiceManagement() {
                             className="btn btn-success"
                             disabled={loading}
                         >
-                            {loading ? "Saving..." : "Save"}
+                            {loading
+                                ? isEditMode
+                                    ? "Updating..."
+                                    : "Saving..."
+                                : isEditMode
+                                    ? "Update"
+                                    : "Save"}
                         </button>
                     </div>
                 </form>
