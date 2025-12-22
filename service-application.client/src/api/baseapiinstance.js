@@ -38,7 +38,9 @@ function clearTokens() {
 /* Base URL configuration */
 const BASE_URL =
     import.meta.env.VITE_API_BASE_URL ||
-  `${window.location.origin}/api`;
+    `https://localhost:44351`;
+
+console.log("RestAPI URL" + BASE_URL);
 
 /* Create axios instance */
 const api = axios.create({

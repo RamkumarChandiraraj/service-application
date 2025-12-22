@@ -13,7 +13,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Register DbContext with MySQL
 builder.Services.AddDbContext<ServiceApplicationDbContext>(options =>
-    options.UseMySQL(builder.Configuration.GetConnectionString("DB_mysql")), ServiceLifetime.Singleton);
+    options.UseMySQL(builder.Configuration.GetConnectionString("DB_mysql")), ServiceLifetime.Scoped);
 
 //mapper registration
 builder.Services.AddMapster();

@@ -36,7 +36,7 @@ const HeaderNav = () => {
                             <Link to="/servicelist">Services</Link>
                         </li>
                         <li>
-                            <a href="#portfolio">Portfolio</a>
+                            <Link to="/categorylist">Category</Link>
                         </li>
                         <li>
                             <a href="#team">Team</a>
