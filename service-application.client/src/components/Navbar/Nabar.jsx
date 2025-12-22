@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { Link } from "react-router-dom";
 
 const HeaderNav = () => {
     const [mobileActive, setMobileActive] = useState(false);
@@ -32,7 +33,7 @@ const HeaderNav = () => {
                             <a href="#about">About</a>
                         </li>
                         <li>
-                            <a href="#services">Services</a>
+                            <Link to="/servicelist">Services</Link>
                         </li>
                         <li>
                             <a href="#portfolio">Portfolio</a>

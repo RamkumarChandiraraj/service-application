@@ -8,11 +8,15 @@ using Services.Impl;
 using Services.Interface;
 using Services.Mappings;
 
+var corsPolicyName = "AllowAll";
 var builder = WebApplication.CreateBuilder(args);
 
+var con = builder.Configuration.GetConnectionString("DB_mysql");
 // Register DbContext with MySQL
 builder.Services.AddDbContext<ServiceApplicationDbContext>(options =>
-    options.UseMySQL(builder.Configuration.GetConnectionString("DB_mysql")), ServiceLifetime.Singleton);
+    options.UseMySQL(con),   ServiceLifetime.Scoped
+    
+    );
 
 //mapper registration
 builder.Services.AddMapster();
@@ -31,10 +35,34 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+builder.Services.AddCors(options =>
+{
+    //options.AddPolicy("MyCorsPolicy", policy =>
+    //{
+    //    policy.WithOrigins("http://localhost:4200", "https://myclientapp.com") // Specific origins
+    //          .AllowAnyHeader()
+    //          .AllowAnyMethod();
+    //    // .AllowCredentials(); // Use with caution and specific origins
+    //});
+
+    // Alternatively, a more permissive policy (use with caution in production)
+    options.AddPolicy(corsPolicyName, policy =>
+    {
+        policy.AllowAnyOrigin()
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+});
+
+
+
+
 var app = builder.Build();
 
 app.UseDefaultFiles();
 app.UseStaticFiles();
+
+
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -44,6 +72,9 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+// Enable CORS middleware, applying the named policy
+app.UseCors(corsPolicyName); // Use the name of your defined policy
 
 app.UseAuthorization();
 

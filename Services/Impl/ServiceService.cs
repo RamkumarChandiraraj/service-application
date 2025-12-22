@@ -2,6 +2,8 @@
 using Common.RequestDto;
 using Data.Base;
 using Data.Entities;
+using Microsoft.EntityFrameworkCore;
+using Org.BouncyCastle.Ocsp;
 using Services.Interface;
 
 namespace Services.Impl
@@ -49,7 +51,7 @@ namespace Services.Impl
         {
             try
             {
-                var oldEntity = await GetServiceById(req.ID);
+                var oldEntity = await _serviceRespository.FindByCondition(s => s.ID == req.ID).FirstOrDefaultAsync();
 
                 oldEntity.Name = req.Name;
                 oldEntity.Description = req.Description;
@@ -68,7 +70,7 @@ namespace Services.Impl
         {
             try
             {
-                var oldEntity = await GetServiceById(id);
+                var oldEntity = await _serviceRespository.FindByCondition(s => s.ID == id).FirstOrDefaultAsync();
 
                 oldEntity.GenerateDeleteHistory(1);
                 await _serviceRespository.DeleteAsync(oldEntity);
