@@ -11,9 +11,12 @@ using Services.Mappings;
 var corsPolicyName = "AllowAll";
 var builder = WebApplication.CreateBuilder(args);
 
+var con = builder.Configuration.GetConnectionString("DB_mysql");
 // Register DbContext with MySQL
 builder.Services.AddDbContext<ServiceApplicationDbContext>(options =>
-    options.UseMySQL(builder.Configuration.GetConnectionString("DB_mysql")), ServiceLifetime.Singleton);
+    options.UseMySQL(con),   ServiceLifetime.Scoped
+    
+    );
 
 //mapper registration
 builder.Services.AddMapster();
