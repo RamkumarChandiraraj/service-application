@@ -1,6 +1,5 @@
 import React from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { getAllServices } from "../../api/serviceList";
 
 const serviceData = {
   home: {

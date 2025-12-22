@@ -1,4 +1,7 @@
-﻿using Mapster;
+﻿using Common.RequestDto;
+using Common.ResponseDto;
+using Data.Entities;
+using Mapster;
 using MapsterMapper;
 using Services.Mapper;
 
@@ -11,5 +14,6 @@ public static class RegisterMapper
         TypeAdapterConfig.GlobalSettings.Apply(
             new ServicesMapper()
             );
+     
     }
 }

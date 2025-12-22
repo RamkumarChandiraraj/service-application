@@ -11,9 +11,12 @@ using Services.Mappings;
 var corsPolicyName = "AllowAll";
 var builder = WebApplication.CreateBuilder(args);
 
+var con = builder.Configuration.GetConnectionString("DB_mysql");
 // Register DbContext with MySQL
 builder.Services.AddDbContext<ServiceApplicationDbContext>(options =>
-    options.UseMySQL(builder.Configuration.GetConnectionString("DB_mysql")), ServiceLifetime.Singleton);
+    options.UseMySQL(con),   ServiceLifetime.Scoped
+    
+    );
 
 //mapper registration
 builder.Services.AddMapster();
@@ -25,7 +28,9 @@ builder.Services.AddScoped<IServiceService, ServiceService>();
 builder.Services.AddScoped(typeof(IApiMessage<>), typeof(ApiMessage<>));
 
 //Repository Registration
+
 builder.Services.AddScoped(typeof(IRepositary<>), typeof(Repository<>));
+builder.Services.AddScoped<ICategoryService, CategoryService>();
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle

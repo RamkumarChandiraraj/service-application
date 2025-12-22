@@ -8,6 +8,7 @@ namespace Data.Context
         public ServiceApplicationDbContext(DbContextOptions<ServiceApplicationDbContext> options) : base(options)
         { 
         }
+        public DbSet<Category> Categories { get; set; }
         public DbSet<Service> Service { get; set; }
     }
 }

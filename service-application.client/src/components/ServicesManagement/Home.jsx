@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { Link } from "react-router-dom";
-import { getAllServices } from "../../api/serviceList";
+import { getAllServices, deleteService } from "../../api/serviceList";
 
 function Home() {
     const [data, setData] = useState([]);
@@ -9,6 +9,9 @@ function Home() {
     const [error, setError] = useState(null);
 
     useEffect(() => {
+
+        const abortController = new AbortController()
+
         const fetchServices = async () => {
             try {
                 const res = await getAllServices();
@@ -22,10 +25,30 @@ function Home() {
         };
 
         fetchServices();
+
+        // Cleanup function runs before the next effect or unmount
+        return () => {
+            abortController.abort(); // Aborts ongoing request
+        }
+
     }, []);
 
+    const handleDelete = async (id) => {
+        const confirmed = window.confirm("Are you sure you want to delete this service?");
+        if (!confirmed) return;
 
-    if (loading) return <p>Loading products...</p>;
+        try {
+            await deleteService(id);
+            // Remove deleted item from state to update UI
+            setData(prev => prev.filter(service => service.id !== id));
+            alert("Service deleted successfully");
+        } catch (err) {
+            alert("Failed to delete service: " + (err.response?.data?.message || err.message));
+        }
+    };
+
+
+    if (loading) return <p>Loading Services...</p>;
     if (error) return <p>Error: {error}</p>;
 
     //useEffect(() => {
@@ -62,18 +85,36 @@ function Home() {
                                 <td>{d.name}</td>
                                 <td>{d.description}</td>
                                 <td className="text-end">
-                                    <button className="btn btn-sm btn-info me-2">
+                                    <Link
+                                        to={`/readservice/${d.id}`}
+                                        className="btn btn-sm btn-info me-2"
+                                    >
                                         Read
-                                    </button>
-                                    <button className="btn btn-sm btn-primary me-2">
+                                    </Link>
+                                    <Link
+                                        to={`/createservicemanagement/${d.id}`}
+                                        className="btn btn-sm btn-primary me-2"
+                                    >
                                         Edit
-                                    </button>
-                                    <button className="btn btn-sm btn-danger">
+                                    </Link>
+                                    <button
+                                        className="btn btn-sm btn-danger"
+                                        onClick={() => handleDelete(d.id)}
+                                    >
                                         Delete
                                     </button>
                                 </td>
                             </tr>
                         ))}
+                        {
+                            data.length === 0 && (
+                                <tr>
+                                    <td colSpan="4" className ="text-center">
+                                        No Services Found
+                                    </td>
+                                </tr>
+                            )
+                        }
                     </tbody>
                 </table>
             </div>
