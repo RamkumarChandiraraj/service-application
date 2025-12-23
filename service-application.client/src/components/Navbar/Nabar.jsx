@@ -39,7 +39,7 @@ const HeaderNav = () => {
                             <Link to="/categorylist">Category</Link>
                         </li>
                         <li>
-                            <a href="#team">Team</a>
+                            <a href="/locationlist">Location</a>
                         </li>
 
                         <li className="dropdown">
