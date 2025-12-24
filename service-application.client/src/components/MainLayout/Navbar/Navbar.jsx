@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
+import logo from "../logo.jpeg";
 
 const Navbar = () => {
   const [mobileActive, setMobileActive] = useState(false);
@@ -51,15 +52,29 @@ const Navbar = () => {
           className="logo d-flex align-items-center me-auto"
           onClick={handleLinkClick}
         >
-          <h1 className="sitename">Aanaiyaan</h1>
+          <img
+            src={logo}
+            alt="Aanaiyaan Logo"
+            style={{
+              maxHeight: "60px", // maximum height
+              width: "auto", // keep aspect ratio
+              objectFit: "contain",
+            }}
+          />
         </Link>
 
         <nav id="navmenu" className="navmenu">
           <ul className="ms-auto align-items-center">
             <li>
-              <Link to="/" className="active" onClick={handleLinkClick}>
+              <a
+                href="#hero"
+                onClick={(e) => {
+                  e.preventDefault();
+                  scrollToSection("hero");
+                }}
+              >
                 Home
-              </Link>
+              </a>
             </li>
 
             {/* ✅ About scroll */}

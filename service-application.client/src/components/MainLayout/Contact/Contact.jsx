@@ -6,7 +6,7 @@ const Contact = () => {
       {/* Section Title */}
       <div className="container section-title" data-aos="fade-up">
         <h2>Contact</h2>
-        <p>Necessitatibus eius consequatur ex aliquid fuga eum quidem sint consectetur velit</p>
+        <p>We would love to hear from you. Fill out the form below to get in touch!</p>
       </div>
 
       <div className="container" data-aos="fade-up" data-aos-delay="100">
@@ -17,7 +17,11 @@ const Contact = () => {
               <i className="bi bi-geo-alt flex-shrink-0"></i>
               <div>
                 <h3>Address</h3>
-                <p>A108 Adam Street, New York, NY 535022</p>
+                <p>Anaiyaan Technologies
+
+Chennai, Tamil Nadu
+
+India</p>
               </div>
             </div>
 
@@ -25,7 +29,7 @@ const Contact = () => {
               <i className="bi bi-telephone flex-shrink-0"></i>
               <div>
                 <h3>Call Us</h3>
-                <p>+1 5589 55488 55</p>
+                <p>+91 00000 00000</p>
               </div>
             </div>
 
