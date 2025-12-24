@@ -1,60 +1,71 @@
 import React from "react";
-import { useNavigate } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 
-// Sample category data
 const categoryData = {
     home: {
-        title: "Home Services",
-        description: "Plumbing, Carpentry, Electrical, and more",
+        title: "Home Categories",
+        items: ["Plumbing", "Carpentry", "Electrician"],
     },
     mechanic: {
-        title: "Mechanic Services",
-        description: "Two Wheeler, Four Wheeler, Heavy Mechanics",
+        title: "Mechanic Categories",
+        items: ["Two Wheeler", "Four Wheeler", "Heavy Mechanics"],
     },
     food: {
-        title: "Food Services",
-        description: "Dine In, Take Away",
+        title: "Food Categories",
+        items: ["Dine In", "Take Away"],
     },
     agriculture: {
-        title: "Agriculture Services",
-        description: "Harvesting, Delivery, Equipment Services",
+        title: "Agriculture Categories",
+        items: ["Harvest", "Delivery"],
     },
 };
 
-const Category = () => {
+const Categories = () => {
+    const { category } = useParams();
     const navigate = useNavigate();
+    const data = categoryData[category];
 
-    // Redirect to service page on category click
-    const goToCategory = (categoryKey) => {
-        navigate(`/services/${categoryKey}`); // assuming Services route: /services/:category
-    };
+    const goToHome = () => navigate("/");
+
+    if (!data) {
+        return (
+            <section className="categories section light-background">
+                <div className="container text-center">
+                    <h2>Please select a category</h2>
+                    <button className="btn btn-primary mt-3" onClick={goToHome}>
+                        Back to Home
+                    </button>
+                </div>
+            </section>
+        );
+    }
 
     return (
-        <section id="category" className="category section light-background">
+        <section id="categories" className="categories section light-background">
             <div className="container section-title text-center" data-aos="fade-up">
-                <h2>Our Categories</h2>
-                <p>Select a category to explore available services</p>
+                <h2>{data.title}</h2>
+                <p>Select a category based on your needs</p>
+
+                <button className="btn btn-outline-primary mt-3" onClick={goToHome}>
+                    <i className="bi bi-arrow-left"></i> Back to Home
+                </button>
             </div>
 
             <div className="container">
                 <div className="row gy-4">
-                    {Object.keys(categoryData).map((key, index) => (
+                    {data.items.map((item, index) => (
                         <div
-                            key={key}
-                            className="col-lg-3 col-md-6"
+                            key={item}
+                            className="col-lg-4 col-md-6"
                             data-aos="fade-up"
                             data-aos-delay={(index + 1) * 100}
                         >
-                            <div
-                                className="category-item position-relative border rounded p-3 text-center cursor-pointer"
-                                onClick={() => goToCategory(key)}
-                                style={{ cursor: "pointer", minHeight: "150px" }}
-                            >
-                                <h3>{categoryData[key].title}</h3>
-                                <p>{categoryData[key].description}</p>
-                                <button className="btn btn-outline-primary mt-2">
-                                    Explore
-                                </button>
+                            <div className="category-item position-relative">
+                                <h3>{item}</h3>
+                                <p>
+                                    Professional {item.toLowerCase()} services delivered with
+                                    quality and reliability.
+                                </p>
                             </div>
                         </div>
                     ))}
@@ -64,4 +75,4 @@ const Category = () => {
     );
 };
 
-export default Category;
+export default Categories;

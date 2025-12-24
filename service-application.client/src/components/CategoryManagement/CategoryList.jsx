@@ -1,46 +1,54 @@
-﻿import { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+﻿/* eslint-disable no-unused-vars */
+import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { getAllCategories, deleteCategory } from "../../api/categoryApi";
 
 function CategoryList() {
-    const navigate = useNavigate();
-
     const [data, setData] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
     useEffect(() => {
+        const abortController = new AbortController();
+
         const fetchCategories = async () => {
             try {
                 const res = await getAllCategories();
-                console.log(res);
-                setData(res.data); // 🔑 same pattern as Home
+
+                // keep existing response handling
+                const categories = res?.data?.data || res?.data || [];
+
+                const ordered = [...categories].sort((a, b) => a.id - b.id);
+                setData(ordered);
+
                 setLoading(false);
             } catch (err) {
-                setError(err.message);
+                setError(err.response?.data?.message || err.message);
                 setLoading(false);
             }
         };
 
         fetchCategories();
+
+        return () => {
+            abortController.abort();
+        };
     }, []);
 
-    const handleEdit = (id) => {
-        navigate(`/category/edit/${id}`);
-    };
-
     const handleDelete = async (id) => {
-        if (!window.confirm("Are you sure you want to delete this category?")) return;
+        const confirmed = window.confirm("Are you sure you want to delete this category?");
+        if (!confirmed) return;
 
         try {
             await deleteCategory(id);
-            setData(data.filter((c) => c.id !== id));
-        } catch {
-            alert("Delete failed");
+            setData(prev => prev.filter(category => category.id !== id));
+            alert("Category deleted successfully");
+        } catch (err) {
+            alert(err.response?.data?.message || err.message);
         }
     };
 
-    if (loading) return <p>Loading categories...</p>;
+    if (loading) return <p>Loading Categories...</p>;
     if (error) return <p>Error: {error}</p>;
 
     return (
@@ -49,7 +57,7 @@ function CategoryList() {
 
             <div className="w-75 rounded bg-white border shadow p-4">
                 <div className="d-flex justify-content-end">
-                    <Link to="/CreateCategorymanagement" className="btn btn-success">
+                    <Link to="/createcategorymanagement" className="btn btn-success">
                         Add +
                     </Link>
                 </div>
@@ -60,6 +68,7 @@ function CategoryList() {
                             <th>ID</th>
                             <th>Name</th>
                             <th>Description</th>
+                            <th className="text-end">Actions</th>
                         </tr>
                     </thead>
 
@@ -70,12 +79,18 @@ function CategoryList() {
                                 <td>{d.name}</td>
                                 <td>{d.description}</td>
                                 <td className="text-end">
-                                    <button
+                                    <Link
+                                        to={`/ReadCategory/${d.id}`}
+                                        className="btn btn-sm btn-info me-2"
+                                    >
+                                        Read
+                                    </Link>
+                                    <Link
+                                        to={`/createcategorymanagement/${d.id}`}
                                         className="btn btn-sm btn-primary me-2"
-                                        onClick={() => handleEdit(d.id)}
                                     >
                                         Edit
-                                    </button>
+                                    </Link>
                                     <button
                                         className="btn btn-sm btn-danger"
                                         onClick={() => handleDelete(d.id)}
@@ -89,7 +104,7 @@ function CategoryList() {
                         {data.length === 0 && (
                             <tr>
                                 <td colSpan="4" className="text-center">
-                                    No categories found
+                                    No Categories Found
                                 </td>
                             </tr>
                         )}

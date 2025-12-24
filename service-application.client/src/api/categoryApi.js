@@ -1,23 +1,37 @@
-import api from "./baseapiinstance";
+﻿import api from "./baseapiinstance";
 
+// GET ALL CATEGORIES
 export const getAllCategories = async () => {
-    const res = await api.get("/api/category/list");
-    return res.data;
+    const response = await api.get("/api/category/list");
+    return response.data;
 };
 
+// GET CATEGORY BY ID
 export const getCategoryById = async (id) => {
-    const res = await api.get(`/api/category/${id}`);
-    return res.data;
+    const response = await api.get(`/api/category/${id}`);
+    return response.data;
 };
 
-export const createCategory = async (payload) => {
-    return await api.post("/api/category", payload);
+// CREATE CATEGORY
+export const createCategory = async (data) => {
+    const response = await api.post("/api/category", {
+        name: data.name,
+        description: data.description,
+    });
+    return response.data;
 };
 
-export const updateCategory = async (id, payload) => {
-    return await api.put(`/api/category/${id}`, payload);
+// UPDATE CATEGORY
+export const updateCategory = async (id, data) => {
+    const response = await api.put(`/api/category/${id}`, {
+        name: data.name,
+        description: data.description,
+    });
+    return response.data;
 };
 
+// DELETE CATEGORY
 export const deleteCategory = async (id) => {
-    return await api.delete(`/api/category/${id}`);
+    const response = await api.delete(`/api/category/${id}`);
+    return response.data;
 };

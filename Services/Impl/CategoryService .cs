@@ -16,22 +16,18 @@ namespace Services.Impl
             _repository = repository;
         }
 
-        public async ValueTask CreateCategoryAsync(CategoryRequestDto dto)
+        public async ValueTask<Category> CreateCategoryAsync(CategoryRequestDto dto)
         {
             var entity = dto.ToMap<CategoryRequestDto, Category>();
             await _repository.CreateAsync(entity);
+            return entity;
         }
 
-        public async ValueTask<Category> GetCategoryByIdAsync(long id)
+        public async ValueTask<Category?> GetCategoryByIdAsync(long id)
         {
-            var entity = await _repository
+            return await _repository
                 .FindByCondition(x => x.ID == id)
                 .FirstOrDefaultAsync();
-
-            if (entity == null)
-                throw new Exception("Category not found");
-
-            return entity;
         }
 
         public async ValueTask<List<Category>> GetCategoryAllAsync()
@@ -42,20 +38,25 @@ namespace Services.Impl
                 .ToListAsync();
         }
 
-        public async ValueTask UpdateCategoryAsync(CategoryRequestDto dto)
+        public async ValueTask<bool> UpdateCategoryByIdAsync(CategoryRequestDto dto)
         {
             var entity = await GetCategoryByIdAsync(dto.ID);
+            if (entity == null) return false;
 
             entity.Name = dto.Name;
             entity.Description = dto.Description;
 
             await _repository.UpdateAsync(entity);
+            return true;
         }
 
-        public async ValueTask DeleteCategoryAsync(long id)
+        public async ValueTask<bool> DeleteCategoryByIdAsync(long id)
         {
             var entity = await GetCategoryByIdAsync(id);
+            if (entity == null) return false;
+
             await _repository.DeleteAsync(entity);
+            return true;
         }
     }
 }

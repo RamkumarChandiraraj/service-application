@@ -9,7 +9,7 @@ import Home from "./components/ServicesManagement/Home";
 import CreateServiceManagement from "./components/ServicesManagement/CreateServicesManagement";
 import ReadServiceManagement from "./components/ServicesManagement/ReadServiceManagement";
 import CreateCategorymanagement from "./components/CategoryManagement/CreateCategorymanagement";
-
+import ReadCategoryManagement from "./components/CategoryManagement/ReadCategoryManagement";
 
 function App() {
   return (
@@ -20,7 +20,7 @@ function App() {
               <Route path="/" element={<HeroSection />} />
               <Route path="/services/:category" element={<Services />} />
               <Route path="/Categorys/:Categorys" element={<Categorys />} />
-              <Route path="/categorylist" element={<CategoryList />} />
+              <Route path="/CategoryList" element={<CategoryList />} />
               <Route path="/servicelist/" element={<Home />} />
               {/* CREATE */}
               <Route
@@ -32,9 +32,16 @@ function App() {
                   path="/createservicemanagement/:id"
                   element={<CreateServiceManagement />}
               />
+              <Route path="/CreateCategorymanagement/:id"
+                  element={<CreateCategorymanagement />} />
+              { /* READ */ }
               <Route
                   path="/readservice/:id"
                   element={<ReadServiceManagement />}
+              />
+              <Route
+                  path="/ReadCategory/:id"
+                  element={<ReadCategoryManagement />}
               />
               <Route path="/createservicemanagement/" element={<CreateServiceManagement />} />
               <Route path="/CreateCategorymanagement/" element={<CreateCategorymanagement />} />
