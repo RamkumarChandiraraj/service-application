@@ -26,9 +26,9 @@ RegisterMapper.RegisterMapsterConfiguration();
 //builder.Services.AddScoped<ServiceApplicationDbContext>();
 builder.Services.AddScoped<IServiceService, ServiceService>();
 builder.Services.AddScoped(typeof(IApiMessage<>), typeof(ApiMessage<>));
+builder.Services.AddScoped<ILocationService, LocationService>();
 
 //Repository Registration
-
 builder.Services.AddScoped(typeof(IRepositary<>), typeof(Repository<>));
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 
