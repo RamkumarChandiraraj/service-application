@@ -27,9 +27,9 @@ RegisterMapper.RegisterMapsterConfiguration();
 builder.Services.AddScoped<IServiceService, ServiceService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped(typeof(IApiMessage<>), typeof(ApiMessage<>));
+builder.Services.AddScoped<ILocationService, LocationService>();
 
 //Repository Registration
-
 builder.Services.AddScoped(typeof(IRepositary<>), typeof(Repository<>));
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 
@@ -68,11 +68,11 @@ app.UseStaticFiles();
 
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
+//if (app.Environment.IsDevelopment())
+//{
     app.UseSwagger();
     app.UseSwaggerUI();
-}
+//}
 
 app.UseHttpsRedirection();
 
