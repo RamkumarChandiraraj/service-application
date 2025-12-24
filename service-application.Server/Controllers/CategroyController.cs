@@ -11,22 +11,79 @@ namespace service_application.Server.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class CategoryController(
-        ICategoryService categoryService,
-        IApiMessage<IApiResponse> apiResponse) : ControllerBase
+    public class CategoryController : ControllerBase
     {
-        private readonly ICategoryService _categoryService = categoryService;
-        private readonly IApiMessage<IApiResponse> _apiResponse = apiResponse;
+        private readonly ICategoryService _categoryService;
+        private readonly IApiMessage<IApiResponse> _apiResponse;
+
+        public CategoryController(
+            ICategoryService categoryService,
+            IApiMessage<IApiResponse> apiResponse)
+        {
+            _categoryService = categoryService;
+            _apiResponse = apiResponse;
+        }
 
         [HttpPost]
-        public async ValueTask<IActionResult> Create(CategoryRequestDto dto)
+        public async ValueTask<IActionResult> CreateCategory([FromBody] CategoryRequestDto dto)
         {
             try
             {
-                if (string.IsNullOrEmpty(dto.Name))
+                if (string.IsNullOrWhiteSpace(dto.Name))
                     return _apiResponse.BadRequest("Name is required");
 
-                await _categoryService.CreateCategoryAsync(dto);
+                if (string.IsNullOrWhiteSpace(dto.Description))
+                    return _apiResponse.BadRequest("Description is required");
+
+                var result = await _categoryService.CreateCategoryAsync(dto);
+                return _apiResponse.Ok(result.ID);
+            }
+            catch (Exception ex)
+            {
+                return _apiResponse.InternalServerError(ex.Message);
+            }
+        }
+
+        [HttpGet("{id:long}")]
+        public async ValueTask<IActionResult> GetById(long id)
+        {
+            try
+            {
+                if (id <= 0)
+                    return _apiResponse.BadRequest("Invalid Id");
+
+                var entity = await _categoryService.GetCategoryByIdAsync(id);
+                if (entity == null)
+                    return _apiResponse.NotFound("Category not found");
+
+                var dto = entity.ToMap<Category, CategoryResponseDto>();
+                return _apiResponse.Ok(dto);
+            }
+            catch (Exception ex)
+            {
+                return _apiResponse.InternalServerError(ex.Message);
+            }
+        }
+
+        [HttpPut("{id:long}")]
+        public async ValueTask<IActionResult> Update(
+       long id,
+       [FromBody] CategoryRequestDto dto)
+        {
+            try
+            {
+                if (id <= 0)
+                    return _apiResponse.BadRequest("Invalid Id");
+
+                if (dto == null)
+                    return _apiResponse.BadRequest("Request body is required");
+
+                dto.ID = id; // 🔑 sync route id with body
+
+                var updated = await _categoryService.UpdateCategoryByIdAsync(dto);
+                if (!updated)
+                    return _apiResponse.NotFound("Category not found");
+
                 return _apiResponse.Ok(true);
             }
             catch (Exception ex)
@@ -35,14 +92,19 @@ namespace service_application.Server.Controllers
             }
         }
 
-        [HttpGet("{id}")]
-        public async ValueTask<IActionResult> Get(long id)
+        [HttpDelete("{id:long}")]
+        public async ValueTask<IActionResult> Delete(long id)
         {
             try
             {
-                var entity = await _categoryService.GetCategoryByIdAsync(id);
-                var dto = entity.ToMap<Category, CategoryResponseDto>();
-                return _apiResponse.Ok(dto);
+                if (id <= 0)
+                    return _apiResponse.BadRequest("Invalid Id");
+
+                var deleted = await _categoryService.DeleteCategoryByIdAsync(id);
+                if (!deleted)
+                    return _apiResponse.NotFound("Category not found");
+
+                return _apiResponse.Ok(true);
             }
             catch (Exception ex)
             {
@@ -53,23 +115,16 @@ namespace service_application.Server.Controllers
         [HttpGet("list")]
         public async ValueTask<IActionResult> GetAll()
         {
-            var list = await _categoryService.GetCategoryAllAsync();
-            var result = list.ToMap<List<Category>, List<CategoryResponseDto>>();
-            return _apiResponse.Ok(result);
-        }
-
-        [HttpPut]
-        public async ValueTask<IActionResult> Update(CategoryRequestDto dto)
-        {
-            await _categoryService.UpdateCategoryAsync(dto);
-            return _apiResponse.Ok(true);
-        }
-
-        [HttpDelete("{id}")]
-        public async ValueTask<IActionResult> Delete(long id)
-        {
-            await _categoryService.DeleteCategoryAsync(id);
-            return _apiResponse.Ok(true);
+            try
+            {
+                var data = await _categoryService.GetCategoryAllAsync();
+                var result = data.ToMap<List<Category>, List<CategoryResponseDto>>();
+                return _apiResponse.Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return _apiResponse.InternalServerError(ex.Message);
+            }
         }
     }
 }
