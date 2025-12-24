@@ -57,9 +57,15 @@ const Navbar = () => {
         <nav id="navmenu" className="navmenu">
           <ul className="ms-auto align-items-center">
             <li>
-              <Link to="/" className="active" onClick={handleLinkClick}>
+              <a
+                href="#hero"
+                onClick={(e) => {
+                  e.preventDefault();
+                  scrollToSection("hero");
+                }}
+              >
                 Home
-              </Link>
+              </a>
             </li>
 
             {/* ✅ About scroll */}
