@@ -60,7 +60,6 @@ function CategoryList() {
                             <th>ID</th>
                             <th>Name</th>
                             <th>Description</th>
-                            <th className="text-end">Action</th>
                         </tr>
                     </thead>
 
