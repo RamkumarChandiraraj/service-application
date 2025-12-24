@@ -1,20 +1,19 @@
 import { Routes, Route } from "react-router-dom";
 
-import Navbar from "./components/Navbar/Nabar";
-import Footer from "./components/Footer/Footer";
+// Layouts
+import MainLayout from "./components/MainLayout/MainLayout";
+import Navbar from "./components/MainLayout/Navbar/Navbar";
+import Footer from "./components/MainLayout/Footer/Footer";
 
-// Public pages
-import HeroSection from "./components/HeroSection/HeroSection";
 
 // Category Management
 import CategoryList from "./components/CategoryManagement/CategoryList";
-import CreateCategorymanagement from "./components/CategoryManagement/CreateCategorymanagement";
+import CreateCategoryManagement from "./components/CategoryManagement/CreateCategorymanagement";
 
 // Service Management
 import Home from "./components/ServicesManagement/Home";
 import CreateServiceManagement from "./components/ServicesManagement/CreateServicesManagement";
 import ReadServiceManagement from "./components/ServicesManagement/ReadServiceManagement";
-import CreateCategorymanagement from "./components/CategoryManagement/CreateCategorymanagement";
 
 // Location Management
 import LocationHome from "./components/Location/LocationHome";
@@ -22,24 +21,32 @@ import CreateLocation from "./components/Location/CreateLocation";
 import ReadLocation from "./components/Location/ReadLocation";
 
 function App() {
-    return (
-        <>
-            <Navbar />
+  return (
+    <>
+      <Navbar />
+      <Routes>
+        {/* Landing Page */}
+        <Route path="/" element={<MainLayout />} />
 
-            <Routes>
-                {/* Public Routes */}
-                <Route path="/" element={<HeroSection />} />
+        {/* Category Management */}
+        <Route path="/categorylist" element={<CategoryList />} />
+        <Route path="/createcategorymanagement" element={<CreateCategoryManagement />} />
 
-                {/* Category Management */}
-                <Route path="/categorylist" element={<CategoryList />} />
-                <Route
-                    path="/createcategorymanagement"
-                    element={<CreateCategorymanagement />}
-                />
+        {/* Service Management */}
+        <Route path="/servicelist" element={<Home />} />
+        <Route path="/createservicemanagement" element={<CreateServiceManagement />} />
+        <Route path="/createservicemanagement/:id" element={<CreateServiceManagement />} />
+        <Route path="/readservice/:id" element={<ReadServiceManagement />} />
 
-                {/* Service Management */}
-                <Route path="/servicelist" element={<Home />} />
-
+        {/* Location Management */}
+        <Route path="/locationlist" element={<LocationHome />} />
+        <Route path="/createlocation" element={<CreateLocation />} />
+        <Route path="/createlocation/:id" element={<CreateLocation />} />
+        <Route path="/readlocation/:id" element={<ReadLocation />} />
+      </Routes>
+      <Footer />
+    </>
+  );
                 <Route
                     path="/createservicemanagement"
                     element={<CreateServiceManagement />}
