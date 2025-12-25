@@ -12,7 +12,9 @@ public static class RegisterMapper
     public static void RegisterMapsterConfiguration()
     {
         TypeAdapterConfig.GlobalSettings.Apply(
-            new ServicesMapper()
+            new ServicesMapper(),
+            new CategoryMapper(),
+            new UserMapper()            
             );
      
     }
