@@ -1,7 +1,7 @@
 using Common.Base;
+using Common.BaseResponse;
 using Data.Base;
 using Data.Context;
-using Data.Entities;
 using Mapster;
 using Microsoft.EntityFrameworkCore;
 using Services.Impl;
@@ -11,44 +11,38 @@ using Services.Mappings;
 var corsPolicyName = "AllowAll";
 var builder = WebApplication.CreateBuilder(args);
 
+// ===================== DATABASE =====================
 var con = builder.Configuration.GetConnectionString("DB_mysql");
-// Register DbContext with MySQL
-builder.Services.AddDbContext<ServiceApplicationDbContext>(options =>
-    options.UseMySQL(con),   ServiceLifetime.Scoped
-    
-    );
 
-//mapper registration
+builder.Services.AddDbContext<ServiceApplicationDbContext>(options =>
+    options.UseMySQL(con),
+    ServiceLifetime.Scoped
+);
+
+// ===================== MAPSTER =====================
 builder.Services.AddMapster();
 RegisterMapper.RegisterMapsterConfiguration();
 
-//Service Registration
-//builder.Services.AddScoped<ServiceApplicationDbContext>();
+// ===================== SERVICES =====================
 builder.Services.AddScoped<IServiceService, ServiceService>();
 builder.Services.AddScoped<IUserService, UserService>();
-builder.Services.AddScoped(typeof(IApiMessage<>), typeof(ApiMessage<>));
+builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<ILocationService, LocationService>();
 
-//Repository Registration
-builder.Services.AddScoped(typeof(IRepositary<>), typeof(Repository<>));
-builder.Services.AddScoped<ICategoryService, CategoryService>();
+// ===================== API RESPONSE =====================
+builder.Services.AddScoped(typeof(IApiMessage<>), typeof(ApiMessage<>));
 
+// ===================== REPOSITORY =====================
+builder.Services.AddScoped(typeof(IRepositary<>), typeof(Repository<>));
+
+// ===================== CONTROLLERS =====================
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+// ===================== CORS =====================
 builder.Services.AddCors(options =>
 {
-    //options.AddPolicy("MyCorsPolicy", policy =>
-    //{
-    //    policy.WithOrigins("http://localhost:4200", "https://myclientapp.com") // Specific origins
-    //          .AllowAnyHeader()
-    //          .AllowAnyMethod();
-    //    // .AllowCredentials(); // Use with caution and specific origins
-    //});
-
-    // Alternatively, a more permissive policy (use with caution in production)
     options.AddPolicy(corsPolicyName, policy =>
     {
         policy.AllowAnyOrigin()
@@ -57,32 +51,21 @@ builder.Services.AddCors(options =>
     });
 });
 
-
-
-
 var app = builder.Build();
 
-app.UseDefaultFiles();
-app.UseStaticFiles();
-
-
-
-// Configure the HTTP request pipeline.
-//if (app.Environment.IsDevelopment())
-//{
+// ===================== MIDDLEWARE =====================
+if (app.Environment.IsDevelopment())
+{
     app.UseSwagger();
     app.UseSwaggerUI();
-//}
+}
 
 app.UseHttpsRedirection();
 
-// Enable CORS middleware, applying the named policy
-app.UseCors(corsPolicyName); // Use the name of your defined policy
+app.UseCors(corsPolicyName);
 
 app.UseAuthorization();
 
 app.MapControllers();
-
-app.MapFallbackToFile("/index.html");
 
 app.Run();

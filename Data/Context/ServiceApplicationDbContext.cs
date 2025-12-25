@@ -11,5 +11,15 @@ namespace Data.Context
         public DbSet<Category> Categories { get; set; }
         public DbSet<Service> Service { get; set; }
         public DbSet<Location> Locations { get; set; }
+        public DbSet<Attachment> Attachments { get; set; }
+
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<Attachment>()
+                .HasIndex(a => a.FileName)
+                .IsUnique(); // optional: unique filenames
+        }
+
     }
 }
