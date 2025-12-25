@@ -1,3 +1,14 @@
+using Common.Base;
+using Data.Base;
+using Data.Context;
+using Mapster;
+using Microsoft.EntityFrameworkCore;
+using Services.Impl;
+using Services.Interface;
+using Services.Mappings;
+
+var corsPolicyName = "AllowAll";
+
 var builder = WebApplication.CreateBuilder(args);
 
 var con = builder.Configuration.GetConnectionString("DB_mysql");
@@ -15,7 +26,10 @@ RegisterMapper.RegisterMapsterConfiguration();
 //builder.Services.AddScoped<ServiceApplicationDbContext>();
 builder.Services.AddScoped<IServiceService, ServiceService>();
 builder.Services.AddScoped<IRegistrationService, RegistrationService>();
+builder.Services.AddScoped<ILocationService, LocationService>();
+builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped(typeof(IApiMessage<>), typeof(ApiMessage<>));
+builder.Services.AddScoped(typeof(IRepositary<>), typeof(Repository<>));
 
 //Repository Registration
 
@@ -23,6 +37,27 @@ builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+builder.Services.AddCors(options =>
+{
+    //options.AddPolicy("MyCorsPolicy", policy =>
+    //{
+    //    policy.WithOrigins("http://localhost:4200", "https://myclientapp.com") // Specific origins
+    //          .AllowAnyHeader()
+    //          .AllowAnyMethod();
+    //    // .AllowCredentials(); // Use with caution and specific origins
+    //});
+
+    // Alternatively, a more permissive policy (use with caution in production)
+    options.AddPolicy(corsPolicyName, policy =>
+    {
+        policy.AllowAnyOrigin()
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+});
+
+
 
 var app = builder.Build();
 
@@ -37,6 +72,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+// Enable CORS middleware, applying the named policy
+app.UseCors(corsPolicyName); // Use the name of your defined policy
 
 app.UseAuthorization();
 
