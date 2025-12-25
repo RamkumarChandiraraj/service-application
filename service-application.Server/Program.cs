@@ -25,6 +25,7 @@ RegisterMapper.RegisterMapsterConfiguration();
 //Service Registration
 //builder.Services.AddScoped<ServiceApplicationDbContext>();
 builder.Services.AddScoped<IServiceService, ServiceService>();
+builder.Services.AddScoped<IRegistrationService, RegistrationService>();
 builder.Services.AddScoped(typeof(IApiMessage<>), typeof(ApiMessage<>));
 
 //Repository Registration
