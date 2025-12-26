@@ -28,6 +28,8 @@ builder.Services.AddScoped<IServiceService, ServiceService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<ILocationService, LocationService>();
+builder.Services.AddScoped<IAttachmentService, AttachmentService>();
+
 
 // ===================== API RESPONSE =====================
 builder.Services.AddScoped(typeof(IApiMessage<>), typeof(ApiMessage<>));

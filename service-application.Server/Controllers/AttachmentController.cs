@@ -1,110 +1,103 @@
-﻿using Data;
-using Data.Context;
+﻿using Common.Base;
+using Common.BaseResponse;
+using Common.Extension;
+using Common.RequestDto;
+using Common.ResponseDto;
 using Data.Entities;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using System;
+using Services.Interface;
 
 namespace service_application.Server.Controllers
 {
+    [Route("api/[controller]")]
     [ApiController]
-    [Route("api/attachment")]
     public class AttachmentController : ControllerBase
     {
-        private readonly ServiceApplicationDbContext _context;
-        private readonly string _imagePath;
+        private readonly IAttachmentService _attachmentService;
+        private readonly IApiMessage<IApiResponse> _apiResponse;
 
-        public AttachmentController(ServiceApplicationDbContext context, IConfiguration configuration)
+        public AttachmentController(
+            IAttachmentService attachmentService,
+            IApiMessage<IApiResponse> apiResponse)
         {
-            _context = context;
-            _imagePath = configuration["ImageSettings:ImageUploadPath"];
-
-            if (!Directory.Exists(_imagePath))
-                Directory.CreateDirectory(_imagePath);
+            _attachmentService = attachmentService;
+            _apiResponse = apiResponse;
         }
 
-        // ===============================
-        // UPLOAD IMAGE
-        // ===============================
         [HttpPost("upload")]
-        public async Task<IActionResult> UploadImage(IFormFile file)
+        public async ValueTask<IActionResult> Upload(
+            [FromForm] AttachmentRequestDto dto)
         {
-            if (file == null || file.Length == 0)
-                return BadRequest("No file uploaded");
-
-            var allowedTypes = new[] { ".jpg", ".jpeg", ".png", ".webp" };
-            var extension = Path.GetExtension(file.FileName).ToLower();
-
-            if (!allowedTypes.Contains(extension))
-                return BadRequest("Invalid image format");
-
-            var fileName = $"{Guid.NewGuid()}{extension}";
-            var filePath = Path.Combine(_imagePath, fileName);
-
-            using (var stream = new FileStream(filePath, FileMode.Create))
+            try
             {
-                await file.CopyToAsync(stream);
+                if (dto.File == null || dto.File.Length == 0)
+                    return _apiResponse.BadRequest("File is required");
+
+                var result = await _attachmentService.UploadAsync(dto);
+                if (result == null)
+                    return _apiResponse.BadRequest("Upload failed");
+                return _apiResponse.Ok(result.ToMap<Attachment, AttachmentResponseDto>());
             }
-
-            var attachment = new Attachment
+            catch (Exception ex)
             {
-                FileName = file.FileName,
-                FilePath = filePath
-            };
+                return _apiResponse.InternalServerError(ex.Message);
+            }
+        }
 
-            _context.Attachments.Add(attachment);
-            await _context.SaveChangesAsync();
-
-            return Ok(new
+        [HttpGet("{id:long}")]
+        public async ValueTask<IActionResult> GetById(long id)
+        {
+            try
             {
-                message = "Image uploaded successfully",
-                id = attachment.Id,
-                fileName = attachment.FileName
-            });
+                if (id <= 0)
+                    return _apiResponse.BadRequest("Invalid Id");
+
+                var result = await _attachmentService.GetByIdAsync(id);
+                if (result == null)
+                    return _apiResponse.NotFound("Attachment not found");
+
+                return _apiResponse.Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return _apiResponse.InternalServerError(ex.Message);
+            }
         }
 
-        // ===============================
-        // DOWNLOAD IMAGE BY ID
-        // ===============================
-        [HttpGet("download/id/{id}")]
-        public async Task<IActionResult> DownloadById(long id)
+        [HttpGet("download/{id:long}")]
+        public async ValueTask<IActionResult> Download(long id)
         {
-            var attachment = await _context.Attachments.FindAsync(id);
-            if (attachment == null)
-                return NotFound("Image not found");
+            try
+            {
+                if (id <= 0)
+                    return _apiResponse.BadRequest("Invalid Id");
 
-            var imageBytes = await System.IO.File.ReadAllBytesAsync(attachment.FilePath);
-            var contentType = GetContentType(attachment.FilePath);
+                var result = await _attachmentService.GetByIdAsync(id);
+                if (result == null)
+                    return _apiResponse.NotFound("Attachment not found");
 
-            return File(imageBytes, contentType, attachment.FileName);
+                if (!System.IO.File.Exists(result.FilePath))
+                    return _apiResponse.NotFound("File not found on server");
+
+                var bytes = await System.IO.File.ReadAllBytesAsync(result.FilePath);
+                var contentType = GetContentType(result.FileName);
+
+                return File(bytes, contentType, result.FileName);
+            }
+            catch (Exception ex)
+            {
+                return _apiResponse.InternalServerError(ex.Message);
+            }
         }
 
-        // ===============================
-        // DOWNLOAD IMAGE BY FILENAME
-        // ===============================
-        [HttpGet("download/name/{fileName}")]
-        public async Task<IActionResult> DownloadByFileName(string fileName)
+        private static string GetContentType(string fileName)
         {
-            var attachment = await _context.Attachments
-                .FirstOrDefaultAsync(a => a.FileName == fileName);
-
-            if (attachment == null)
-                return NotFound("Image not found");
-
-            var imageBytes = await System.IO.File.ReadAllBytesAsync(attachment.FilePath);
-            var contentType = GetContentType(attachment.FilePath);
-
-            return File(imageBytes, contentType, attachment.FileName);
-        }
-
-        private string GetContentType(string path)
-        {
-            var ext = Path.GetExtension(path).ToLower();
-            return ext switch
+            return Path.GetExtension(fileName).ToLower() switch
             {
                 ".jpg" or ".jpeg" => "image/jpeg",
                 ".png" => "image/png",
                 ".webp" => "image/webp",
+                ".pdf" => "application/pdf",
                 _ => "application/octet-stream"
             };
         }

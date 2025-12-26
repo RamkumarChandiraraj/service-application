@@ -14,12 +14,5 @@ namespace Data.Context
         public DbSet<Attachment> Attachments { get; set; }
 
 
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
-        {
-            modelBuilder.Entity<Attachment>()
-                .HasIndex(a => a.FileName)
-                .IsUnique(); // optional: unique filenames
-        }
-
     }
 }

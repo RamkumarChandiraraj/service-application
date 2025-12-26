@@ -21,7 +21,7 @@ namespace Data.Migrations
 
             modelBuilder.Entity("Data.Entities.Attachment", b =>
                 {
-                    b.Property<long>("Id")
+                    b.Property<long>("ID")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bigint");
 
@@ -39,14 +39,11 @@ namespace Data.Migrations
 
                     b.Property<string>("FileName")
                         .IsRequired()
-                        .HasColumnType("varchar(255)");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("FilePath")
                         .IsRequired()
                         .HasColumnType("longtext");
-
-                    b.Property<long>("ID")
-                        .HasColumnType("bigint");
 
                     b.Property<bool>("IsActive")
                         .HasColumnType("tinyint(1)");
@@ -57,10 +54,7 @@ namespace Data.Migrations
                     b.Property<DateTime?>("UpdatedDate")
                         .HasColumnType("datetime(6)");
 
-                    b.HasKey("Id");
-
-                    b.HasIndex("FileName")
-                        .IsUnique();
+                    b.HasKey("ID");
 
                     b.ToTable("Attachments");
                 });

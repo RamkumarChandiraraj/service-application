@@ -3,10 +3,10 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Data.Entities
 {
-    public class Attachment:BaseEntityModel
+    public class Attachment : BaseEntityModel
     {
         [Key]
-        public long Id { get; set; }
+        public override long ID { get; set; }
 
         [Required]
         public string FileName { get; set; }
