@@ -7,8 +7,11 @@ function ReadUserManagement() {
     const [user, setUser] = useState(null);
 
     useEffect(() => {
-        getUserById(id).then(setUser);
-    }, [id]);
+        getUserById(id).then(res => {
+            const data = res.data?.data || res.data;
+            setUser(data);
+        });
+    }, [id]); 
 
     if (!user) return <p className="text-center mt-5">Loading...</p>;
 
@@ -21,7 +24,7 @@ function ReadUserManagement() {
                     <tr><th>ID</th><td>{user.id}</td></tr>
                     <tr><th>User Name</th><td>{user.userName}</td></tr>
                     <tr><th>Email</th><td>{user.email}</td></tr>
-                    <tr><th>MobileNumber</th><td>{user.mobilenumber}</td></tr>
+                    <tr><th>MobileNumber</th><td>{user.mobileNumber}</td></tr>
                     <tr><th>Role</th><td>{user.role}</td></tr>
                 </tbody>
             </table>

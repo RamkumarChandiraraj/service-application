@@ -35,20 +35,19 @@ const UserList = () => {
 
     const columns = useMemo(() => [
         { header: "ID", field: "id" },
-        { header: "UserName", field: "username" },
-        { header: "Password", field: "password" },
+        { header: "UserName", field: "userName" },       
         { header: "Email", field: "email" },
-        { header: "MobileNumber", field: "mobilenumber" },
+        { header: "MobileNumber", field: "mobileNumber" },
         { header: "Role", field: "role" },
         {
             header: "Actions",
             field: "actions",
             body: (row) => (
                 <>
-                    <Link to={`/user/read/:id/${row.id}`} className="btn btn-info btn-sm me-2">
+                    <Link to={`/user/read/${row.id}`} className="btn btn-info btn-sm me-2">
                         Read
                     </Link>
-                    <Link to={`/user/edit/:id"/${row.id}`} className="btn btn-primary btn-sm me-2">
+                    <Link to={`/user/edit/${row.id}`} className="btn btn-primary btn-sm me-2">
                         Edit
                     </Link>
                     <button
