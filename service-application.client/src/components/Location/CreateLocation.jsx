@@ -1,257 +1,277 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import {
-    createLocation,
-    updateLocation,
-    getLocationById,
+  createLocation,
+  updateLocation,
+  getLocationById,
 } from "../../api/locationList";
 
 function CreateLocation() {
-    const { id } = useParams();
-    const navigate = useNavigate();
-    const isEditMode = Boolean(id);
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const isEditMode = Boolean(id);
 
-    const [formData, setFormData] = useState({
-        ID: 0, // Must match backend
-        Name: "",
-        Description: "",
-        LocationCode: "",
-        Latitude: "",
-        Longitude: "",
-        Pincode: "",
-        ReferenceId: null,
-    });
+  const [formData, setFormData] = useState({
+    ID: 0,
+    Name: "",
+    Description: "",
+    LocationCode: "",
+    Latitude: "",
+    Longitude: "",
+    Pincode: "",
+    ReferenceId: "",
+  });
 
-    const [errors, setErrors] = useState({});
-    const [loading, setLoading] = useState(false);
-    const [pageLoading, setPageLoading] = useState(false);
-    const [error, setError] = useState(null);
+  const [errors, setErrors] = useState({});
+  const [loading, setLoading] = useState(false);
+  const [pageLoading, setPageLoading] = useState(false);
+  const [error, setError] = useState(null);
 
-    // Load location data for edit mode
-    useEffect(() => {
-        if (!isEditMode) return;
+  // ================= LOAD DATA (EDIT MODE) =================
+  useEffect(() => {
+    if (!isEditMode) return;
 
-        const fetchLocation = async () => {
-            setPageLoading(true);
-            try {
-                const res = await getLocationById(id);
-                setFormData({
-                    ID: res.data.id,
-                    Name: res.data.name || "",
-                    Description: res.data.description || "",
-                    LocationCode: res.data.locationCode || "",
-                    Latitude: res.data.latitude ?? 0,
-                    Longitude: res.data.longitude ?? 0,
-                    Pincode: res.data.pincode ?? 0,
-                    ReferenceId: res.data.referenceId ?? null,
-                });
-            } catch (err) {
-                setError("Failed to load location details");
-            } finally {
-                setPageLoading(false);
-            }
-        };
-
-        fetchLocation();
-    }, [id, isEditMode]);
-
-    // Handle form input changes
-    const handleChange = (e) => {
-        let { name, value } = e.target;
-
-        // Convert numbers properly
-        if (["Latitude", "Longitude"].includes(name)) value = parseFloat(value) || 0;
-        if (["Pincode", "ReferenceId"].includes(name))
-            value = value === "" ? null : parseInt(value);
-
-        setFormData({ ...formData, [name]: value });
-        setErrors({ ...errors, [name]: "" });
+    const fetchLocation = async () => {
+      setPageLoading(true);
+      try {
+        const res = await getLocationById(id);
+        setFormData({
+          ID: res.data.id,
+          Name: res.data.name || "",
+          Description: res.data.description || "",
+          LocationCode: res.data.locationCode || "",
+          Latitude: res.data.latitude ?? "",
+          Longitude: res.data.longitude ?? "",
+          Pincode: res.data.pincode ?? "",
+          ReferenceId: res.data.referenceId ?? "",
+        });
+      } catch {
+        setError("Failed to load location details");
+      } finally {
+        setPageLoading(false);
+      }
     };
 
-    // Validate form
-    const validate = () => {
-        let temp = {};
-        if (!formData.Name.trim()) temp.Name = "Location name is required";
-        if (!formData.Latitude) temp.Latitude = "Latitude is required";
-        if (!formData.Longitude) temp.Longitude = "Longitude is required";
-        if (!formData.Pincode || formData.Pincode.toString().length !== 6)
-            temp.Pincode = "Pincode must be 6 digits";
+    fetchLocation();
+  }, [id, isEditMode]);
 
-        setErrors(temp);
-        return Object.keys(temp).length === 0;
-    };
+  // ================= HANDLE INPUT =================
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
+    setErrors({ ...errors, [name]: "" });
+  };
 
-    // Handle submit
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        if (!validate()) return;
+  // ================= VALIDATION =================
+  const validate = () => {
+    let temp = {};
+    if (!formData.Name.trim()) temp.Name = "Location name is required";
+    if (!formData.Latitude) temp.Latitude = "Latitude is required";
+    if (!formData.Longitude) temp.Longitude = "Longitude is required";
+    if (!formData.Pincode || formData.Pincode.toString().length !== 6)
+      temp.Pincode = "Pincode must be 6 digits";
 
-        setLoading(true);
-        setError(null);
+    setErrors(temp);
+    return Object.keys(temp).length === 0;
+  };
 
-        try {
-            const payload = { ...formData };
+  // ================= SUBMIT =================
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!validate()) return;
 
-            if (isEditMode) {
-                await updateLocation(payload); // backend expects ID
-                alert("Location updated successfully");
-            } else {
-                const { ID, ...createPayload } = payload; // remove ID for create
-                await createLocation(createPayload);
-                alert("Location created successfully");
-            }
+    setLoading(true);
+    setError(null);
 
-            navigate("/locationlist");
-        } catch (err) {
-            setError(
-                err.response?.data?.message ||
-                    "Something went wrong. Please try again."
-            );
-        } finally {
-            setLoading(false);
-        }
-    };
+    try {
+      const payload = {
+        ...formData,
+        Latitude: Number(formData.Latitude),
+        Longitude: Number(formData.Longitude),
+        Pincode: Number(formData.Pincode),
+        ReferenceId: formData.ReferenceId
+          ? Number(formData.ReferenceId)
+          : null,
+      };
 
-    if (pageLoading)
-        return <p className="text-center mt-5">Loading location details...</p>;
+      if (isEditMode) {
+        await updateLocation(payload);
+        alert("Location updated successfully");
+      } else {
+        const { ID, ...createPayload } = payload;
+        await createLocation(createPayload);
+        alert("Location created successfully");
+      }
 
-    return (
-        <div className="bg-light min-vh-100 pt-5 pb-5 d-flex justify-content-center align-items-start">
-            <div className="w-50 rounded bg-white border shadow p-4">
-                <h3 className="text-center mb-4">
-                    {isEditMode ? "Update Location" : "Create Location"}
-                </h3>
+      navigate("/locationlist");
+    } catch (err) {
+      setError(
+        err.response?.data?.message ||
+          "Something went wrong. Please try again."
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
 
-                {error && <div className="alert alert-danger">{error}</div>}
+  if (pageLoading)
+    return <p className="text-center mt-5">Loading location details...</p>;
 
-                <form onSubmit={handleSubmit}>
-                    {/* Name */}
-                    <div className="mb-3">
-                        <label className="form-label">
-                            Location Name <span className="text-danger">*</span>
-                        </label>
-                        <input
-                            type="text"
-                            name="Name"
-                            value={formData.Name}
-                            onChange={handleChange}
-                            className={`form-control ${errors.Name ? "is-invalid" : ""}`}
-                        />
-                        {errors.Name && <div className="invalid-feedback">{errors.Name}</div>}
-                    </div>
+  return (
+    <div className="bg-light min-vh-100 d-flex justify-content-center py-5">
+      <div className="container px-3">
+        {/* MAIN CARD */}
+        <div
+          className="card shadow-sm mx-auto p-4 p-md-5"
+          style={{ maxWidth: "900px" }}
+        >
+          <h3 className="text-center mb-4">
+            {isEditMode ? "Update Location" : "Create Location"}
+          </h3>
 
-                    {/* Description */}
-                    <div className="mb-3">
-                        <label className="form-label">Description</label>
-                        <textarea
-                            name="Description"
-                            value={formData.Description}
-                            onChange={handleChange}
-                            className="form-control"
-                            rows="3"
-                        />
-                    </div>
+          {error && <div className="alert alert-danger">{error}</div>}
 
-                    {/* Location Code */}
-                    <div className="mb-3">
-                        <label className="form-label">Location Code</label>
-                        <input
-                            type="text"
-                            name="LocationCode"
-                            value={formData.LocationCode}
-                            onChange={handleChange}
-                            className="form-control"
-                        />
-                    </div>
+          <form onSubmit={handleSubmit}>
+            <div className="row g-4">
+              {/* Location Name */}
+              <div className="col-12">
+                <label className="form-label">
+                  Location Name <span className="text-danger">*</span>
+                </label>
+                <input
+                  type="text"
+                  name="Name"
+                  value={formData.Name}
+                  onChange={handleChange}
+                  className={`form-control ${
+                    errors.Name ? "is-invalid" : ""
+                  }`}
+                />
+                {errors.Name && (
+                  <div className="invalid-feedback">{errors.Name}</div>
+                )}
+              </div>
 
-                    {/* Latitude */}
-                    <div className="mb-3">
-                        <label className="form-label">
-                            Latitude <span className="text-danger">*</span>
-                        </label>
-                        <input
-                            type="number"
-                            step="0.000001"
-                            name="Latitude"
-                            value={formData.Latitude}
-                            onChange={handleChange}
-                            className={`form-control ${errors.Latitude ? "is-invalid" : ""}`}
-                        />
-                        {errors.Latitude && (
-                            <div className="invalid-feedback">{errors.Latitude}</div>
-                        )}
-                    </div>
+              {/* Description */}
+              <div className="col-12">
+                <label className="form-label">Description</label>
+                <textarea
+                  name="Description"
+                  value={formData.Description}
+                  onChange={handleChange}
+                  className="form-control"
+                  rows="3"
+                />
+              </div>
 
-                    {/* Longitude */}
-                    <div className="mb-3">
-                        <label className="form-label">
-                            Longitude <span className="text-danger">*</span>
-                        </label>
-                        <input
-                            type="number"
-                            step="0.000001"
-                            name="Longitude"
-                            value={formData.Longitude}
-                            onChange={handleChange}
-                            className={`form-control ${errors.Longitude ? "is-invalid" : ""}`}
-                        />
-                        {errors.Longitude && (
-                            <div className="invalid-feedback">{errors.Longitude}</div>
-                        )}
-                    </div>
+              {/* Location Code */}
+              <div className="col-12 col-md-6">
+                <label className="form-label">Location Code</label>
+                <input
+                  type="text"
+                  name="LocationCode"
+                  value={formData.LocationCode}
+                  onChange={handleChange}
+                  className="form-control"
+                />
+              </div>
 
-                    {/* Pincode */}
-                    <div className="mb-3">
-                        <label className="form-label">
-                            Pincode <span className="text-danger">*</span>
-                        </label>
-                        <input
-                            type="number"
-                            name="Pincode"
-                            value={formData.Pincode}
-                            onChange={handleChange}
-                            className={`form-control ${errors.Pincode ? "is-invalid" : ""}`}
-                        />
-                        {errors.Pincode && (
-                            <div className="invalid-feedback">{errors.Pincode}</div>
-                        )}
-                    </div>
+              {/* Pincode */}
+              <div className="col-12 col-md-6">
+                <label className="form-label">
+                  Pincode <span className="text-danger">*</span>
+                </label>
+                <input
+                  type="number"
+                  name="Pincode"
+                  value={formData.Pincode}
+                  onChange={handleChange}
+                  className={`form-control ${
+                    errors.Pincode ? "is-invalid" : ""
+                  }`}
+                />
+                {errors.Pincode && (
+                  <div className="invalid-feedback">{errors.Pincode}</div>
+                )}
+              </div>
 
-                    {/* ReferenceId */}
-                    <div className="mb-3">
-                        <label className="form-label">Reference ID</label>
-                        <input
-                            type="number"
-                            name="ReferenceId"
-                            value={formData.ReferenceId ?? ""}
-                            onChange={handleChange}
-                            className="form-control"
-                        />
-                    </div>
+              {/* Latitude */}
+              <div className="col-12 col-md-6">
+                <label className="form-label">
+                  Latitude <span className="text-danger">*</span>
+                </label>
+                <input
+                  type="number"
+                  step="0.000001"
+                  name="Latitude"
+                  value={formData.Latitude}
+                  onChange={handleChange}
+                  className={`form-control ${
+                    errors.Latitude ? "is-invalid" : ""
+                  }`}
+                />
+                {errors.Latitude && (
+                  <div className="invalid-feedback">{errors.Latitude}</div>
+                )}
+              </div>
 
-                    {/* Buttons */}
-                    <div className="d-flex justify-content-end">
-                        <Link to="/locationlist" className="btn btn-secondary me-2">
-                            Cancel
-                        </Link>
-                        <button
-                            type="submit"
-                            className="btn btn-success"
-                            disabled={loading}
-                        >
-                            {loading
-                                ? isEditMode
-                                    ? "Updating..."
-                                    : "Saving..."
-                                : isEditMode
-                                    ? "Update"
-                                    : "Save"}
-                        </button>
-                    </div>
-                </form>
+              {/* Longitude */}
+              <div className="col-12 col-md-6">
+                <label className="form-label">
+                  Longitude <span className="text-danger">*</span>
+                </label>
+                <input
+                  type="number"
+                  step="0.000001"
+                  name="Longitude"
+                  value={formData.Longitude}
+                  onChange={handleChange}
+                  className={`form-control ${
+                    errors.Longitude ? "is-invalid" : ""
+                  }`}
+                />
+                {errors.Longitude && (
+                  <div className="invalid-feedback">{errors.Longitude}</div>
+                )}
+              </div>
+
+              {/* Reference ID */}
+              <div className="col-12 col-md-4">
+                <label className="form-label">Reference ID</label>
+                <input
+                  type="number"
+                  name="ReferenceId"
+                  value={formData.ReferenceId}
+                  onChange={handleChange}
+                  className="form-control"
+                />
+              </div>
             </div>
+
+            {/* BUTTONS */}
+            <div className="d-flex justify-content-end gap-3 mt-5">
+              <Link to="/locationlist" className="btn btn-secondary">
+                Cancel
+              </Link>
+              <button
+                type="submit"
+                className="btn btn-success"
+                disabled={loading}
+              >
+                {loading
+                  ? isEditMode
+                    ? "Updating..."
+                    : "Saving..."
+                  : isEditMode
+                  ? "Update"
+                  : "Save"}
+              </button>
+            </div>
+          </form>
         </div>
-    );
+      </div>
+    </div>
+  );
 }
 
 export default CreateLocation;

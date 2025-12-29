@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from "react";
-import "./DataTable.css"; // Make sure this file is included
+import "./DataTable.css";
 
 const DataTable = ({
   data = [],
@@ -8,6 +8,7 @@ const DataTable = ({
   searchFields = [],
   rowsPerPageOptions = [5, 10, 25, 50],
   defaultRowsPerPage = 10,
+  onAdd, // optional Add button handler
 }) => {
   const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
@@ -15,7 +16,6 @@ const DataTable = ({
   const [sortField, setSortField] = useState(null);
   const [sortOrder, setSortOrder] = useState("asc");
 
-  // Filter data based on search
   const filteredData = useMemo(() => {
     if (!search) return data;
     return data.filter((row) =>
@@ -25,7 +25,6 @@ const DataTable = ({
     );
   }, [search, data, searchFields]);
 
-  // Sort filtered data
   const sortedData = useMemo(() => {
     if (!sortField) return filteredData;
     return [...filteredData].sort((a, b) => {
@@ -35,18 +34,18 @@ const DataTable = ({
       if (aVal == null) return 1;
       if (bVal == null) return -1;
 
-      if (typeof aVal === "number" && typeof bVal === "number") {
+      if (typeof aVal === "number") {
         return sortOrder === "asc" ? aVal - bVal : bVal - aVal;
-      } else {
-        return sortOrder === "asc"
-          ? aVal.toString().localeCompare(bVal.toString())
-          : bVal.toString().localeCompare(aVal.toString());
       }
+
+      return sortOrder === "asc"
+        ? aVal.toString().localeCompare(bVal.toString())
+        : bVal.toString().localeCompare(aVal.toString());
     });
   }, [filteredData, sortField, sortOrder]);
 
-  // Pagination logic
   const totalPages = Math.ceil(sortedData.length / rowsPerPage);
+
   const paginatedData = useMemo(() => {
     const start = (currentPage - 1) * rowsPerPage;
     return sortedData.slice(start, start + rowsPerPage);
@@ -62,24 +61,35 @@ const DataTable = ({
   };
 
   return (
-    <div className="datatable-container">
-      {/* Top controls: Title, Pagination (Prev/Page/Next) left, Search right */}
-      <div className="datatable-top">
-        {title && <h4>{title}</h4>}
+    <div className="datatable-card">
+      {/* HEADER */}
+      <div className="datatable-header">
+        <h3 className="datatable-title">{title}</h3>
 
-        <div className="datatable-top-left">
+        {onAdd && (
+          <button className="datatable-add-btn" onClick={onAdd}>
+            Add
+          </button>
+        )}
+      </div>
+
+      {/* CONTROLS */}
+      <div className="datatable-controls">
+        <div className="datatable-pagination">
           <button
             disabled={currentPage === 1}
-            onClick={() => setCurrentPage((prev) => prev - 1)}
+            onClick={() => setCurrentPage((p) => p - 1)}
           >
             Prev
           </button>
+
           <span>
             Page {currentPage} of {totalPages || 1}
           </span>
+
           <button
             disabled={currentPage === totalPages || totalPages === 0}
-            onClick={() => setCurrentPage((prev) => prev + 1)}
+            onClick={() => setCurrentPage((p) => p + 1)}
           >
             Next
           </button>
@@ -88,7 +98,7 @@ const DataTable = ({
         {searchFields.length > 0 && (
           <input
             type="text"
-            className="form-control datatable-search"
+            className="datatable-search"
             placeholder="Search..."
             value={search}
             onChange={(e) => {
@@ -99,10 +109,10 @@ const DataTable = ({
         )}
       </div>
 
-      {/* Table */}
-      <div className="table-responsive">
-        <table className="table table-striped table-bordered">
-          <thead className="table-light">
+      {/* TABLE */}
+      <div className="datatable-table-wrapper">
+        <table className="table table-bordered table-striped">
+          <thead>
             <tr>
               {columns.map((col) => (
                 <th
@@ -110,13 +120,13 @@ const DataTable = ({
                   onClick={() =>
                     col.sortable !== false && handleSort(col.field)
                   }
-                  style={{
-                    cursor: col.sortable !== false ? "pointer" : "default",
-                    whiteSpace: "nowrap",
-                  }}
                 >
                   {col.header}{" "}
-                  {sortField === col.field ? (sortOrder === "asc" ? "▲" : "▼") : ""}
+                  {sortField === col.field
+                    ? sortOrder === "asc"
+                      ? "▲"
+                      : "▼"
+                    : ""}
                 </th>
               ))}
             </tr>
@@ -144,11 +154,10 @@ const DataTable = ({
         </table>
       </div>
 
-      {/* Bottom controls: Rows per page selector */}
-      <div className="d-flex justify-content-end mt-3">
-        <label className="me-2">Rows per page:</label>
+      {/* FOOTER */}
+      <div className="datatable-footer">
+        <label>Rows per page:</label>
         <select
-          className="form-select form-select-sm w-auto"
           value={rowsPerPage}
           onChange={(e) => {
             setRowsPerPage(Number(e.target.value));
