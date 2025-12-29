@@ -20,6 +20,8 @@ import LocationHome from "./components/Location/LocationHome";
 import CreateLocation from "./components/Location/CreateLocation";
 import ReadLocation from "./components/Location/ReadLocation";
 
+// Attachment Management
+import AttachmentList from "./components/AttachmentManagement/AttachmentList";
 
 // Registration Management
 import CreateRegistration from "./components/RegistrationManagement/CreateRegistration";
@@ -77,6 +79,10 @@ function App() {
                 <Route path="/user/read/:id" element={<ReadUser />} />
 
                 
+
+                {/* Attachment Management */}
+                <Route path="/attachmentlist" element={<AttachmentList />} />
+
             </Routes>
 
             <Footer />

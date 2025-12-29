@@ -38,12 +38,15 @@ namespace Services.Impl
                 .ToListAsync();
         }
 
+
         public async ValueTask<bool> UpdateCategoryByIdAsync(CategoryRequestDto dto)
         {
             var entity = await GetCategoryByIdAsync(dto.ID);
             if (entity == null) return false;
 
             entity.Name = dto.Name;
+            entity.Icon = dto.Icon;
+            entity.Link = dto.Link;
             entity.Description = dto.Description;
 
             await _repository.UpdateAsync(entity);

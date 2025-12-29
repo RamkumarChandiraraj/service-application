@@ -12,8 +12,8 @@ function CreateUserManagement() {
       username: "",
     password:"",
       email: "",
-      mobilenumber: "",
-      role:""
+      mobilenumber: 0,
+      role:0
 
   });
 
@@ -31,13 +31,15 @@ function CreateUserManagement() {
         const res = await getUserById(id);
         const user = res.data?.data || res.data;
 
+          console.log(user);
+
           setFormData({
               id: user.id || 0,
               username: user.userName || "",
               email: user.email || "",
               password: "",
-              mobilenumber: user.mobileNumber || "",
-              role: user.role || ""
+              mobilenumber: user.mobileNumber || 0,
+              role: user.role || 0
           });
       } catch (err) {
         console.error(err);
@@ -51,8 +53,20 @@ function CreateUserManagement() {
   }, [id, isEditMode]);
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
+      const { name, value } = e.target;
+
+
+      let newValue = value;
+
+      if (name === "role") {
+          newValue = Number(value);
+      }
+
+      if (name === "mobilenumber") {
+          newValue = Number(value);
+      }
+
+    setFormData({ ...formData, [name]: newValue });
     setErrors({ ...errors, [name]: "" });
   };
 
@@ -62,7 +76,7 @@ function CreateUserManagement() {
       if (!formData.password.trim() && !isEditMode) temp.password = "Password required";
       if (!formData.email.trim()) temp.email = "Email required";
       if (!formData.mobilenumber) temp.mobileNumber = "Mobilenumber required";
-      if (!formData.role.trim()) temp.role = "Role required";
+      if (!formData.role) temp.role = "Role required";
     setErrors(temp);
     return Object.keys(temp).length === 0;
   };
@@ -154,12 +168,20 @@ function CreateUserManagement() {
 
               <div className="mb-3">
                   <label>Role</label>
-                  <input
+                  <select
                       name="role"
                       value={formData.role}
                      onChange={handleChange}
-                      className="form-control"
-                  />
+                      className="form-control">
+                      <option value="">--Select Role--</option>
+                      <option value={1}>Admin</option>
+                      <option value={2}>Manager</option>
+                      <option value={3}>User</option>
+                      <option value={4}>Painting</option>
+                      <option value={5}>Cooking</option>
+                      <option value={6}>Plumbing</option>
+                  </select>
+                  
                   {errors.role && <small className="text-danger">{errors.role}</small>}
               </div>
         <div>

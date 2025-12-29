@@ -1,118 +1,88 @@
-﻿/* eslint-disable no-unused-vars */
-import { useEffect, useState } from "react";
+﻿import { useEffect, useState, useMemo } from "react";
 import { Link } from "react-router-dom";
+import DataTable from "../../components/Common/DataTable"; // adjust path
 import { getAllCategories, deleteCategory } from "../../api/categoryApi";
 
-function CategoryList() {
+function CategoryHome() {
     const [data, setData] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
     useEffect(() => {
-        const abortController = new AbortController();
-
         const fetchCategories = async () => {
             try {
                 const res = await getAllCategories();
-
-                // keep existing response handling
-                const categories = res?.data?.data || res?.data || [];
-
-                const ordered = [...categories].sort((a, b) => a.id - b.id);
-                setData(ordered);
-
-                setLoading(false);
+                const categories = Array.isArray(res) ? res : res.data;
+                setData(categories || []);
             } catch (err) {
-                setError(err.response?.data?.message || err.message);
+                setError(err.message || "Failed to load categories");
+            } finally {
                 setLoading(false);
             }
         };
-
         fetchCategories();
-
-        return () => {
-            abortController.abort();
-        };
     }, []);
 
     const handleDelete = async (id) => {
-        const confirmed = window.confirm("Are you sure you want to delete this category?");
-        if (!confirmed) return;
+        if (!window.confirm("Are you sure you want to delete this category?")) return;
 
         try {
             await deleteCategory(id);
-            setData(prev => prev.filter(category => category.id !== id));
-            alert("Category deleted successfully");
-        } catch (err) {
-            alert(err.response?.data?.message || err.message);
+            setData((prev) => prev.filter((x) => x.id !== id));
+        } catch {
+            alert("Failed to delete category");
         }
     };
 
-    if (loading) return <p>Loading Categories...</p>;
-    if (error) return <p>Error: {error}</p>;
+    const columns = useMemo(() => [
+        { header: "ID", field: "id" },
+        { header: "Name", field: "name" },
+        { header: "Description", field: "description" },
+        
+        {
+            header: "Actions",
+            field: "actions",
+            body: (row) => (
+                <>
+                    <Link to={`/readcategory/${row.id}`} className="btn btn-info btn-sm me-2">
+                        View
+                    </Link>
+                    <Link to={`/createcategorymanagement/${row.id}`} className="btn btn-primary btn-sm me-2">
+                        Edit
+                    </Link>
+                    <button
+                        className="btn btn-danger btn-sm"
+                        onClick={() => handleDelete(row.id)}
+                    >
+                        Delete
+                    </button>
+                </>
+            ),
+        },
+    ], []);
+
+    if (loading) return <p className="text-center mt-5">Loading Categories...</p>;
+    if (error) return <p className="text-center mt-5 text-danger">{error}</p>;
 
     return (
-        <div className="d-flex flex-column justify-content-center align-items-center bg-light vh-100">
-            <h1>Category List</h1>
+        <div className="d-flex flex-column align-items-center bg-light min-vh-100 pb-5">
+            <h1 className="mt-4">Category List</h1>
 
-            <div className="w-75 rounded bg-white border shadow p-4">
-                <div className="d-flex justify-content-end">
+            <div className="w-75 rounded bg-white border shadow p-4 mb-4">
+                <div className="d-flex justify-content-end mb-3">
                     <Link to="/createcategorymanagement" className="btn btn-success">
-                        Add +
+                        Add
                     </Link>
                 </div>
 
-                <table className="table table-striped mt-3">
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Name</th>
-                            <th>Description</th>
-                            <th className="text-end">Actions</th>
-                        </tr>
-                    </thead>
-
-                    <tbody>
-                        {data.map((d, i) => (
-                            <tr key={i}>
-                                <td>{d.id}</td>
-                                <td>{d.name}</td>
-                                <td>{d.description}</td>
-                                <td className="text-end">
-                                    <Link
-                                        to={`/ReadCategory/${d.id}`}
-                                        className="btn btn-sm btn-info me-2"
-                                    >
-                                        Read
-                                    </Link>
-                                    <Link
-                                        to={`/createcategorymanagement/${d.id}`}
-                                        className="btn btn-sm btn-primary me-2"
-                                    >
-                                        Edit
-                                    </Link>
-                                    <button
-                                        className="btn btn-sm btn-danger"
-                                        onClick={() => handleDelete(d.id)}
-                                    >
-                                        Delete
-                                    </button>
-                                </td>
-                            </tr>
-                        ))}
-
-                        {data.length === 0 && (
-                            <tr>
-                                <td colSpan="4" className="text-center">
-                                    No Categories Found
-                                </td>
-                            </tr>
-                        )}
-                    </tbody>
-                </table>
+                <DataTable
+                    data={data}
+                    columns={columns}
+                    searchFields={["name", "description"]}
+                />
             </div>
         </div>
     );
 }
 
-export default CategoryList;
+export default CategoryHome;
