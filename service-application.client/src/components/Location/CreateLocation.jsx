@@ -1,25 +1,17 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import {
-    createLocation,
-    updateLocation,
-    getLocationById,
-} from "../../api/locationList";
+import { createCategory, updateCategory, getCategoryById } from "../../api/categoryApi";
 
-function CreateLocation() {
+function CreateCategoryManagement() {
     const { id } = useParams();
     const navigate = useNavigate();
     const isEditMode = Boolean(id);
 
     const [formData, setFormData] = useState({
-        ID: 0, // Must match backend
-        Name: "",
-        Description: "",
-        LocationCode: "",
-        Latitude: "",
-        Longitude: "",
-        Pincode: "",
-        ReferenceId: null,
+        name: "",
+        description: "",
+        icon: "",
+        link: "",
     });
 
     const [errors, setErrors] = useState({});
@@ -27,55 +19,43 @@ function CreateLocation() {
     const [pageLoading, setPageLoading] = useState(false);
     const [error, setError] = useState(null);
 
-    // Load location data for edit mode
+    // Load category data for edit mode
     useEffect(() => {
         if (!isEditMode) return;
 
-        const fetchLocation = async () => {
+        const fetchCategory = async () => {
             setPageLoading(true);
             try {
-                const res = await getLocationById(id);
+                const res = await getCategoryById(id);
                 setFormData({
-                    ID: res.data.id,
-                    Name: res.data.name || "",
-                    Description: res.data.description || "",
-                    LocationCode: res.data.locationCode || "",
-                    Latitude: res.data.latitude ?? 0,
-                    Longitude: res.data.longitude ?? 0,
-                    Pincode: res.data.pincode ?? 0,
-                    ReferenceId: res.data.referenceId ?? null,
+                    name: res.name || "",
+                    description: res.description || "",
+                    icon: res.icon || "",
+                    link: res.link || "",
                 });
             } catch (err) {
-                setError("Failed to load location details");
+                setError("Failed to load category details");
             } finally {
                 setPageLoading(false);
             }
         };
 
-        fetchLocation();
+        fetchCategory();
     }, [id, isEditMode]);
 
     // Handle form input changes
     const handleChange = (e) => {
-        let { name, value } = e.target;
-
-        // Convert numbers properly
-        if (["Latitude", "Longitude"].includes(name)) value = parseFloat(value) || 0;
-        if (["Pincode", "ReferenceId"].includes(name))
-            value = value === "" ? null : parseInt(value);
-
+        const { name, value } = e.target;
         setFormData({ ...formData, [name]: value });
         setErrors({ ...errors, [name]: "" });
     };
 
     // Validate form
     const validate = () => {
-        let temp = {};
-        if (!formData.Name.trim()) temp.Name = "Location name is required";
-        if (!formData.Latitude) temp.Latitude = "Latitude is required";
-        if (!formData.Longitude) temp.Longitude = "Longitude is required";
-        if (!formData.Pincode || formData.Pincode.toString().length !== 6)
-            temp.Pincode = "Pincode must be 6 digits";
+        const temp = {};
+        if (!formData.name.trim()) temp.name = "Category name is required";
+        if (!formData.icon.trim()) temp.icon = "Icon name is required";
+        if (!formData.link.trim()) temp.link = "Link is required";
 
         setErrors(temp);
         return Object.keys(temp).length === 0;
@@ -90,36 +70,29 @@ function CreateLocation() {
         setError(null);
 
         try {
-            const payload = { ...formData };
-
             if (isEditMode) {
-                await updateLocation(payload); // backend expects ID
-                alert("Location updated successfully");
+                await updateCategory(id, formData);
+                alert("Category updated successfully");
             } else {
-                const { ID, ...createPayload } = payload; // remove ID for create
-                await createLocation(createPayload);
-                alert("Location created successfully");
+                await createCategory(formData);
+                alert("Category created successfully");
             }
-
-            navigate("/locationlist");
+            navigate("/categorylist");
         } catch (err) {
-            setError(
-                err.response?.data?.message ||
-                    "Something went wrong. Please try again."
-            );
+            setError(err.response?.data?.message || "Something went wrong. Please try again.");
         } finally {
             setLoading(false);
         }
     };
 
     if (pageLoading)
-        return <p className="text-center mt-5">Loading location details...</p>;
+        return <p className="text-center mt-5">Loading category details...</p>;
 
     return (
         <div className="bg-light min-vh-100 pt-5 pb-5 d-flex justify-content-center align-items-start">
             <div className="w-50 rounded bg-white border shadow p-4">
                 <h3 className="text-center mb-4">
-                    {isEditMode ? "Update Location" : "Create Location"}
+                    {isEditMode ? "Update Category" : "Create Category"}
                 </h3>
 
                 {error && <div className="alert alert-danger">{error}</div>}
@@ -128,110 +101,63 @@ function CreateLocation() {
                     {/* Name */}
                     <div className="mb-3">
                         <label className="form-label">
-                            Location Name <span className="text-danger">*</span>
+                            Name <span className="text-danger">*</span>
                         </label>
                         <input
                             type="text"
-                            name="Name"
-                            value={formData.Name}
+                            name="name"
+                            value={formData.name}
                             onChange={handleChange}
-                            className={`form-control ${errors.Name ? "is-invalid" : ""}`}
+                            className={`form-control ${errors.name ? "is-invalid" : ""}`}
                         />
-                        {errors.Name && <div className="invalid-feedback">{errors.Name}</div>}
+                        {errors.name && <div className="invalid-feedback">{errors.name}</div>}
                     </div>
 
                     {/* Description */}
                     <div className="mb-3">
                         <label className="form-label">Description</label>
                         <textarea
-                            name="Description"
-                            value={formData.Description}
+                            name="description"
+                            value={formData.description}
                             onChange={handleChange}
                             className="form-control"
                             rows="3"
                         />
                     </div>
 
-                    {/* Location Code */}
+                    {/* Icon */}
                     <div className="mb-3">
-                        <label className="form-label">Location Code</label>
+                        <label className="form-label">
+                            Icon Name <span className="text-danger">*</span>
+                        </label>
                         <input
                             type="text"
-                            name="LocationCode"
-                            value={formData.LocationCode}
+                            name="icon"
+                            value={formData.icon}
                             onChange={handleChange}
-                            className="form-control"
+                            className={`form-control ${errors.icon ? "is-invalid" : ""}`}
                         />
+                        {errors.icon && <div className="invalid-feedback">{errors.icon}</div>}
                     </div>
 
-                    {/* Latitude */}
+                    {/* Link */}
                     <div className="mb-3">
                         <label className="form-label">
-                            Latitude <span className="text-danger">*</span>
+                            Link <span className="text-danger">*</span>
                         </label>
                         <input
-                            type="number"
-                            step="0.000001"
-                            name="Latitude"
-                            value={formData.Latitude}
+                            type="text"
+                            name="link"
+                            value={formData.link}
                             onChange={handleChange}
-                            className={`form-control ${errors.Latitude ? "is-invalid" : ""}`}
+                            className={`form-control ${errors.link ? "is-invalid" : ""}`}
                         />
-                        {errors.Latitude && (
-                            <div className="invalid-feedback">{errors.Latitude}</div>
-                        )}
-                    </div>
-
-                    {/* Longitude */}
-                    <div className="mb-3">
-                        <label className="form-label">
-                            Longitude <span className="text-danger">*</span>
-                        </label>
-                        <input
-                            type="number"
-                            step="0.000001"
-                            name="Longitude"
-                            value={formData.Longitude}
-                            onChange={handleChange}
-                            className={`form-control ${errors.Longitude ? "is-invalid" : ""}`}
-                        />
-                        {errors.Longitude && (
-                            <div className="invalid-feedback">{errors.Longitude}</div>
-                        )}
-                    </div>
-
-                    {/* Pincode */}
-                    <div className="mb-3">
-                        <label className="form-label">
-                            Pincode <span className="text-danger">*</span>
-                        </label>
-                        <input
-                            type="number"
-                            name="Pincode"
-                            value={formData.Pincode}
-                            onChange={handleChange}
-                            className={`form-control ${errors.Pincode ? "is-invalid" : ""}`}
-                        />
-                        {errors.Pincode && (
-                            <div className="invalid-feedback">{errors.Pincode}</div>
-                        )}
-                    </div>
-
-                    {/* ReferenceId */}
-                    <div className="mb-3">
-                        <label className="form-label">Reference ID</label>
-                        <input
-                            type="number"
-                            name="ReferenceId"
-                            value={formData.ReferenceId ?? ""}
-                            onChange={handleChange}
-                            className="form-control"
-                        />
+                        {errors.link && <div className="invalid-feedback">{errors.link}</div>}
                     </div>
 
                     {/* Buttons */}
                     <div className="d-flex justify-content-end">
-                        <Link to="/locationlist" className="btn btn-secondary me-2">
+                        <Link to="/categorylist" className="btn btn-secondary me-2">
                             Cancel
                         </Link>
                         <button
@@ -254,4 +180,4 @@ function CreateLocation() {
     );
 }
 
-export default CreateLocation;
+export default CreateCategoryManagement;
