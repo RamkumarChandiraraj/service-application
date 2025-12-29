@@ -1,161 +1,132 @@
-/* Container */
-.datatable-container {
+/* SINGLE MAIN CARD */
+.datatable-card {
   width: 100%;
-  background: #fff;
+  background: #ffffff;
+  border-radius: 12px;
   padding: 1rem;
-  border-radius: 8px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
-  overflow-x: auto;
-  font-family: Arial, sans-serif;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.08);
 }
 
-/* Header Title */
-.datatable-container h4 {
-  margin: 0 0 0.5rem 0;
-  font-weight: 600;
-  font-size: 1.2rem;
-}
-
-/* Top controls container */
-.datatable-top {
+/* HEADER */
+.datatable-header {
+  position: relative;
   display: flex;
   align-items: center;
+  justify-content: center;
+  margin-bottom: 1rem;
+}
+
+.datatable-title {
+  font-size: 1.4rem;
+  font-weight: 600;
+  margin: 0;
+  text-align: center;
+}
+
+/* ADD BUTTON */
+.datatable-add-btn {
+  position: absolute;
+  right: 0;
+  background: #198754;
+  color: #fff;
+  border: none;
+  padding: 0.45rem 1rem;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.datatable-add-btn:hover {
+  background: #157347;
+}
+
+/* CONTROLS */
+.datatable-controls {
+  display: flex;
   justify-content: space-between;
-  flex-wrap: wrap;
+  align-items: center;
   gap: 1rem;
-  margin-bottom: 1.25rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
 }
 
-.datatable-top h4 {
-  flex-basis: 100%;
-  margin-bottom: 0.75rem;
-}
-
-/* Left side: Prev, Page info, Next */
-.datatable-top-left {
+.datatable-pagination {
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  flex-wrap: nowrap;
 }
 
-/* Right side: Search input */
-.datatable-search {
-  max-width: 300px;
-  min-width: 150px;
-  border-radius: 4px;
-  padding: 0.4rem 0.6rem;
-  font-size: 1rem;
-  flex-shrink: 0;
+.datatable-pagination button {
+  border: 1px solid #0d6efd;
+  background: transparent;
+  color: #0d6efd;
+  padding: 0.35rem 0.8rem;
+  border-radius: 6px;
 }
 
-/* Buttons */
-.datatable-top-left button {
-  padding: 0.4rem 0.8rem;
-  border-radius: 5px;
-  border: 1.5px solid #007bff;
-  background-color: white;
-  color: #007bff;
-  cursor: pointer;
-  transition: background-color 0.25s, color 0.25s;
+.datatable-pagination button:hover:not(:disabled) {
+  background: #0d6efd;
+  color: #fff;
 }
 
-.datatable-top-left button:disabled {
-  cursor: not-allowed;
+.datatable-pagination button:disabled {
   opacity: 0.5;
-  border-color: #a0a0a0;
-  color: #a0a0a0;
+  cursor: not-allowed;
 }
 
-.datatable-top-left button:hover:not(:disabled) {
-  background-color: #007bff;
-  color: white;
+/* SEARCH */
+.datatable-search {
+  width: 260px;
+  max-width: 100%;
+  padding: 0.45rem 0.7rem;
+  border-radius: 6px;
+  border: 1px solid #ced4da;
 }
 
-/* Table */
+/* TABLE */
+.datatable-table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+}
+
 .table {
   width: 100%;
-  border-collapse: collapse;
-  min-width: 600px; /* ensures horizontal scroll on small screens */
-}
-
-.table th,
-.table td {
-  padding: 0.6rem 0.75rem;
-  text-align: left;
-  border-bottom: 1px solid #e0e0e0;
+  min-width: 600px;
 }
 
 .table th {
-  background-color: #f8f9fa;
+  background: #f8f9fa;
   font-weight: 600;
-  position: sticky;
-  top: 0;
-  z-index: 1;
   white-space: nowrap;
 }
 
-.table tr:hover {
-  background-color: #f1f3f5;
-}
-
-.table td button {
-  margin: 0 2px;
-  font-size: 0.8rem;
-  padding: 0.25rem 0.5rem;
-}
-
-/* Bottom controls */
-.d-flex.justify-content-end.mt-3 {
+/* FOOTER */
+.datatable-footer {
   margin-top: 1rem;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 0.5rem;
 }
 
-/* Pagination select */
-.form-select {
-  padding: 0.3rem 0.5rem;
-  border-radius: 4px;
-  border: 1px solid #ced4da;
-  font-size: 0.9rem;
-}
-
-/* Responsive adjustments */
+/* MOBILE FIX */
 @media (max-width: 768px) {
-  .datatable-container {
-    padding: 0.75rem;
+  .datatable-card {
+    padding: 0.5rem;
   }
 
-  .datatable-top {
+  .datatable-title {
+    font-size: 1.2rem;
+  }
+
+  .datatable-controls {
     flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .datatable-top h4 {
-    margin-bottom: 0.75rem;
-  }
-
-  .datatable-top-left {
-    margin-bottom: 0.75rem;
+    align-items: stretch;
   }
 
   .datatable-search {
     width: 100%;
-    max-width: 100%;
-    min-width: unset;
   }
 
-  .table th,
-  .table td {
-    padding: 0.45rem 0.5rem;
-    font-size: 0.85rem;
-  }
-}
-
-@media (max-width: 480px) {
-  .table {
-    font-size: 0.8rem;
-  }
-
-  .datatable-container h4 {
-    font-size: 1rem;
-  }
+  
 }

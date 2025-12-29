@@ -1,6 +1,6 @@
 ﻿import api from "./baseapiinstance";
 
-// GET ALL CATEGORIES
+//GET ALL CATEGORIES
 export const getAllCategories = async () => {
     try {
         const response = await api.get("/api/category/list");
@@ -10,6 +10,15 @@ export const getAllCategories = async () => {
         throw error;
     }
 };
+
+// src/services/categoryService.js
+// export const getAllCategories = async () => {
+//   const response = await api.get("/api/category/list");
+
+//   // ✅ Return ONLY the array
+//   return response.data?.data ?? [];
+// };
+
 
 // GET CATEGORY BY ID
 // GET CATEGORY BY ID

@@ -1,12 +1,18 @@
-import React, { useState } from "react";
-import { Link, useNavigate, useLocation } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { NavLink, useNavigate, useLocation } from "react-router-dom";
 import logo from "../logo.jpeg";
 
 const Navbar = () => {
   const [mobileActive, setMobileActive] = useState(false);
   const [openDropdowns, setOpenDropdowns] = useState({});
+  const [activeHash, setActiveHash] = useState("");
   const navigate = useNavigate();
   const location = useLocation();
+
+  // Update active hash on location change
+  useEffect(() => {
+    setActiveHash(location.hash);
+  }, [location]);
 
   const toggleMobileNav = () => {
     setMobileActive(!mobileActive);
@@ -19,13 +25,12 @@ const Navbar = () => {
     }));
   };
 
-  // Close mobile nav when a link is clicked
   const handleLinkClick = () => {
     setMobileActive(false);
     setOpenDropdowns({});
   };
 
-  // ✅ ADDED: universal smooth scroll
+  // Smooth scroll for anchors
   const scrollToSection = (id) => {
     handleLinkClick();
 
@@ -39,6 +44,9 @@ const Navbar = () => {
     }
   };
 
+  // Helper to determine if hash link is active
+  const isHashActive = (hash) => activeHash === hash;
+
   return (
     <header
       id="header"
@@ -47,27 +55,20 @@ const Navbar = () => {
       }`}
     >
       <div className="container-fluid container-xl position-relative d-flex align-items-center">
-        <Link
-          to="/"
-          className="logo d-flex align-items-center me-auto"
-          onClick={handleLinkClick}
-        >
+        <NavLink to="/" className="logo d-flex align-items-center me-auto" onClick={handleLinkClick}>
           <img
             src={logo}
             alt="Aanaiyaan Logo"
-            style={{
-              maxHeight: "60px", // maximum height
-              width: "auto", // keep aspect ratio
-              objectFit: "contain",
-            }}
+            style={{ maxHeight: "60px", width: "auto", objectFit: "contain" }}
           />
-        </Link>
+        </NavLink>
 
         <nav id="navmenu" className="navmenu">
           <ul className="ms-auto align-items-center">
             <li>
               <a
                 href="#hero"
+                className={isHashActive("#hero") ? "active" : ""}
                 onClick={(e) => {
                   e.preventDefault();
                   scrollToSection("hero");
@@ -77,10 +78,10 @@ const Navbar = () => {
               </a>
             </li>
 
-            {/* ✅ About scroll */}
             <li>
               <a
                 href="#about"
+                className={isHashActive("#about") ? "active" : ""}
                 onClick={(e) => {
                   e.preventDefault();
                   scrollToSection("about");
@@ -90,65 +91,73 @@ const Navbar = () => {
               </a>
             </li>
 
-            {/* Main Dropdown */}
-            <li className="dropdown">
+            <li className={`dropdown ${openDropdowns["main"] ? "active" : ""}`}>
               <a
                 href="#!"
                 onClick={(e) => {
                   e.preventDefault();
                   toggleDropdown("main");
                 }}
+                className={openDropdowns["main"] ? "active" : ""}
               >
                 <span>Content Management</span>
-                <i
-                  className={`bi bi-chevron-down toggle-dropdown ${
-                    openDropdowns["main"] ? "active" : ""
-                  }`}
-                ></i>
+                <i className={`bi bi-chevron-down toggle-dropdown ${openDropdowns["main"] ? "active" : ""}`}></i>
               </a>
 
               <ul className={openDropdowns["main"] ? "dropdown-active" : ""}>
                 <li>
-                  <Link to="/example1" onClick={handleLinkClick}>
+                  <NavLink
+                    to="/example1"
+                    onClick={handleLinkClick}
+                    className={({ isActive }) => (isActive ? "active" : "")}
+                  >
                     Dropdown 1
-                  </Link>
+                  </NavLink>
                 </li>
 
-                {/* Nested Dropdown */}
-                <li className="dropdown">
+                <li className={`dropdown ${openDropdowns["deep"] ? "active" : ""}`}>
                   <a
                     href="#!"
                     onClick={(e) => {
                       e.preventDefault();
                       toggleDropdown("deep");
                     }}
+                    className={openDropdowns["deep"] ? "active" : ""}
                   >
                     <span>Master Data</span>
-                    <i
-                      className={`bi bi-chevron-down toggle-dropdown ${
-                        openDropdowns["deep"] ? "active" : ""
-                      }`}
-                    ></i>
+                    <i className={`bi bi-chevron-down toggle-dropdown ${openDropdowns["deep"] ? "active" : ""}`}></i>
                   </a>
 
-                  <ul className={openDropdowns["deep"] ? "dropdown-active" : ""}      >
+                  <ul className={openDropdowns["deep"] ? "dropdown-active" : ""}>
                     <li>
-                      <Link to="/servicelist" onClick={handleLinkClick}>
+                      <NavLink
+                        to="/servicelist"
+                        onClick={handleLinkClick}
+                        className={({ isActive }) => (isActive ? "active" : "")}
+                      >
                         Services
-                      </Link>
+                      </NavLink>
                     </li>
                     <li>
-                      <Link to="/categorylist" onClick={handleLinkClick}>
+                      <NavLink
+                        to="/categorylist"
+                        onClick={handleLinkClick}
+                        className={({ isActive }) => (isActive ? "active" : "")}
+                      >
                         Category
-                      </Link>
+                      </NavLink>
                     </li>
                     <li>
-                      <Link to="/locationlist" onClick={handleLinkClick}>
+                      <NavLink
+                        to="/locationlist"
+                        onClick={handleLinkClick}
+                        className={({ isActive }) => (isActive ? "active" : "")}
+                      >
                         Location
-                      </Link>
+                      </NavLink>
                     </li>
                     <li>
-                      <Link to="/userlist" onClick={handleLinkClick}>
+                      <NavLink to="/userlist" onClick={handleLinkClick}>
                         User
                       </Link>
                                       </li>
@@ -167,27 +176,39 @@ const Navbar = () => {
                 </li>
 
                 <li>
-                  <Link to="/example2" onClick={handleLinkClick}>
+                  <NavLink
+                    to="/example2"
+                    onClick={handleLinkClick}
+                    className={({ isActive }) => (isActive ? "active" : "")}
+                  >
                     Dropdown 2
-                  </Link>
+                  </NavLink>
                 </li>
                 <li>
-                  <Link to="/example3" onClick={handleLinkClick}>
+                  <NavLink
+                    to="/example3"
+                    onClick={handleLinkClick}
+                    className={({ isActive }) => (isActive ? "active" : "")}
+                  >
                     Dropdown 3
-                  </Link>
+                  </NavLink>
                 </li>
                 <li>
-                  <Link to="/example4" onClick={handleLinkClick}>
+                  <NavLink
+                    to="/example4"
+                    onClick={handleLinkClick}
+                    className={({ isActive }) => (isActive ? "active" : "")}
+                  >
                     Dropdown 4
-                  </Link>
+                  </NavLink>
                 </li>
               </ul>
             </li>
 
-            {/* ✅ Contact scroll */}
             <li>
               <a
                 href="#contact"
+                className={isHashActive("#contact") ? "active" : ""}
                 onClick={(e) => {
                   e.preventDefault();
                   scrollToSection("contact");
@@ -198,16 +219,12 @@ const Navbar = () => {
             </li>
           </ul>
 
-          {/* Mobile toggle */}
-          <i
-            className="mobile-nav-toggle d-xl-none bi bi-list"
-            onClick={toggleMobileNav}
-          ></i>
+          <i className="mobile-nav-toggle d-xl-none bi bi-list" onClick={toggleMobileNav}></i>
         </nav>
 
-        <Link to="/signup" className="btn-getstarted" onClick={handleLinkClick}>
+        <NavLink to="/signup" className="btn-getstarted" onClick={handleLinkClick}>
           Sign Up
-        </Link>
+        </NavLink>
       </div>
     </header>
   );
