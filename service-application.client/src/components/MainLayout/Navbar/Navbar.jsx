@@ -157,13 +157,9 @@ const Navbar = () => {
                       </NavLink>
                     </li>
                     <li>
-                      <NavLink
-                        to="/deep4"
-                        onClick={handleLinkClick}
-                        className={({ isActive }) => (isActive ? "active" : "")}
-                      >
+                      <Link to="/deep4" onClick={handleLinkClick}>
                         Deep Dropdown 4
-                      </NavLink>
+                      </Link>
                     </li>
                     <li>
                       <NavLink

@@ -22,6 +22,20 @@ import ReadLocation from "./components/Location/ReadLocation";
 import SignUp from "./components/Signup/SignUp";
 import ScrollToTopButton from "./components/Common/ScrollToTopButton";
 
+
+// Registration Management
+import CreateRegistration from "./components/RegistrationManagement/CreateRegistration";
+import RegistrationList from "./components/RegistrationManagement/RegistrationList";
+import ReadRegistration from "./components/RegistrationManagement/ReadRegistration";
+
+// User Management
+import UserList from "./components/UserManagement/UserList";
+import CreateUser from "./components/UserManagement/CreateUser";
+import ReadUser from "./components/UserManagement/ReadUser";
+
+
+
+
 function App() {
   return (
     <>
@@ -53,12 +67,27 @@ function App() {
         <Route path="/createservicemanagement/:id" element={<CreateServiceManagement />} />
         <Route path="/readservice/:id" element={<ReadServiceManagement />} />
 
-        {/* Location Management */}
-        <Route path="/locationlist" element={<LocationHome />} />
-        <Route path="/createlocation" element={<CreateLocation />} />
-        <Route path="/createlocation/:id" element={<CreateLocation />} />
-        <Route path="/readlocation/:id" element={<ReadLocation />} />
-      </Routes>
+                {/* Location Management */}
+                <Route path="/locationlist" element={<LocationHome />} />
+                <Route path="/createlocation" element={<CreateLocation />} />
+                <Route path="/createlocation/:id" element={<CreateLocation />} />
+                <Route path="/readlocation/:id" element={<ReadLocation />} />
+
+                {/* REGISTRATION MANAGEMENT  */}
+                <Route path="/registrationlist" element={<RegistrationList />} />
+                <Route path="/createregistration" element={<CreateRegistration />} />
+                <Route path="/createregistration/:id" element={<CreateRegistration />} />
+                <Route path="/readregistration/:id" element={<ReadRegistration />} />
+            
+
+                {/*User*/}
+                <Route path="/userlist" element={<UserList />} />
+                <Route path="/user/create" element={<CreateUser />} />
+                <Route path="/user/edit/:id" element={<CreateUser />} />
+                <Route path="/user/read/:id" element={<ReadUser />} />
+
+                
+            </Routes>
 
       <Footer />
     </>
