@@ -28,10 +28,13 @@ builder.Services.AddScoped<IServiceService, ServiceService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped(typeof(IApiMessage<>), typeof(ApiMessage<>));
 builder.Services.AddScoped<ILocationService, LocationService>();
+builder.Services.AddScoped<ICategoryService, CategoryService>();
+builder.Services.AddScoped<IAttachmentService, AttachmentService>();
+builder.Services.AddScoped<IRegistrationService, RegistrationService>();
 
 //Repository Registration
 builder.Services.AddScoped(typeof(IRepositary<>), typeof(Repository<>));
-builder.Services.AddScoped<ICategoryService, CategoryService>();
+
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -49,33 +52,27 @@ builder.Services.AddCors(options =>
 });
 
 
-
+var app = builder.Build();
 
 
 app.UseDefaultFiles();
 app.UseStaticFiles();
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-// Configure the HTTP request pipeline.
-//if (app.Environment.IsDevelopment())
-//}
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+app.UseSwagger();
+app.UseSwaggerUI();
+app.UseHttpsRedirection();
 
 
 // Enable CORS middleware, applying the named policy
 app.UseCors(corsPolicyName); // Use the name of your defined policy
 // Enable CORS middleware, applying the named policy
-app.MapFallbackToFile("/index.html");
 
 app.UseCors(corsPolicyName); // Use the name of your defined policy
 
 app.UseAuthorization();
 
 app.MapControllers();
+
+app.MapFallbackToFile("/index.html");
 
 app.Run();

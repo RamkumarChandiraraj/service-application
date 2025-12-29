@@ -131,9 +131,7 @@ const Navbar = () => {
                     ></i>
                   </a>
 
-                  <ul
-                    className={openDropdowns["deep"] ? "dropdown-active" : ""}
-                  >
+                  <ul className={openDropdowns["deep"] ? "dropdown-active" : ""}      >
                     <li>
                       <Link to="/servicelist" onClick={handleLinkClick}>
                         Services
@@ -153,10 +151,14 @@ const Navbar = () => {
                       <Link to="/userlist" onClick={handleLinkClick}>
                         User
                       </Link>
-                    </li>
+                                      </li>
+                                      <li>
+                                          <Link to="/Registrationlist" onClick={handleLinkClick}>
+                                              Registration
+                                          </Link>
+                                      </li>
                     <li>
-                      <Link to="/Registrationlist" onClick={handleLinkClick}>
-                      Registration
+                      
                       <Link to="/attachmentlist" onClick={handleLinkClick}>
                         Attachments
                       </Link>
