@@ -1,9 +1,11 @@
-import { useState, useEffect } from "react";
+﻿import { useState, useEffect } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import {
     createRegistration,
     updateRegistration,
-    getRegistrationById
+    getRegistrationById,
+    deleteRegistration,
+    getAllRegistrations
 } from "../../api/registrationApi";
 
 function CreateRegistration() {
@@ -44,7 +46,8 @@ function CreateRegistration() {
                     description: res.description,
                 });
             } catch (err) {
-                setError("Failed to load registration details");
+                console.error("API fetch error:", err);
+                setError("Failed to load registration. Check backend URL and CORS.");
             } finally {
                 setPageLoading(false);
             }
@@ -60,25 +63,58 @@ function CreateRegistration() {
         setErrors({ ...errors, [name]: "" });
     };
 
-    // Validation
-    const validate = () => {
+    // Validation with duplicate check
+    const validate = async () => {
         let temp = {};
         if (!formData.companyName.trim())
             temp.companyName = "Company Name is required";
-        if (!formData.email.trim()) temp.email = "Email is required";
+        if (!formData.email.trim())
+            temp.email = "Email is required";
+        if (!formData.phoneNumber.trim())
+            temp.phoneNumber = "Phone Number is required";
+        if (!formData.location.trim())
+            temp.location = "Location is required";
+
+        try {
+            const registrations = await getAllRegistrations();
+
+            // 🔁 Email duplicate check
+            const emailExists = registrations.find(
+                (r) =>
+                    r.email?.toLowerCase() === formData.email.toLowerCase() &&
+                    r.id !== formData.id
+            );
+            if (emailExists) {
+                temp.email = "Email already exists";
+            }
+
+            // 🔁 Mobile duplicate check
+            const phoneExists = registrations.find(
+                (r) =>
+                    r.phoneNumber?.toString().trim() ===
+                    formData.phoneNumber.toString().trim() &&
+                    r.id !== formData.id
+            );
+
+            if (phoneExists) {
+                temp.phoneNumber = "Mobile number already exists";
+            }
+        } catch (err) {
+            console.error("Duplicate check failed:", err);
+        }
 
         setErrors(temp);
         return Object.keys(temp).length === 0;
     };
-
     // Submit (Create / Update)
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (!validate()) return;
-
-        setLoading(true);
         setError(null);
 
+        const isValid = await validate();
+        if (!isValid) return;
+
+        setLoading(true);
         try {
             if (isEditMode) {
                 await updateRegistration(formData);
@@ -87,7 +123,7 @@ function CreateRegistration() {
                 await createRegistration(formData);
                 alert("Registration created successfully");
             }
-            navigate("/registrationlist"); // change to your list route
+            navigate("/registrationlist");
         } catch (err) {
             setError(
                 err.response?.data?.message ||
@@ -95,6 +131,20 @@ function CreateRegistration() {
             );
         } finally {
             setLoading(false);
+        }
+    };
+
+    // Delete handler
+    const handleDelete = async () => {
+        if (window.confirm("Are you sure you want to delete this registration?")) {
+            try {
+                await deleteRegistration(id);
+                alert("Registration deleted successfully!");
+                navigate("/registrationlist");
+            } catch (err) {
+                console.error("Error deleting registration:", err);
+                alert("Failed to delete registration. Check console for details.");
+            }
         }
     };
 
@@ -121,8 +171,7 @@ function CreateRegistration() {
                             name="companyName"
                             value={formData.companyName}
                             onChange={handleChange}
-                            className={`form-control ${errors.companyName ? "is-invalid" : ""
-                                }`}
+                            className={`form-control ${errors.companyName ? "is-invalid" : ""}`}
                         />
                         {errors.companyName && (
                             <div className="invalid-feedback">{errors.companyName}</div>
@@ -149,25 +198,36 @@ function CreateRegistration() {
                     {/* Location */}
                     <div className="mb-3">
                         <label className="form-label">Location</label>
-                        <input
-                            type="text"
+                        <select
                             name="location"
                             value={formData.location}
                             onChange={handleChange}
                             className="form-control"
-                        />
+                        >
+                            <option value="">-- Select Location --</option>
+                            <option value="Chennai">Chennai</option>
+                            <option value="Bangalore">Bangalore</option>
+                            <option value="Mumbai">Mumbai</option>
+                            <option value="Delhi">Delhi</option>
+                        </select>
                     </div>
 
                     {/* Services */}
                     <div className="mb-3">
                         <label className="form-label">Services</label>
-                        <input
-                            type="text"
+                        <select
                             name="services"
                             value={formData.services}
                             onChange={handleChange}
                             className="form-control"
-                        />
+                        >
+                            <option value="">-- Select Service --</option>
+                            <option value="Home Services">Home Services</option>
+                            <option value="Mechanical Services">Mechanical Services</option>
+                            <option value="Agriculture Solutions">Agriculture Solutions</option>
+                            <option value="Food Services">Food Services</option>
+                            <option value="Other Services">Other Services</option>
+                        </select>
                     </div>
 
                     {/* Phone Number */}
@@ -178,8 +238,11 @@ function CreateRegistration() {
                             name="phoneNumber"
                             value={formData.phoneNumber}
                             onChange={handleChange}
-                            className="form-control"
+                            className={`form-control ${errors.phoneNumber ? "is-invalid" : ""}`}
                         />
+                        {errors.phoneNumber && (
+                            <div className="invalid-feedback">{errors.phoneNumber}</div>
+                        )}
                     </div>
 
                     {/* Description */}
@@ -212,6 +275,17 @@ function CreateRegistration() {
                                     ? "Update"
                                     : "Save"}
                         </button>
+
+                        {/* Delete button only in edit mode */}
+                        {isEditMode && (
+                            <button
+                                type="button"
+                                className="btn btn-danger ms-2"
+                                onClick={handleDelete}
+                            >
+                                Delete
+                            </button>
+                        )}
                     </div>
                 </form>
             </div>

@@ -155,8 +155,8 @@ const Navbar = () => {
                       </Link>
                     </li>
                     <li>
-                      <Link to="/deep5" onClick={handleLinkClick}>
-                        Deep Dropdown 5
+                      <Link to="/Registrationlist" onClick={handleLinkClick}>
+                      Registration
                       </Link>
                     </li>
                   </ul>
