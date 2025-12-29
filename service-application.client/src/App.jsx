@@ -20,6 +20,10 @@ import LocationHome from "./components/Location/LocationHome";
 import CreateLocation from "./components/Location/CreateLocation";
 import ReadLocation from "./components/Location/ReadLocation";
 
+// Attachment Management
+import AttachmentList from "./components/AttachmentManagement/AttachmentList";
+
+
 
 
 function App() {
@@ -50,6 +54,10 @@ function App() {
                 <Route path="/createlocation" element={<CreateLocation />} />
                 <Route path="/createlocation/:id" element={<CreateLocation />} />
                 <Route path="/readlocation/:id" element={<ReadLocation />} />
+
+                {/* Attachment Management */}
+                <Route path="/attachmentlist" element={<AttachmentList />} />
+
             </Routes>
 
             <Footer />

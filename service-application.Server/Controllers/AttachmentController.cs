@@ -9,97 +9,84 @@ using Services.Interface;
 
 namespace service_application.Server.Controllers
 {
-    [Route("api/[controller]")]
     [ApiController]
+    [Route("api/attachments")]
     public class AttachmentController : ControllerBase
     {
         private readonly IAttachmentService _attachmentService;
         private readonly IApiMessage<IApiResponse> _apiResponse;
 
-        public AttachmentController(
-            IAttachmentService attachmentService,
-            IApiMessage<IApiResponse> apiResponse)
+        public AttachmentController(IAttachmentService attachmentService, IApiMessage<IApiResponse> apiResponse)
         {
             _attachmentService = attachmentService;
             _apiResponse = apiResponse;
         }
 
+        // ================= UPLOAD =================
         [HttpPost("upload")]
-        public async ValueTask<IActionResult> Upload(
-            [FromForm] AttachmentRequestDto dto)
+        public async Task<IActionResult> Upload([FromForm] AttachmentRequestDto dto)
         {
-            try
-            {
-                if (dto.File == null || dto.File.Length == 0)
-                    return _apiResponse.BadRequest("File is required");
+            if (dto.File == null || dto.File.Length == 0)
+                return _apiResponse.BadRequest("File is required");
 
-                var result = await _attachmentService.UploadAsync(dto);
-                if (result == null)
-                    return _apiResponse.BadRequest("Upload failed");
-                return _apiResponse.Ok(result.ToMap<Attachment, AttachmentResponseDto>());
-            }
-            catch (Exception ex)
-            {
-                return _apiResponse.InternalServerError(ex.Message);
-            }
+            var result = await _attachmentService.UploadAsync(dto);
+            return _apiResponse.Ok(result.ToMap<Attachment, AttachmentResponseDto>());
         }
 
+        // ================= GET ALL =================
+        [HttpGet]
+        public async Task<IActionResult> GetAll()
+        {
+            var result = await _attachmentService.GetAllAsync();
+            return _apiResponse.Ok(result);
+        }
+
+        // ================= GET BY ID =================
         [HttpGet("{id:long}")]
-        public async ValueTask<IActionResult> GetById(long id)
+        public async Task<IActionResult> GetById(long id)
         {
-            try
-            {
-                if (id <= 0)
-                    return _apiResponse.BadRequest("Invalid Id");
+            var result = await _attachmentService.GetByIdAsync(id);
+            if (result == null)
+                return _apiResponse.NotFound("Attachment not found");
 
-                var result = await _attachmentService.GetByIdAsync(id);
-                if (result == null)
-                    return _apiResponse.NotFound("Attachment not found");
-
-                return _apiResponse.Ok(result);
-            }
-            catch (Exception ex)
-            {
-                return _apiResponse.InternalServerError(ex.Message);
-            }
+            return _apiResponse.Ok(result);
         }
 
+        // ================= DOWNLOAD =================
         [HttpGet("download/{id:long}")]
-        public async ValueTask<IActionResult> Download(long id)
+        public async Task<IActionResult> Download(long id)
         {
-            try
-            {
-                if (id <= 0)
-                    return _apiResponse.BadRequest("Invalid Id");
+            var result = await _attachmentService.GetByIdAsync(id);
+            if (result == null)
+                return _apiResponse.NotFound("Attachment not found");
 
-                var result = await _attachmentService.GetByIdAsync(id);
-                if (result == null)
-                    return _apiResponse.NotFound("Attachment not found");
+            if (!System.IO.File.Exists(result.FilePath))
+                return _apiResponse.NotFound("File not found");
 
-                if (!System.IO.File.Exists(result.FilePath))
-                    return _apiResponse.NotFound("File not found on server");
-
-                var bytes = await System.IO.File.ReadAllBytesAsync(result.FilePath);
-                var contentType = GetContentType(result.FileName);
-
-                return File(bytes, contentType, result.FileName);
-            }
-            catch (Exception ex)
-            {
-                return _apiResponse.InternalServerError(ex.Message);
-            }
+            var bytes = await System.IO.File.ReadAllBytesAsync(result.FilePath);
+            return File(bytes, "application/octet-stream", result.FileName);
         }
 
-        private static string GetContentType(string fileName)
+        // ================= DELETE =================
+        [HttpDelete("{id:long}")]
+        public async Task<IActionResult> Delete(long id)
         {
-            return Path.GetExtension(fileName).ToLower() switch
-            {
-                ".jpg" or ".jpeg" => "image/jpeg",
-                ".png" => "image/png",
-                ".webp" => "image/webp",
-                ".pdf" => "application/pdf",
-                _ => "application/octet-stream"
-            };
+            var success = await _attachmentService.DeleteAsync(id);
+            if (!success)
+                return _apiResponse.NotFound("Attachment not found");
+
+            return _apiResponse.Ok("Attachment deleted successfully");
+        }
+
+        // ================= UPDATE =================
+        [HttpPut("{id:long}")]
+        public async Task<IActionResult> Update(long id, [FromForm] AttachmentRequestDto dto)
+        {
+            var success = await _attachmentService.UpdateAsync(id, dto);
+            if (!success)
+                return _apiResponse.NotFound("Attachment not found");
+
+            return _apiResponse.Ok("Attachment updated successfully");
         }
     }
 }

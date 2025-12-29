@@ -5,87 +5,114 @@ using Data.Base;
 using Data.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
-using Services.Interface;
 
 namespace Services.Impl
 {
-    public class AttachmentService(
-        IRepositary<Attachment> attachmentRepository,
-        IConfiguration configuration
-    ) : IAttachmentService
+    public class AttachmentService : IAttachmentService
     {
-        private readonly IRepositary<Attachment> _attachmentRepository = attachmentRepository;
-        private readonly string _imagePath =
-            configuration["ImageSettings:ImageUploadPath"]
-            ?? throw new Exception("ImageUploadPath missing");
+        private readonly IRepositary<Attachment> _attachmentRepository;
+        private readonly string _uploadPath;
 
-        // ============================
-        // UPLOAD
-        // ============================
-        public async Task<Attachment> UploadAsync(
-            AttachmentRequestDto dto)
+        public AttachmentService(IRepositary<Attachment> attachmentRepository, IConfiguration configuration)
         {
-            try
-            {
-                var file = dto.File;
-                if (file == null || file.Length == 0)
-                    return null;
-
-                if (!Directory.Exists(_imagePath))
-                    Directory.CreateDirectory(_imagePath);
-
-                var ext = Path.GetExtension(file.FileName).ToLower();
-                var allowed = new[] { ".jpg", ".jpeg", ".png", ".webp", ".pdf" };
-
-                if (!allowed.Contains(ext))
-                    throw new InvalidDataException("Invalid file format");
-
-                var storedName = $"{Guid.NewGuid()}{ext}";
-                var fullPath = Path.Combine(_imagePath, storedName);
-
-                await using (var fs = new FileStream(fullPath, FileMode.Create))
-                {
-                    await file.CopyToAsync(fs);
-                }
-
-                // 🔑 DTO → ENTITY
-                var entity = dto.ToMap<AttachmentRequestDto, Attachment>();
-                entity.FileName = file.FileName;
-                entity.FilePath = fullPath;
-
-                entity.GenerateCreateHistory(1);
-
-                await _attachmentRepository.CreateAsync(entity);
-
-                return entity;
-            }
-            catch
-            {
-                throw;
-            }
+            _attachmentRepository = attachmentRepository;
+            _uploadPath = configuration["ImageSettings:ImageUploadPath"]
+                          ?? throw new Exception("ImageUploadPath missing");
         }
 
-        // ============================
-        // GET BY ID
-        // ============================
+        // ================= UPLOAD =================
+        public async Task<Attachment> UploadAsync(AttachmentRequestDto dto)
+        {
+            var file = dto.File;
+            if (file == null || file.Length == 0)
+                throw new Exception("File is required");
+
+            if (!Directory.Exists(_uploadPath))
+                Directory.CreateDirectory(_uploadPath);
+
+            var ext = Path.GetExtension(file.FileName);
+            var storedName = $"{Guid.NewGuid()}{ext}";
+            var fullPath = Path.Combine(_uploadPath, storedName);
+
+            await using (var fs = new FileStream(fullPath, FileMode.Create))
+                await file.CopyToAsync(fs);
+
+            var entity = dto.ToMap<AttachmentRequestDto, Attachment>();
+            entity.FileName = file.FileName;
+            entity.FilePath = fullPath;
+            entity.GenerateCreateHistory(1);
+
+            await _attachmentRepository.CreateAsync(entity);
+            return entity;
+        }
+
+        // ================= GET ALL =================
+        public async Task<List<AttachmentResponseDto>> GetAllAsync()
+        {
+            var list = await _attachmentRepository
+                .FindAll()
+                .AsNoTracking()
+                .OrderBy(x => x.CreatedDate)
+                .ToListAsync();
+
+            return list.Select(x => x.ToMap<Attachment, AttachmentResponseDto>()).ToList();
+        }
+
+        // ================= GET BY ID =================
         public async Task<AttachmentResponseDto?> GetByIdAsync(long id)
         {
-            try
-            {
-                var entity = await _attachmentRepository
-                    .FindByCondition(x => x.ID == id)
-                    .AsNoTracking()
-                    .FirstOrDefaultAsync();
+            var entity = await _attachmentRepository
+                .FindByCondition(x => x.ID == id)
+                .AsNoTracking()
+                .FirstOrDefaultAsync();
 
-                if (entity == null)
-                    return null;
+            return entity?.ToMap<Attachment, AttachmentResponseDto>();
+        }
 
-                return entity.ToMap<Attachment, AttachmentResponseDto>();
-            }
-            catch
-            {
-                throw;
-            }
+        // ================= DELETE =================
+        public async Task<bool> DeleteAsync(long id)
+        {
+            var entity = await _attachmentRepository
+                .FindByCondition(x => x.ID == id)
+                .FirstOrDefaultAsync();
+
+            if (entity == null) return false;
+            if (File.Exists(entity.FilePath))
+                File.Delete(entity.FilePath);
+
+            await _attachmentRepository.DeleteAsync(entity);
+            return true;
+        }
+
+        // ================= UPDATE =================
+        public async Task<bool> UpdateAsync(long id, AttachmentRequestDto dto)
+        {
+            var entity = await _attachmentRepository
+                .FindByCondition(x => x.ID == id)
+                .FirstOrDefaultAsync();
+
+            if (entity == null)
+                return false;
+
+            if (dto.File == null || dto.File.Length == 0)
+                throw new Exception("File is required");
+
+            // Delete old file
+            if (File.Exists(entity.FilePath))
+                File.Delete(entity.FilePath);
+
+            var ext = Path.GetExtension(dto.File.FileName);
+            var newName = $"{Guid.NewGuid()}{ext}";
+            var newPath = Path.Combine(_uploadPath, newName);
+
+            await using (var fs = new FileStream(newPath, FileMode.Create))
+                await dto.File.CopyToAsync(fs);
+
+            entity.FileName = dto.File.FileName;
+            entity.FilePath = newPath;
+
+            await _attachmentRepository.UpdateAsync(entity);
+            return true;
         }
     }
 }

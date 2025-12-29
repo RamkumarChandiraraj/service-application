@@ -13,5 +13,7 @@ namespace Data.Entities
 
         [Required]
         public string FilePath { get; set; }
+
+        
     }
 }
