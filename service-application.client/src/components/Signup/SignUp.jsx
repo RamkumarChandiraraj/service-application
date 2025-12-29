@@ -30,7 +30,6 @@ const SignUp = () => {
       <div className="signup-slider-form-container signup-slider-sign-in-container">
         <form>
           <h1>Sign In</h1>
-          <span>or use your mobile number</span>
 
           <input type="tel" placeholder="Mobile Number" />
           <input type="password" placeholder="Password" />
@@ -44,7 +43,6 @@ const SignUp = () => {
       <div className="signup-slider-form-container signup-slider-sign-up-container">
         <form>
           <h1>Create Account</h1>
-          <span>Use your details to register</span>
 
           <input type="text" placeholder="Full Name" />
           <input type="tel" placeholder="Mobile Number" />

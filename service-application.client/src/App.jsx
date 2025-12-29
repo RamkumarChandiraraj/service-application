@@ -9,7 +9,7 @@ import CategoriesPage from "./components/Pages/Category";
 import Service from "./components/Pages/Service"; 
 // Category Management 
 import CategoryList from "./components/CategoryManagement/CategoryList"; 
-import CreateCategoryManagement from "./components/CategoryManagement/CreateCategorymanagement"; 
+import CreateCategoryManagement from "./components/CategoryManagement/CreateCategoryManagement"; 
 import ReadCategoryManagement from "./components/CategoryManagement/ReadCategoryManagement"; 
 // Service Management 
 import Home from "./components/ServicesManagement/Home"; 

@@ -59,8 +59,9 @@ const Navbar = () => {
           <img
             src={logo}
             alt="Aanaiyaan Logo"
-            style={{ maxHeight: "60px", width: "auto", objectFit: "contain" }}
+            style={{ maxHeight: "40px", width: "auto", objectFit: "contain" }}
           />
+          {/* <h1>Mr LookUp</h1> */}
         </NavLink>
 
         <nav id="navmenu" className="navmenu">
@@ -157,21 +158,34 @@ const Navbar = () => {
                       </NavLink>
                     </li>
                     <li>
-                      <NavLink to="/userlist" onClick={handleLinkClick}>
+                      <NavLink
+                        to="/userlist"
+                        onClick={handleLinkClick}
+                        className={({ isActive }) => (isActive ? "active" : "")}
+                      >
                         User
-                      </Link>
-                                      </li>
-                                      <li>
-                                          <Link to="/Registrationlist" onClick={handleLinkClick}>
-                                              Registration
-                                          </Link>
-                                      </li>
-                    <li>
-                      
-                      <Link to="/attachmentlist" onClick={handleLinkClick}>
-                        Attachments
-                      </Link>
+                      </NavLink>
                     </li>
+                    <li>
+                      <NavLink
+                        to="/Registrationlist"
+                        onClick={handleLinkClick}
+                        className={({ isActive }) => (isActive ? "active" : "")}
+                      >
+                        Registration
+                      </NavLink>
+                    </li>
+                    
+                      <li>
+                      <NavLink
+                        to="/attachmentlist"
+                        onClick={handleLinkClick}
+                        className={({ isActive }) => (isActive ? "active" : "")}
+                      >
+                        Attachments
+                      </NavLink>
+                    </li>
+                    
                   </ul>
                 </li>
 

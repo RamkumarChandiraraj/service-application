@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import DataTable from "../../components/Common/DataTable";
 import { getAllLocations, deleteLocation } from "../../api/locationList";
 
@@ -7,24 +7,25 @@ function LocationHome() {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchLocations = async () => {
-      try {
-        const res = await getAllLocations();
-        setData(res.data);
-      } catch (err) {
-        setError(err.message || "Failed to load locations");
-      } finally {
-        setLoading(false);
-      }
-    };
     fetchLocations();
   }, []);
 
-  const handleDelete = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this location?")) return;
+  const fetchLocations = async () => {
+    try {
+      const res = await getAllLocations();
+      setData(res.data || []);
+    } catch (err) {
+      setError(err.message || "Failed to load locations");
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  const handleDelete = async (id) => {
+    if (!window.confirm("Delete this location?")) return;
     try {
       await deleteLocation(id);
       setData((prev) => prev.filter((x) => x.id !== id));
@@ -41,38 +42,36 @@ function LocationHome() {
       {
         header: "Actions",
         field: "actions",
+        sortable: false,
         body: (row) => (
-          <>
-            <Link to={`/readlocation/${row.id}`} className="btn btn-info btn-sm me-2">
-              Read
+          <div className="d-flex gap-2 flex-wrap">
+            <Link to={`/readlocation/${row.id}`} className="btn btn-info btn-sm">
+              View
             </Link>
-            <Link to={`/createlocation/${row.id}`} className="btn btn-primary btn-sm me-2">
+            <Link to={`/createlocation/${row.id}`} className="btn btn-primary btn-sm">
               Edit
             </Link>
-            <button
-              className="btn btn-danger btn-sm"
-              onClick={() => handleDelete(row.id)}
-            >
+            <button className="btn btn-danger btn-sm" onClick={() => handleDelete(row.id)}>
               Delete
             </button>
-          </>
+          </div>
         ),
       },
     ],
     []
   );
 
-  if (loading) return <p className="text-center mt-5">Loading Locations...</p>;
+  if (loading) return <p className="text-center mt-5">Loading locations...</p>;
   if (error) return <p className="text-center mt-5 text-danger">{error}</p>;
 
   return (
-    <div className="container-fluid px-2 px-md-4 mt-4">
+    <div className="container py-4">
       <DataTable
-        title="Locations List"
+        title="Locations"
         data={data}
         columns={columns}
         searchFields={["name", "pincode"]}
-        onAdd={() => (window.location.href = "/createlocation")}
+        onAdd={() => navigate("/createlocation")}
       />
     </div>
   );

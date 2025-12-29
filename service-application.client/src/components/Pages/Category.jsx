@@ -1,8 +1,30 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Card from "../Common/Card";
-import { categoryCards } from "./CategoryCards";
+import { getAllCategories } from "../../api/categoryApi"; // adjust path to your API file
 
 const Category = () => {
+  const [categories, setCategories] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await getAllCategories();
+        if (response?.data) {
+          setCategories(response.data);
+        }
+      } catch (error) {
+        console.error("Failed to load categories:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCategories();
+  }, []);
+
+  if (loading) return <p>Loading categories...</p>;
+
   return (
     <section id="categories" className="services section-bg py-5">
       <div className="container">
@@ -14,14 +36,15 @@ const Category = () => {
 
         {/* Category Cards */}
         <div className="row gy-4 section-cards">
-          {categoryCards.map((service, index) => (
+          {categories.map((service, index) => (
             <Card
               key={service.id}
               data={{
                 icon: service.icon,
-                title: service.title,
+                title: service.name,
                 description: service.description,
-                link: `/service/${service.link}`, // ✅ default dynamic link
+                link: `/service/${service.link}`,
+                isActive: service.isActive, // optional: for styling inactive cards
               }}
               delay={(index + 1) * 100}
             />
