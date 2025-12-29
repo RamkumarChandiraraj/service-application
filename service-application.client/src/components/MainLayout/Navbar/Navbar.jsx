@@ -155,6 +155,8 @@ const Navbar = () => {
                       </Link>
                     </li>
                     <li>
+                      <Link to="/Registrationlist" onClick={handleLinkClick}>
+                      Registration
                       <Link to="/attachmentlist" onClick={handleLinkClick}>
                         Attachments
                       </Link>
