@@ -1,7 +1,6 @@
 using Common.Base;
 using Data.Base;
 using Data.Context;
-using Data.Entities;
 using Mapster;
 using Microsoft.EntityFrameworkCore;
 using Services.Impl;
@@ -9,6 +8,7 @@ using Services.Interface;
 using Services.Mappings;
 
 var corsPolicyName = "AllowAll";
+
 var builder = WebApplication.CreateBuilder(args);
 
 var con = builder.Configuration.GetConnectionString("DB_mysql");
@@ -25,13 +25,13 @@ RegisterMapper.RegisterMapsterConfiguration();
 //Service Registration
 //builder.Services.AddScoped<ServiceApplicationDbContext>();
 builder.Services.AddScoped<IServiceService, ServiceService>();
-builder.Services.AddScoped<IUserService, UserService>();
-builder.Services.AddScoped(typeof(IApiMessage<>), typeof(ApiMessage<>));
+builder.Services.AddScoped<IRegistrationService, RegistrationService>();
 builder.Services.AddScoped<ILocationService, LocationService>();
+builder.Services.AddScoped<ICategoryService, CategoryService>();
+builder.Services.AddScoped(typeof(IApiMessage<>), typeof(ApiMessage<>));
+builder.Services.AddScoped(typeof(IRepositary<>), typeof(Repository<>));
 
 //Repository Registration
-builder.Services.AddScoped(typeof(IRepositary<>), typeof(Repository<>));
-builder.Services.AddScoped<ICategoryService, CategoryService>();
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -59,23 +59,19 @@ builder.Services.AddCors(options =>
 
 
 
-
 var app = builder.Build();
 
 app.UseDefaultFiles();
 app.UseStaticFiles();
 
-
-
 // Configure the HTTP request pipeline.
-//if (app.Environment.IsDevelopment())
-//{
+if (app.Environment.IsDevelopment())
+{
     app.UseSwagger();
     app.UseSwaggerUI();
-//}
+}
 
 app.UseHttpsRedirection();
-
 // Enable CORS middleware, applying the named policy
 app.UseCors(corsPolicyName); // Use the name of your defined policy
 
