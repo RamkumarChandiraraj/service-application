@@ -11,6 +11,7 @@
   <ItemGroup>
     <Folder Include="src\assets\base-html\" />
     <Folder Include="src\components\Navbar\" />
+    <Folder Include="src\components\UserManagement\" />
     <Folder Include="src\components\RegistrationManagement\" />
   </ItemGroup>
 </Project>

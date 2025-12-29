@@ -26,6 +26,14 @@ import CreateRegistration from "./components/RegistrationManagement/CreateRegist
 import RegistrationList from "./components/RegistrationManagement/RegistrationList";
 import ReadRegistration from "./components/RegistrationManagement/ReadRegistration";
 
+// User Management
+import UserList from "./components/UserManagement/UserList";
+import CreateUser from "./components/UserManagement/CreateUser";
+import ReadUser from "./components/UserManagement/ReadUser";
+
+
+
+
 function App() {
     return (
         <>
@@ -61,6 +69,14 @@ function App() {
                 <Route path="/createregistration/:id" element={<CreateRegistration />} />
                 <Route path="/readregistration/:id" element={<ReadRegistration />} />
             
+
+                {/*User*/}
+                <Route path="/userlist" element={<UserList />} />
+                <Route path="/user/create" element={<CreateUser />} />
+                <Route path="/user/edit/:id" element={<CreateUser />} />
+                <Route path="/user/read/:id" element={<ReadUser />} />
+
+                
             </Routes>
 
             <Footer />
