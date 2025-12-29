@@ -1,4 +1,5 @@
-﻿using Data.BaseEntity;
+﻿using Common.Enum;
+using Data.BaseEntity;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -16,6 +17,7 @@ namespace Data.Entities
         public string Password { get; set; }
         public string Email { get; set; }
         public long MobileNumber { get; set; }
-        public string Role { get; set; }
+        public UserRole Role { get; set; }
      }
+   
 }
