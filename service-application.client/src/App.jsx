@@ -24,6 +24,12 @@ import ReadLocation from "./components/Location/ReadLocation";
 import AttachmentList from "./components/AttachmentManagement/AttachmentList";
 
 
+// User Management
+import UserList from "./components/UserManagement/UserList";
+import CreateUser from "./components/UserManagement/CreateUser";
+import ReadUser from "./components/UserManagement/ReadUser";
+
+
 
 
 function App() {
@@ -54,6 +60,14 @@ function App() {
                 <Route path="/createlocation" element={<CreateLocation />} />
                 <Route path="/createlocation/:id" element={<CreateLocation />} />
                 <Route path="/readlocation/:id" element={<ReadLocation />} />
+
+                {/*User*/}
+                <Route path="/userlist" element={<UserList />} />
+                <Route path="/user/create" element={<CreateUser />} />
+                <Route path="/user/edit/:id" element={<CreateUser />} />
+                <Route path="/user/read/:id" element={<ReadUser />} />
+
+                
 
                 {/* Attachment Management */}
                 <Route path="/attachmentlist" element={<AttachmentList />} />
