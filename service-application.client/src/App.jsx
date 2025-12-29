@@ -22,6 +22,8 @@ import ReadLocation from "./components/Location/ReadLocation";
 import SignUp from "./components/Signup/SignUp";
 import ScrollToTopButton from "./components/Common/ScrollToTopButton";
 
+// Attachment Management
+import AttachmentList from "./components/AttachmentManagement/AttachmentList";
 
 // Registration Management
 import CreateRegistration from "./components/RegistrationManagement/CreateRegistration";
@@ -87,6 +89,10 @@ function App() {
                 <Route path="/user/read/:id" element={<ReadUser />} />
 
                 
+
+                {/* Attachment Management */}
+                <Route path="/attachmentlist" element={<AttachmentList />} />
+
             </Routes>
 
       <Footer />

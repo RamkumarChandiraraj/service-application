@@ -274,4 +274,4 @@ function CreateLocation() {
   );
 }
 
-export default CreateLocation;
+export default CreateCategoryManagement;

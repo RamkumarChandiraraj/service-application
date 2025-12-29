@@ -11,5 +11,7 @@ namespace Common.RequestDto
     {
         public string Name { get; set; } = null!;
         public string? Description { get; set; }
+        public string? Icon { get; set; }
+        public string Link { get; set; } = null!;
     }
 }
