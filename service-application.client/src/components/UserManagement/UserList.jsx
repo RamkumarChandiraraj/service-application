@@ -1,88 +1,82 @@
-import React, { useEffect, useState, useMemo } from "react";
-import { Link } from "react-router-dom";
+import { useEffect, useState, useMemo } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import DataTable from "../../components/Common/DataTable";
 import { getAllUsers, deleteUser } from "../../api/UserApi";
 
-const UserList = () => {
-    const [users, setUsers] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
+function UserList() {
+  const [data, setData] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const navigate = useNavigate();
 
-    useEffect(() => {
-        const fetchUser = async () => {
-            try {
-                const res = await getAllUsers();
-                setUsers(res.data);
-            } catch (err) {
-                setError(err.message || "Failed to load users");
-            } finally {
-                setLoading(false);
-            }
-        };
-        fetchUser();
-    }, []);
+  useEffect(() => {
+    fetchUsers();
+  }, []);
 
-    const handleDelete = async (id) => {
-        if (!window.confirm("Are you sure you want to delete this user?")) return;
+  const fetchUsers = async () => {
+    try {
+      const res = await getAllUsers();
+      setData(res.data || []);
+    } catch (err) {
+      setError(err.message || "Failed to load users");
+    } finally {
+      setLoading(false);
+    }
+  };
 
-        try {
-            await deleteUser(id);
-            setUsers((prev) => prev.filter((x) => x.id !== id));
-        } catch {
-            alert("Failed to delete user");
-        }
-    };
+  const handleDelete = async (id) => {
+    if (!window.confirm("Delete this user?")) return;
+    try {
+      await deleteUser(id);
+      setData((prev) => prev.filter((x) => x.id !== id));
+    } catch {
+      alert("Failed to delete user");
+    }
+  };
 
-    const columns = useMemo(() => [
-        { header: "ID", field: "id" },
-        { header: "UserName", field: "userName" },       
-        { header: "Email", field: "email" },
-        { header: "MobileNumber", field: "mobileNumber" },
-        { header: "Role", field: "role" },
-        {
-            header: "Actions",
-            field: "actions",
-            body: (row) => (
-                <>
-                    <Link to={`/user/read/${row.id}`} className="btn btn-info btn-sm me-2">
-                        Read
-                    </Link>
-                    <Link to={`/user/edit/${row.id}`} className="btn btn-primary btn-sm me-2">
-                        Edit
-                    </Link>
-                    <button
-                        className="btn btn-danger btn-sm"
-                        onClick={() => handleDelete(row.id)}
-                    >
-                        Delete
-                    </button>
-                </>
-            ),
-        },
-    ], []);
+  const columns = useMemo(
+    () => [
+      { header: "ID", field: "id" },
+      { header: "Username", field: "userName" },
+      { header: "Email", field: "email" },
+      { header: "Mobile", field: "mobileNumber" },
+      { header: "Role", field: "role" },
+      {
+        header: "Actions",
+        field: "actions",
+        sortable: false,
+        body: (row) => (
+          <div className="d-flex gap-2 flex-wrap">
+            <Link to={`/user/read/${row.id}`} className="btn btn-info btn-sm">
+              Read
+            </Link>
+            <Link to={`/user/edit/${row.id}`} className="btn btn-primary btn-sm">
+              Edit
+            </Link>
+            <button className="btn btn-danger btn-sm" onClick={() => handleDelete(row.id)}>
+              Delete
+            </button>
+          </div>
+        ),
+      },
+    ],
+    []
+  );
 
-    if (loading) return <p className="text-center mt-5">Loading Users...</p>;
-    if (error) return <p className="text-center mt-5 text-danger">{error}</p>;
+  if (loading) return <p className="text-center mt-5">Loading users...</p>;
+  if (error) return <p className="text-center mt-5 text-danger">{error}</p>;
 
-    return (
-        <div className="d-flex flex-column align-items-center bg-light min-vh-100 pb-5">
-            <h1 className="mt-4">Users List</h1>
-
-            <div className="w-75 rounded bg-white border shadow p-4 mb-4">
-                <div className="d-flex justify-content-end mb-3">
-                    <Link to="/user/create" className="btn btn-success">
-                        Add
-                    </Link>
-                </div>
-
-                <DataTable
-                    data={users}
-                    columns={columns}
-                    searchFields={["username", "email"]}
-                />
-            </div>
-        </div>
-    );
-};
+  return (
+    <div className="container py-4">
+      <DataTable
+        title="Users"
+        data={data}
+        columns={columns}
+        searchFields={["userName", "email"]}
+        onAdd={() => navigate("/user/create")}
+      />
+    </div>
+  );
+}
 
 export default UserList;

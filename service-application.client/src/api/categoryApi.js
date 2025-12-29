@@ -21,7 +21,6 @@ export const getAllCategories = async () => {
 
 
 // GET CATEGORY BY ID
-// GET CATEGORY BY ID
 export const getCategoryById = async (id) => {
     try {
         const response = await api.get(`/api/Category/${id}`);

@@ -1,21 +1,22 @@
-import React, { useState, useMemo } from "react";
+import { useState, useMemo } from "react";
 import "./DataTable.css";
 
 const DataTable = ({
+  title,
   data = [],
   columns = [],
-  title,
   searchFields = [],
   rowsPerPageOptions = [5, 10, 25, 50],
   defaultRowsPerPage = 10,
-  onAdd, // optional Add button handler
+  onAdd,
 }) => {
   const [search, setSearch] = useState("");
-  const [currentPage, setCurrentPage] = useState(1);
+  const [page, setPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(defaultRowsPerPage);
   const [sortField, setSortField] = useState(null);
   const [sortOrder, setSortOrder] = useState("asc");
 
+  // FILTER
   const filteredData = useMemo(() => {
     if (!search) return data;
     return data.filter((row) =>
@@ -25,12 +26,12 @@ const DataTable = ({
     );
   }, [search, data, searchFields]);
 
+  // SORT
   const sortedData = useMemo(() => {
     if (!sortField) return filteredData;
     return [...filteredData].sort((a, b) => {
       const aVal = a[sortField];
       const bVal = b[sortField];
-
       if (aVal == null) return 1;
       if (bVal == null) return -1;
 
@@ -44,12 +45,12 @@ const DataTable = ({
     });
   }, [filteredData, sortField, sortOrder]);
 
+  // PAGINATION
   const totalPages = Math.ceil(sortedData.length / rowsPerPage);
-
   const paginatedData = useMemo(() => {
-    const start = (currentPage - 1) * rowsPerPage;
+    const start = (page - 1) * rowsPerPage;
     return sortedData.slice(start, start + rowsPerPage);
-  }, [sortedData, currentPage, rowsPerPage]);
+  }, [sortedData, page, rowsPerPage]);
 
   const handleSort = (field) => {
     if (sortField === field) {
@@ -64,8 +65,7 @@ const DataTable = ({
     <div className="datatable-card">
       {/* HEADER */}
       <div className="datatable-header">
-        <h3 className="datatable-title">{title}</h3>
-
+        <h3>{title}</h3>
         {onAdd && (
           <button className="datatable-add-btn" onClick={onAdd}>
             Add
@@ -75,35 +75,31 @@ const DataTable = ({
 
       {/* CONTROLS */}
       <div className="datatable-controls">
+        {/* PAGINATION */}
         <div className="datatable-pagination">
-          <button
-            disabled={currentPage === 1}
-            onClick={() => setCurrentPage((p) => p - 1)}
-          >
+          <button disabled={page === 1} onClick={() => setPage(page - 1)}>
             Prev
           </button>
-
           <span>
-            Page {currentPage} of {totalPages || 1}
+            Page {page} / {totalPages || 1}
           </span>
-
           <button
-            disabled={currentPage === totalPages || totalPages === 0}
-            onClick={() => setCurrentPage((p) => p + 1)}
+            disabled={page === totalPages || totalPages === 0}
+            onClick={() => setPage(page + 1)}
           >
             Next
           </button>
         </div>
 
+        {/* SEARCH */}
         {searchFields.length > 0 && (
           <input
             type="text"
-            className="datatable-search"
             placeholder="Search..."
             value={search}
             onChange={(e) => {
               setSearch(e.target.value);
-              setCurrentPage(1);
+              setPage(1);
             }}
           />
         )}
@@ -111,7 +107,7 @@ const DataTable = ({
 
       {/* TABLE */}
       <div className="datatable-table-wrapper">
-        <table className="table table-bordered table-striped">
+        <table>
           <thead>
             <tr>
               {columns.map((col) => (
@@ -120,24 +116,28 @@ const DataTable = ({
                   onClick={() =>
                     col.sortable !== false && handleSort(col.field)
                   }
+                  className={col.sortable !== false ? "sortable" : ""}
                 >
-                  {col.header}{" "}
-                  {sortField === col.field
-                    ? sortOrder === "asc"
-                      ? "▲"
-                      : "▼"
-                    : ""}
+                  {col.header}
+                  {sortField === col.field && (
+                    <span className="sort">
+                      {sortOrder === "asc" ? " ▲" : " ▼"}
+                    </span>
+                  )}
                 </th>
               ))}
             </tr>
           </thead>
 
           <tbody>
-            {paginatedData.length > 0 ? (
+            {paginatedData.length ? (
               paginatedData.map((row, i) => (
                 <tr key={i}>
                   {columns.map((col) => (
-                    <td key={col.field}>
+                    <td
+                      key={col.field}
+                      className={col.field === "actions" ? "actions-cell" : ""}
+                    >
                       {col.body ? col.body(row) : row[col.field]}
                     </td>
                   ))}
@@ -145,7 +145,7 @@ const DataTable = ({
               ))
             ) : (
               <tr>
-                <td colSpan={columns.length} className="text-center">
+                <td colSpan={columns.length} className="empty">
                   No records found
                 </td>
               </tr>
@@ -156,20 +156,20 @@ const DataTable = ({
 
       {/* FOOTER */}
       <div className="datatable-footer">
-        <label>Rows per page:</label>
-        <select
-          value={rowsPerPage}
-          onChange={(e) => {
-            setRowsPerPage(Number(e.target.value));
-            setCurrentPage(1);
-          }}
-        >
-          {rowsPerPageOptions.map((n) => (
-            <option key={n} value={n}>
-              {n}
-            </option>
-          ))}
-        </select>
+        <label>
+          Rows:
+          <select
+            value={rowsPerPage}
+            onChange={(e) => {
+              setRowsPerPage(Number(e.target.value));
+              setPage(1);
+            }}
+          >
+            {rowsPerPageOptions.map((n) => (
+              <option key={n}>{n}</option>
+            ))}
+          </select>
+        </label>
       </div>
     </div>
   );
