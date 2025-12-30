@@ -1,10 +1,11 @@
-﻿using Common.RequestDto;
+﻿using Common.Extension;
+using Common.RequestDto;
 using Common.ResponseDto;
 using Data.Base;
 using Data.Entities;
+using Mapster;
 using Microsoft.EntityFrameworkCore;
 using Services.Interface;
-using System;
 
 namespace Services.Impl
 {
@@ -19,69 +20,58 @@ namespace Services.Impl
 
         public async Task<AnnouncementsResponseDto> CreateAsync(AnnouncementsRequestDto dto)
         {
-            var entity = new Announcements
-            {
-                Title = dto.Title,
-                Description = dto.Description
-            };
+            var entity = dto.ToMap<AnnouncementsRequestDto, Announcements>();
+            await _repository.CreateAsync(entity);
 
-            _context.Announcements.Add(entity);
-            await _context.SaveChangesAsync();
-
-            return new AnnouncementsResponseDto
-            {
-                ID = entity.ID,
-                Title = entity.Title,
-                Description = entity.Description
-            };
-        }
-
-        public async Task<bool> DeleteAsync(long id)
-        {
-            var entity = await _context.Announcements.FindAsync(id);
-            if (entity == null)
-                return false;
-
-            _context.Announcements.Remove(entity);
-            await _context.SaveChangesAsync();
-            return true;
-        }
-
-        public async Task<List<AnnouncementsResponseDto>> GetAllAsync()
-        {
-            return await _context.Announcements
-                .Select(a => new AnnouncementsResponseDto
-                {
-                    ID = a.ID,
-                    Title = a.Title,
-                    Description = a.Description
-                })
-                .ToListAsync();
+            return entity.ToMap<Announcements, AnnouncementsResponseDto>();
         }
 
         public async Task<AnnouncementsResponseDto?> GetByIdAsync(long id)
         {
-            return await _context.Announcements
-                .Where(a => a.ID == id)
-                .Select(a => new AnnouncementsResponseDto
-                {
-                    ID = a.ID,
-                    Title = a.Title,
-                    Description = a.Description
-                })
+            var entity = await _repository
+                .FindByCondition(x => x.ID == id)
                 .FirstOrDefaultAsync();
+
+            return entity?.ToMap<Announcements, AnnouncementsResponseDto>();
+        }
+
+        public async Task<List<AnnouncementsResponseDto>> GetAllAsync()
+        {
+            var entities = await _repository
+                .FindAll()
+                .OrderByDescending(x => x.ID)
+                .ToListAsync();
+
+            return entities
+                .Select(x => x.ToMap<Announcements, AnnouncementsResponseDto>())
+                .ToList();
         }
 
         public async Task<bool> UpdateAsync(long id, AnnouncementsRequestDto dto)
         {
-            var entity = await _context.Announcements.FindAsync(id);
+            var entity = await _repository
+                .FindByCondition(x => x.ID == id)
+                .FirstOrDefaultAsync();
+
             if (entity == null)
                 return false;
 
-            entity.Title = dto.Title;
-            entity.Description = dto.Description;
+            dto.Adapt(entity);
+            await _repository.UpdateAsync(entity);
 
-            await _context.SaveChangesAsync();
+            return true;
+        }
+
+        public async Task<bool> DeleteAsync(long id)
+        {
+            var entity = await _repository
+                .FindByCondition(x => x.ID == id)
+                .FirstOrDefaultAsync();
+
+            if (entity == null)
+                return false;
+
+            await _repository.DeleteAsync(entity);
             return true;
         }
     }
