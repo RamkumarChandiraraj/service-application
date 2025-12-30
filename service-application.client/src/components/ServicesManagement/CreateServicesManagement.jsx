@@ -15,6 +15,8 @@ function CreateServiceManagement() {
         ID: 0, // must match backend
         Name: "",
         Description: "",
+        Icon: "",
+        CategoryId:0,
     });
 
     const [errors, setErrors] = useState({});
@@ -34,6 +36,8 @@ function CreateServiceManagement() {
                     ID: res.data.id,
                     Name: res.data.name || "",
                     Description: res.data.description || "",
+                    Icon: res.data.icon || "",
+                    CategoryId: res.data.categoryId || "",
                 });
             } catch (err) {
                 setError("Failed to load service details");
@@ -59,6 +63,10 @@ function CreateServiceManagement() {
             temp.Name = "Service name is required";
         if (!formData.Description.trim())
             temp.Description = "Description is required";
+        if (!formData.Icon.trim())
+            temp.Icon = "Icon is required";
+        if (!formData.CategoryId || Number(formData.CategoryId) <= 0)
+            temp.CategoryId = "CategoryId is required";
 
         setErrors(temp);
         return Object.keys(temp).length === 0;
@@ -144,6 +152,26 @@ function CreateServiceManagement() {
                         {errors.Description && (
                             <div className="invalid-feedback">
                                 {errors.Description}
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Icon */}
+                    <div className="mb-3">
+                        <label className="form-label">
+                            Icon <span className="text-danger">*</span>
+                        </label>
+                        <input
+                            type="text"
+                            name="Icon"
+                            value={formData.Icon}
+                            onChange={handleChange}
+                            className={`form-control ${errors.Icon ? "is-invalid" : ""
+                                }`}
+                        />
+                        {errors.Icon && (
+                            <div className="invalid-feedback">
+                                {errors.Icon}
                             </div>
                         )}
                     </div>

@@ -53,7 +53,7 @@ function Home() {
         field: "actions",
         sortable: false,
         body: (row) => (
-          <div className="d-flex gap-2 flex-wrap justify-content-end">
+          <div className="d-flex gap-2 flex-wrap justify-content-middle">
             <Link
               to={`/readservice/${row.id}`}
               className="btn btn-info btn-sm"

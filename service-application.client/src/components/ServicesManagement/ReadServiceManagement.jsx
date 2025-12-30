@@ -24,6 +24,9 @@ function ReadServiceManagement() {
                     <strong>Description:</strong> {service.description}
                 </p>
                 <p>
+                    <strong>Icon:</strong> {service.icon}
+                </p>
+                <p>
                     <strong>CategoryId:</strong> {service.categoryId}
                 </p>
 

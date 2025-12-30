@@ -238,7 +238,7 @@ namespace Data.Migrations
                         .IsRequired();
 
                     b.Navigation("Category");
-                });
+                
 
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime(6)");
@@ -268,6 +268,7 @@ namespace Data.Migrations
                     b.HasKey("ID");
 
                     b.ToTable("Service");
+                });
             modelBuilder.Entity("Data.Entities.Category", b =>
                 {
                     b.Navigation("Services");
