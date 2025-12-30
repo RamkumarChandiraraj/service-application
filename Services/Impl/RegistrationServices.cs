@@ -48,27 +48,26 @@ namespace Services.Impl
             return new OkObjectResult(list);
         }
 
-        public async ValueTask<IActionResult> Update(RegistrationRequestDto dto)
+        public async ValueTask<IActionResult> Update(int id, RegistrationRequestDto dto)
         {
             var entity = await _registrationRepository
-                .FindByCondition(r => r.ID == dto.ID)
+                .FindByCondition(r => r.ID == id)
                 .FirstOrDefaultAsync();
 
             if (entity == null)
-                return new NotFoundObjectResult($"Registration with ID {dto.ID} not found.");
+                return new NotFoundObjectResult($"Registration with ID {id} not found.");
 
             // Update fields
             entity.CompanyName = dto.CompanyName;
-            entity.Location = dto.Location;
-            entity.Services = dto.Services;
             entity.Email = dto.Email;
             entity.PhoneNumber = dto.PhoneNumber;
+            entity.Location = dto.Location;
+            entity.Services = dto.Services;
             entity.Description = dto.Description;
 
-            entity.GenerateModifyHistory(1);
             await _registrationRepository.UpdateAsync(entity);
 
-            return new OkObjectResult(entity);
+            return new OkObjectResult("Registration updated successfully");
         }
 
         public async ValueTask<IActionResult> Delete(long id)
@@ -85,5 +84,7 @@ namespace Services.Impl
 
             return new OkObjectResult(true);
         }
+
+        
     }
 }

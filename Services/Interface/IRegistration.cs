@@ -15,8 +15,8 @@ namespace Services.Interface
             ValueTask<IActionResult> Create(RegistrationRequestDto dto);
             ValueTask<IActionResult> Get(long id);
             ValueTask<IActionResult> GetAll();
-            ValueTask<IActionResult> Update(RegistrationRequestDto dto);
-            ValueTask<IActionResult> Delete(long id);
+        ValueTask<IActionResult> Update(int id, RegistrationRequestDto dto);
+        ValueTask<IActionResult> Delete(long id);
         
     }
 }
