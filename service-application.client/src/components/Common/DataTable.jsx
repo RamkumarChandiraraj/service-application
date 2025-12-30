@@ -1,21 +1,22 @@
-import React, { useState, useMemo } from "react";
-import "./DataTable.css"; // Make sure this file is included
+import { useState, useMemo } from "react";
+import "./DataTable.css";
 
 const DataTable = ({
+  title,
   data = [],
   columns = [],
-  title,
   searchFields = [],
   rowsPerPageOptions = [5, 10, 25, 50],
   defaultRowsPerPage = 10,
+  onAdd,
 }) => {
   const [search, setSearch] = useState("");
-  const [currentPage, setCurrentPage] = useState(1);
+  const [page, setPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(defaultRowsPerPage);
   const [sortField, setSortField] = useState(null);
   const [sortOrder, setSortOrder] = useState("asc");
 
-  // Filter data based on search
+  // FILTER
   const filteredData = useMemo(() => {
     if (!search) return data;
     return data.filter((row) =>
@@ -25,32 +26,31 @@ const DataTable = ({
     );
   }, [search, data, searchFields]);
 
-  // Sort filtered data
+  // SORT
   const sortedData = useMemo(() => {
     if (!sortField) return filteredData;
     return [...filteredData].sort((a, b) => {
       const aVal = a[sortField];
       const bVal = b[sortField];
-
       if (aVal == null) return 1;
       if (bVal == null) return -1;
 
-      if (typeof aVal === "number" && typeof bVal === "number") {
+      if (typeof aVal === "number") {
         return sortOrder === "asc" ? aVal - bVal : bVal - aVal;
-      } else {
-        return sortOrder === "asc"
-          ? aVal.toString().localeCompare(bVal.toString())
-          : bVal.toString().localeCompare(aVal.toString());
       }
+
+      return sortOrder === "asc"
+        ? aVal.toString().localeCompare(bVal.toString())
+        : bVal.toString().localeCompare(aVal.toString());
     });
   }, [filteredData, sortField, sortOrder]);
 
-  // Pagination logic
+  // PAGINATION
   const totalPages = Math.ceil(sortedData.length / rowsPerPage);
   const paginatedData = useMemo(() => {
-    const start = (currentPage - 1) * rowsPerPage;
+    const start = (page - 1) * rowsPerPage;
     return sortedData.slice(start, start + rowsPerPage);
-  }, [sortedData, currentPage, rowsPerPage]);
+  }, [sortedData, page, rowsPerPage]);
 
   const handleSort = (field) => {
     if (sortField === field) {
@@ -62,47 +62,53 @@ const DataTable = ({
   };
 
   return (
-    <div className="datatable-container">
-      {/* Top controls: Title, Pagination (Prev/Page/Next) left, Search right */}
-      <div className="datatable-top">
-        {title && <h4>{title}</h4>}
+    <div className="datatable-card">
+      {/* HEADER */}
+      <div className="datatable-header">
+        <h3>{title}</h3>
+        {onAdd && (
+          <button className="datatable-add-btn" onClick={onAdd}>
+            Add
+          </button>
+        )}
+      </div>
 
-        <div className="datatable-top-left">
-          <button
-            disabled={currentPage === 1}
-            onClick={() => setCurrentPage((prev) => prev - 1)}
-          >
+      {/* CONTROLS */}
+      <div className="datatable-controls">
+        {/* PAGINATION */}
+        <div className="datatable-pagination">
+          <button disabled={page === 1} onClick={() => setPage(page - 1)}>
             Prev
           </button>
           <span>
-            Page {currentPage} of {totalPages || 1}
+            Page {page} / {totalPages || 1}
           </span>
           <button
-            disabled={currentPage === totalPages || totalPages === 0}
-            onClick={() => setCurrentPage((prev) => prev + 1)}
+            disabled={page === totalPages || totalPages === 0}
+            onClick={() => setPage(page + 1)}
           >
             Next
           </button>
         </div>
 
+        {/* SEARCH */}
         {searchFields.length > 0 && (
           <input
             type="text"
-            className="form-control datatable-search"
             placeholder="Search..."
             value={search}
             onChange={(e) => {
               setSearch(e.target.value);
-              setCurrentPage(1);
+              setPage(1);
             }}
           />
         )}
       </div>
 
-      {/* Table */}
-      <div className="table-responsive">
-        <table className="table table-striped table-bordered">
-          <thead className="table-light">
+      {/* TABLE */}
+      <div className="datatable-table-wrapper">
+        <table>
+          <thead>
             <tr>
               {columns.map((col) => (
                 <th
@@ -110,24 +116,28 @@ const DataTable = ({
                   onClick={() =>
                     col.sortable !== false && handleSort(col.field)
                   }
-                  style={{
-                    cursor: col.sortable !== false ? "pointer" : "default",
-                    whiteSpace: "nowrap",
-                  }}
+                  className={col.sortable !== false ? "sortable" : ""}
                 >
-                  {col.header}{" "}
-                  {sortField === col.field ? (sortOrder === "asc" ? "▲" : "▼") : ""}
+                  {col.header}
+                  {sortField === col.field && (
+                    <span className="sort">
+                      {sortOrder === "asc" ? " ▲" : " ▼"}
+                    </span>
+                  )}
                 </th>
               ))}
             </tr>
           </thead>
 
           <tbody>
-            {paginatedData.length > 0 ? (
+            {paginatedData.length ? (
               paginatedData.map((row, i) => (
                 <tr key={i}>
                   {columns.map((col) => (
-                    <td key={col.field}>
+                    <td
+                      key={col.field}
+                      className={col.field === "actions" ? "actions-cell" : ""}
+                    >
                       {col.body ? col.body(row) : row[col.field]}
                     </td>
                   ))}
@@ -135,7 +145,7 @@ const DataTable = ({
               ))
             ) : (
               <tr>
-                <td colSpan={columns.length} className="text-center">
+                <td colSpan={columns.length} className="empty">
                   No records found
                 </td>
               </tr>
@@ -144,23 +154,22 @@ const DataTable = ({
         </table>
       </div>
 
-      {/* Bottom controls: Rows per page selector */}
-      <div className="d-flex justify-content-end mt-3">
-        <label className="me-2">Rows per page:</label>
-        <select
-          className="form-select form-select-sm w-auto"
-          value={rowsPerPage}
-          onChange={(e) => {
-            setRowsPerPage(Number(e.target.value));
-            setCurrentPage(1);
-          }}
-        >
-          {rowsPerPageOptions.map((n) => (
-            <option key={n} value={n}>
-              {n}
-            </option>
-          ))}
-        </select>
+      {/* FOOTER */}
+      <div className="datatable-footer">
+        <label>
+          Rows:
+          <select
+            value={rowsPerPage}
+            onChange={(e) => {
+              setRowsPerPage(Number(e.target.value));
+              setPage(1);
+            }}
+          >
+            {rowsPerPageOptions.map((n) => (
+              <option key={n}>{n}</option>
+            ))}
+          </select>
+        </label>
       </div>
     </div>
   );

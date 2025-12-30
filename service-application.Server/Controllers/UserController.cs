@@ -26,6 +26,17 @@ namespace service_application.Server.Controllers
                 if (string.IsNullOrEmpty(dto.UserName))
                     return _apiResponse.BadRequest("Name is required");
 
+
+                var isDuplicate = await _User.IsDuplicateAsync(dto.Email, dto.Password, dto.MobileNumber);
+
+
+
+                if (isDuplicate)
+                {
+                    return _apiResponse.BadRequest("Email, Password, or Mobile number already exists");
+                }
+
+                // No duplicates, create user
                 await _User.CreateUserAsync(dto);
                 return _apiResponse.Ok("User created successfully");
             }
@@ -34,6 +45,7 @@ namespace service_application.Server.Controllers
                 return _apiResponse.InternalServerError(ex.Message);
             }
         }
+
 
         [HttpGet("{id}")]
         public async ValueTask<IActionResult> GetUserById(long id)
@@ -50,15 +62,26 @@ namespace service_application.Server.Controllers
             }
         }
 
-        [HttpPut()]
-        public async ValueTask<IActionResult> UpdateUser([FromBody] UserRequestDto dto)
+        [HttpPut("{id}")]
+
+        public async ValueTask<IActionResult> UpdateUser(int id, [FromBody] UserRequestDto dto)
         {
             try
             {
-                if (dto.ID < 0 || string.IsNullOrEmpty(dto.UserName) || dto.Password == null)
-                {
-                    return _apiResponse.BadRequest("Fields are required");
-                }
+                if (dto.ID != id || string.IsNullOrEmpty(dto.UserName) || string.IsNullOrEmpty(dto.Password))
+                    return _apiResponse.BadRequest("Fields are required or ID mismatch");
+
+                
+                var isDuplicate = await _User.IsDuplicateAsync(
+                    dto.Email,
+                    dto.Password,
+                    dto.MobileNumber,
+                    (int?)dto.ID 
+                );
+
+                if (isDuplicate)
+                    return _apiResponse.BadRequest("Email, Password, or Mobile number already exists");
+
                 await _User.UpdateUserByIdAsync(dto);
 
                 return _apiResponse.Ok("User updated successfully");
@@ -68,6 +91,7 @@ namespace service_application.Server.Controllers
                 return _apiResponse.InternalServerError(ex.Message);
             }
         }
+
 
         [HttpDelete("{id}")]
         public async ValueTask<IActionResult> DeleteUser(long id)

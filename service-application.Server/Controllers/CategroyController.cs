@@ -24,16 +24,26 @@ namespace service_application.Server.Controllers
             _apiResponse = apiResponse;
         }
 
+        // ✅ CREATE
         [HttpPost]
         public async ValueTask<IActionResult> CreateCategory([FromBody] CategoryRequestDto dto)
         {
             try
             {
+                if (dto == null)
+                    return _apiResponse.BadRequest("Request body is required");
+
                 if (string.IsNullOrWhiteSpace(dto.Name))
                     return _apiResponse.BadRequest("Name is required");
 
                 if (string.IsNullOrWhiteSpace(dto.Description))
                     return _apiResponse.BadRequest("Description is required");
+
+                if (string.IsNullOrWhiteSpace(dto.Icon))
+                    return _apiResponse.BadRequest("Icon is required");
+
+                if (string.IsNullOrWhiteSpace(dto.Link))
+                    return _apiResponse.BadRequest("Link is required");
 
                 var result = await _categoryService.CreateCategoryAsync(dto);
                 return _apiResponse.Ok(result.ID);
@@ -44,6 +54,7 @@ namespace service_application.Server.Controllers
             }
         }
 
+        // ✅ GET BY ID
         [HttpGet("{id:long}")]
         public async ValueTask<IActionResult> GetById(long id)
         {
@@ -65,10 +76,9 @@ namespace service_application.Server.Controllers
             }
         }
 
+        // ✅ UPDATE (FIXED)
         [HttpPut("{id:long}")]
-        public async ValueTask<IActionResult> Update(
-       long id,
-       [FromBody] CategoryRequestDto dto)
+        public async ValueTask<IActionResult> Update(long id, [FromBody] CategoryRequestDto dto)
         {
             try
             {
@@ -78,7 +88,20 @@ namespace service_application.Server.Controllers
                 if (dto == null)
                     return _apiResponse.BadRequest("Request body is required");
 
-                dto.ID = id; // 🔑 sync route id with body
+                if (string.IsNullOrWhiteSpace(dto.Name))
+                    return _apiResponse.BadRequest("Name is required");
+
+                if (string.IsNullOrWhiteSpace(dto.Description))
+                    return _apiResponse.BadRequest("Description is required");
+
+                if (string.IsNullOrWhiteSpace(dto.Icon))
+                    return _apiResponse.BadRequest("Icon is required");
+
+                if (string.IsNullOrWhiteSpace(dto.Link))
+                    return _apiResponse.BadRequest("Link is required");
+
+                // 🔑 sync route id with body
+                dto.ID = id;
 
                 var updated = await _categoryService.UpdateCategoryByIdAsync(dto);
                 if (!updated)
@@ -92,6 +115,7 @@ namespace service_application.Server.Controllers
             }
         }
 
+        // ✅ DELETE
         [HttpDelete("{id:long}")]
         public async ValueTask<IActionResult> Delete(long id)
         {
@@ -126,5 +150,6 @@ namespace service_application.Server.Controllers
                 return _apiResponse.InternalServerError(ex.Message);
             }
         }
+
     }
 }

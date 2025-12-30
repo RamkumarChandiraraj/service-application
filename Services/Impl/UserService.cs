@@ -10,7 +10,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Services.Impl
+namespace Services.Impl 
 {
     public class UserService:IUserService
     {
@@ -21,7 +21,21 @@ namespace Services.Impl
             _userRepository = repository;
         }
 
-        public async ValueTask<User> CreateUserAsync(UserRequestDto req)
+public async Task<bool> IsDuplicateAsync(string email, string password, long mobileNumber, int? currentUserId = null)
+    {
+        var user = await _userRepository
+            .FindByCondition(u =>
+                (u.Email == email || u.MobileNumber == mobileNumber || u.Password == password) &&
+                (currentUserId == null || u.ID != currentUserId)
+            )
+            .FirstOrDefaultAsync();
+
+        return user != null;
+    }
+
+
+
+    public async ValueTask<User> CreateUserAsync(UserRequestDto req)
         {
             try
             {

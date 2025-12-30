@@ -1,118 +1,80 @@
-﻿/* eslint-disable no-unused-vars */
-import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+﻿import { useEffect, useState, useMemo } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import DataTable from "../../components/Common/DataTable";
 import { getAllCategories, deleteCategory } from "../../api/categoryApi";
 
 function CategoryList() {
-    const [data, setData] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
+  const [data, setData] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const navigate = useNavigate();
 
-    useEffect(() => {
-        const abortController = new AbortController();
+  useEffect(() => {
+    fetchCategories();
+  }, []);
 
-        const fetchCategories = async () => {
-            try {
-                const res = await getAllCategories();
+  const fetchCategories = async () => {
+    try {
+      const res = await getAllCategories();
+      setData(res.data || res || []);
+    } catch (err) {
+      setError(err.message || "Failed to load categories");
+    } finally {
+      setLoading(false);
+    }
+  };
 
-                // keep existing response handling
-                const categories = res?.data?.data || res?.data || [];
+  const handleDelete = async (id) => {
+    if (!window.confirm("Delete this category?")) return;
+    try {
+      await deleteCategory(id);
+      setData((prev) => prev.filter((x) => x.id !== id));
+    } catch {
+      alert("Failed to delete category");
+    }
+  };
 
-                const ordered = [...categories].sort((a, b) => a.id - b.id);
-                setData(ordered);
+  const columns = useMemo(
+    () => [
+      { header: "ID", field: "id" },
+      { header: "Name", field: "name" },
+      { header: "Description", field: "description" },
+      {
+        header: "Actions",
+        field: "actions",
+        sortable: false,
+        body: (row) => (
+          <div className="d-flex gap-2 flex-wrap">
+            <Link to={`/readcategory/${row.id}`} className="btn btn-info btn-sm">
+              View
+            </Link>
+            <Link to={`/createcategorymanagement/${row.id}`} className="btn btn-primary btn-sm">
+              Edit
+            </Link>
+            <button className="btn btn-danger btn-sm" onClick={() => handleDelete(row.id)}>
+              Delete
+            </button>
+          </div>
+        ),
+      },
+    ],
+    []
+  );
 
-                setLoading(false);
-            } catch (err) {
-                setError(err.response?.data?.message || err.message);
-                setLoading(false);
-            }
-        };
+  if (loading) return <p className="text-center mt-5">Loading categories...</p>;
+  if (error) return <p className="text-center mt-5 text-danger">{error}</p>;
 
-        fetchCategories();
-
-        return () => {
-            abortController.abort();
-        };
-    }, []);
-
-    const handleDelete = async (id) => {
-        const confirmed = window.confirm("Are you sure you want to delete this category?");
-        if (!confirmed) return;
-
-        try {
-            await deleteCategory(id);
-            setData(prev => prev.filter(category => category.id !== id));
-            alert("Category deleted successfully");
-        } catch (err) {
-            alert(err.response?.data?.message || err.message);
-        }
-    };
-
-    if (loading) return <p>Loading Categories...</p>;
-    if (error) return <p>Error: {error}</p>;
-
-    return (
-        <div className="d-flex flex-column justify-content-center align-items-center bg-light vh-100">
-            <h1>Category List</h1>
-
-            <div className="w-75 rounded bg-white border shadow p-4">
-                <div className="d-flex justify-content-end">
-                    <Link to="/createcategorymanagement" className="btn btn-success">
-                        Add +
-                    </Link>
-                </div>
-
-                <table className="table table-striped mt-3">
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Name</th>
-                            <th>Description</th>
-                            <th className="text-end">Actions</th>
-                        </tr>
-                    </thead>
-
-                    <tbody>
-                        {data.map((d, i) => (
-                            <tr key={i}>
-                                <td>{d.id}</td>
-                                <td>{d.name}</td>
-                                <td>{d.description}</td>
-                                <td className="text-end">
-                                    <Link
-                                        to={`/ReadCategory/${d.id}`}
-                                        className="btn btn-sm btn-info me-2"
-                                    >
-                                        Read
-                                    </Link>
-                                    <Link
-                                        to={`/createcategorymanagement/${d.id}`}
-                                        className="btn btn-sm btn-primary me-2"
-                                    >
-                                        Edit
-                                    </Link>
-                                    <button
-                                        className="btn btn-sm btn-danger"
-                                        onClick={() => handleDelete(d.id)}
-                                    >
-                                        Delete
-                                    </button>
-                                </td>
-                            </tr>
-                        ))}
-
-                        {data.length === 0 && (
-                            <tr>
-                                <td colSpan="4" className="text-center">
-                                    No Categories Found
-                                </td>
-                            </tr>
-                        )}
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    );
+  return (
+    <div className="container py-4">
+      <DataTable
+        title="Categories"
+        data={data}
+        columns={columns}
+        searchFields={["name", "description"]}
+        onAdd={() => navigate("/createcategorymanagement")}
+      />
+    </div>
+  );
 }
 
 export default CategoryList;
