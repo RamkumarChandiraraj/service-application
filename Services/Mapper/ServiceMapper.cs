@@ -9,8 +9,15 @@ namespace Services.Mapper
     {
         public void Register(TypeAdapterConfig config)
         {
-            config.NewConfig<ServiceRequestDto, Service>();
-            config.NewConfig<Service, ServiceResponseDto>();
+            // Request DTO → Entity
+            config.NewConfig<ServiceRequestDto, Service>()
+                .Map(dest => dest.CategoryId, src => src.CategoryId);
+
+            // Entity → Response DTO
+            config.NewConfig<Service, ServiceResponseDto>()
+                .Map(dest => dest.CategoryId, src => src.CategoryId)
+                .Map(dest => dest.CategoryName, src => src.Category != null ? src.Category.Name : null);
+
             config.NewConfig<List<ServiceRequestDto>, List<Service>>();
             config.NewConfig<List<Service>, List<ServiceResponseDto>>();
         }
