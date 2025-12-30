@@ -34,7 +34,7 @@ namespace Services.Impl
         {
             try
             {
-                var service = await ValueTask.FromResult(_serviceRespository.FindByCondition(x => x.ID == id).FirstOrDefault());
+                var service = await ValueTask.FromResult(_serviceRespository.FindByCondition(x => x.ID == id).Include(x => x.Category).FirstOrDefault());
                 if (service == null)
                 {
                     throw new InvalidDataException($"Id '{id}' not exists.");
@@ -55,6 +55,7 @@ namespace Services.Impl
 
                 oldEntity.Name = req.Name;
                 oldEntity.Description = req.Description;
+                oldEntity.CategoryId = req.CategoryId;
 
                 oldEntity.GenerateModifyHistory(1);
                 await _serviceRespository.UpdateAsync(oldEntity);
@@ -86,7 +87,7 @@ namespace Services.Impl
         {
             try
             {
-                var services = await ValueTask.FromResult(_serviceRespository.FindAll().ToList());
+                var services = await ValueTask.FromResult(_serviceRespository.FindAll().Include(x => x.Category).ToList());
                 return services;
             }
             catch (Exception ex)

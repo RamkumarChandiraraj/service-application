@@ -7,15 +7,14 @@ import {
 } from "../../api/serviceList";
 
 function CreateServiceManagement() {
-    const { id } = useParams(); // if id exists ? EDIT MODE
+    const { id } = useParams();
     const navigate = useNavigate();
-
     const isEditMode = Boolean(id);
 
     const [formData, setFormData] = useState({
-        id: 0,
-        name: "",
-        description: "",
+        ID: 0, // must match backend
+        Name: "",
+        Description: "",
     });
 
     const [errors, setErrors] = useState({});
@@ -23,7 +22,7 @@ function CreateServiceManagement() {
     const [pageLoading, setPageLoading] = useState(false);
     const [error, setError] = useState(null);
 
-    // Load service data in EDIT mode
+    // Load service data for edit mode
     useEffect(() => {
         if (!isEditMode) return;
 
@@ -32,9 +31,9 @@ function CreateServiceManagement() {
             try {
                 const res = await getServiceById(id);
                 setFormData({
-                    id: Number(res.data.id),
-                    name: res.data.name,
-                    description: res.data.description,
+                    ID: res.data.id,
+                    Name: res.data.name || "",
+                    Description: res.data.description || "",
                 });
             } catch (err) {
                 setError("Failed to load service details");
@@ -46,25 +45,26 @@ function CreateServiceManagement() {
         fetchService();
     }, [id, isEditMode]);
 
-    // Input change
+    // Handle input change
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData({ ...formData, [name]: value });
         setErrors({ ...errors, [name]: "" });
     };
 
-    // Validation
+    // Validate form
     const validate = () => {
         let temp = {};
-        if (!formData.name.trim()) temp.name = "Service name is required";
-        if (!formData.description.trim())
-            temp.description = "Description is required";
+        if (!formData.Name.trim())
+            temp.Name = "Service name is required";
+        if (!formData.Description.trim())
+            temp.Description = "Description is required";
 
         setErrors(temp);
         return Object.keys(temp).length === 0;
     };
 
-    // Submit (Create / Update)
+    // Handle submit
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (!validate()) return;
@@ -73,13 +73,17 @@ function CreateServiceManagement() {
         setError(null);
 
         try {
+            const payload = { ...formData };
+
             if (isEditMode) {
-                await updateService(formData);
+                await updateService(payload); // includes ID
                 alert("Service updated successfully");
             } else {
-                await createService(formData);
+                const { ID, ...createPayload } = payload; // remove ID for create
+                await createService(createPayload);
                 alert("Service created successfully");
             }
+
             navigate("/servicelist");
         } catch (err) {
             setError(
@@ -91,10 +95,11 @@ function CreateServiceManagement() {
         }
     };
 
-    if (pageLoading) return <p className="text-center mt-5">Loading...</p>;
+    if (pageLoading)
+        return <p className="text-center mt-5">Loading service details...</p>;
 
     return (
-        <div className="d-flex justify-content-center align-items-center bg-light vh-100">
+        <div className="bg-light min-vh-100 pt-5 pb-5 d-flex justify-content-center align-items-start">
             <div className="w-50 rounded bg-white border shadow p-4">
                 <h3 className="text-center mb-4">
                     {isEditMode ? "Update Service" : "Create Service"}
@@ -110,14 +115,16 @@ function CreateServiceManagement() {
                         </label>
                         <input
                             type="text"
-                            name="name"
-                            value={formData.name}
+                            name="Name"
+                            value={formData.Name}
                             onChange={handleChange}
-                            className={`form-control ${errors.name ? "is-invalid" : ""
+                            className={`form-control ${errors.Name ? "is-invalid" : ""
                                 }`}
                         />
-                        {errors.name && (
-                            <div className="invalid-feedback">{errors.name}</div>
+                        {errors.Name && (
+                            <div className="invalid-feedback">
+                                {errors.Name}
+                            </div>
                         )}
                     </div>
 
@@ -127,16 +134,36 @@ function CreateServiceManagement() {
                             Description <span className="text-danger">*</span>
                         </label>
                         <textarea
-                            name="description"
-                            value={formData.description}
+                            name="Description"
+                            value={formData.Description}
                             onChange={handleChange}
-                            className={`form-control ${errors.description ? "is-invalid" : ""
+                            className={`form-control ${errors.Description ? "is-invalid" : ""
                                 }`}
                             rows="3"
                         />
-                        {errors.description && (
+                        {errors.Description && (
                             <div className="invalid-feedback">
-                                {errors.description}
+                                {errors.Description}
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Category Id */}
+                    <div className="mb-3">
+                        <label className="form-label">
+                            Category Id <span className="text-danger">*</span>
+                        </label>
+                        <input
+                            type="number"
+                            name="CategoryId"
+                            value={formData.CategoryId}
+                            onChange={handleChange}
+                            className={`form-control ${errors.CategoryId ? "is-invalid" : ""
+                                }`}
+                        />
+                        {errors.CategoryId && (
+                            <div className="invalid-feedback">
+                                {errors.CategoryId}
                             </div>
                         )}
                     </div>

@@ -12,5 +12,7 @@ namespace Data.Entities
 
         public string? Description { get; set; }
 
+        public List<Service> Services { get; set; }
+
     }
 }
