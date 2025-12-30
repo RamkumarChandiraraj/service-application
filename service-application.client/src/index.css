@@ -77,14 +77,14 @@ body {
 
 a {
   color: var(--accent-color);
-  text-decoration: none;
+  text-decoration: none; /* no underline by default */
   transition: 0.3s;
 }
 
 a:hover {
-  color: color-mix(in srgb, var(--accent-color), transparent 25%);
-  text-decoration: none;
+  text-decoration: underline; /* show underline on hover */
 }
+
 
 h1,
 h2,
@@ -96,136 +96,6 @@ h6 {
   font-family: var(--heading-font);
 }
 
-/* Pulsating Play Button
-------------------------------*/
-.pulsating-play-btn {
-  width: 94px;
-  height: 94px;
-  background: radial-gradient(var(--accent-color) 50%, color-mix(in srgb, var(--accent-color), transparent 75%) 52%);
-  border-radius: 50%;
-  display: block;
-  position: relative;
-  overflow: hidden;
-}
-
-.pulsating-play-btn:before {
-  content: "";
-  position: absolute;
-  width: 120px;
-  height: 120px;
-  animation-delay: 0s;
-  animation: pulsate-play-btn 2s;
-  animation-direction: forwards;
-  animation-iteration-count: infinite;
-  animation-timing-function: steps;
-  opacity: 1;
-  border-radius: 50%;
-  border: 5px solid color-mix(in srgb, var(--accent-color), transparent 30%);
-  top: -15%;
-  left: -15%;
-  background: rgba(198, 16, 0, 0);
-}
-
-.pulsating-play-btn:after {
-  content: "";
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  transform: translateX(-40%) translateY(-50%);
-  width: 0;
-  height: 0;
-  border-top: 10px solid transparent;
-  border-bottom: 10px solid transparent;
-  border-left: 15px solid #fff;
-  z-index: 100;
-  transition: all 400ms cubic-bezier(0.55, 0.055, 0.675, 0.19);
-}
-
-.pulsating-play-btn:hover:before {
-  content: "";
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  transform: translateX(-40%) translateY(-50%);
-  width: 0;
-  height: 0;
-  border: none;
-  border-top: 10px solid transparent;
-  border-bottom: 10px solid transparent;
-  border-left: 15px solid #fff;
-  z-index: 200;
-  animation: none;
-  border-radius: 0;
-}
-
-.pulsating-play-btn:hover:after {
-  border-left: 15px solid var(--accent-color);
-  transform: scale(20);
-}
-
-@keyframes pulsate-play-btn {
-  0% {
-    transform: scale(0.6, 0.6);
-    opacity: 1;
-  }
-
-  100% {
-    transform: scale(1, 1);
-    opacity: 0;
-  }
-}
-
-/* PHP Email Form Messages
-------------------------------*/
-.php-email-form .error-message {
-  display: none;
-  background: #df1529;
-  color: #ffffff;
-  text-align: left;
-  padding: 15px;
-  margin-bottom: 24px;
-  font-weight: 600;
-}
-
-.php-email-form .sent-message {
-  display: none;
-  color: #ffffff;
-  background: #059652;
-  text-align: center;
-  padding: 15px;
-  margin-bottom: 24px;
-  font-weight: 600;
-}
-
-.php-email-form .loading {
-  display: none;
-  background: var(--surface-color);
-  text-align: center;
-  padding: 15px;
-  margin-bottom: 24px;
-}
-
-.php-email-form .loading:before {
-  content: "";
-  display: inline-block;
-  border-radius: 50%;
-  width: 24px;
-  height: 24px;
-  margin: 0 10px -6px 0;
-  border: 3px solid var(--accent-color);
-  border-top-color: var(--surface-color);
-  animation: php-email-form-loading 1s linear infinite;
-}
-
-@keyframes php-email-form-loading {
-  0% {
-    transform: rotate(0deg);
-  }
-
-  100% {
-    transform: rotate(360deg);
-  }
-}
 
 /*--------------------------------------------------------------
 # Global Header
@@ -241,6 +111,10 @@ h6 {
 
 .header .logo {
   line-height: 1;
+}
+
+.header a{
+  text-decoration: none;
 }
 
 .header .logo img {
@@ -312,6 +186,10 @@ h6 {
 
   .navmenu li {
     position: relative;
+  }
+
+  .navmenu a{
+    text-decoration: none;
   }
 
   .navmenu a,
@@ -541,7 +419,9 @@ h6 {
   padding-bottom: 50px;
   position: relative;
 }
-
+.footer a{
+  text-decoration: none;
+}
 .footer .footer-top {
   padding-top: 50px;
 }
@@ -719,10 +599,12 @@ h6 {
   color: var(--contrast-color);
 }
 
+
 .scroll-top.active {
   visibility: visible;
   opacity: 1;
 }
+
 
 /*--------------------------------------------------------------
 # Disable aos animation delay on mobile devices
@@ -829,6 +711,9 @@ section,
   padding: 120px 0 60px 0;
   overflow: hidden;
 }
+.hero a{
+  text-decoration: none;  
+}
 
 .hero:before {
   content: "";
@@ -887,6 +772,7 @@ section,
   display: inline-block;
   padding: 14px 50px;
   border-radius: 5px;
+  border-color: color-mix(in srgb, var(--accent-color), transparent 15%);
   transition: 0.5s;
   margin-top: 30px;
 }
@@ -895,55 +781,149 @@ section,
   background: color-mix(in srgb, var(--accent-color), transparent 15%);
 }
 
-.hero .icon-box {
+/* =========================
+   Card Common (Base – Mobile)
+   ========================= */
+.icon-box {
   background-color: var(--surface-color);
-  padding: 50px 30px;
+  padding: 32px 24px;
   position: relative;
   overflow: hidden;
-  box-shadow: 0 0 29px 0 rgba(0, 0, 0, 0.1);
-  transition: all 0.3s ease-in-out;
-  border-radius: 8px;
-  z-index: 1;
+  box-shadow: 0 4px 20px rgba(41, 156, 198, 0.08);
+  border-radius: 10px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
   height: 100%;
   width: 100%;
+  text-align: center;
 }
 
-.hero .icon-box .title {
-  font-weight: 700;
-  margin-bottom: 15px;
-  font-size: 18px;
+/* Remove underline globally */
+.icon-box a {
+  text-decoration: none;
 }
 
-.hero .icon-box .title a {
-  color: var(--heading-color);
-  transition: 0.3s;
-}
-
-.hero .icon-box .description {
-  font-size: 15px;
-  margin-bottom: 0;
-  color: color-mix(in srgb, var(--default-color), transparent 40%);
-}
-
-.hero .icon-box .icon {
-  margin-bottom: 20px;
-  padding-top: 10px;
-  display: inline-block;
-  transition: all 0.3s ease-in-out;
-  font-size: 36px;
+/* Icon */
+.icon-box .icon {
+  margin-bottom: 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
   line-height: 1;
   color: var(--accent-color);
+  transition: transform 0.3s ease;
 }
 
-@media (min-width: 640px) {
-  .hero .icon-box:hover {
-    transform: scale(1.08);
+/* Title */
+.icon-box .title {
+  font-weight: 700;
+  margin-bottom: 12px;
+  font-size: 16px;
+}
+
+.icon-box .title a {
+  color: var(--heading-color);
+  transition: color 0.3s ease;
+}
+
+/* Description */
+.icon-box .description {
+  font-size: 14px;
+  line-height: 1.6;
+  color: color-mix(in srgb, var(--default-color), transparent 40%);
+}
+.card-link {
+  display: block;         /* Make link cover the entire article */
+  height: 100%;           /* Ensure it fills the icon-box */
+  color: inherit;         /* Inherit text color */
+  text-decoration: none;  /* Remove underline */
+}
+
+.card-link:hover {
+  text-decoration: none;
+  color: inherit;
+}
+
+
+/* =========================
+   Small Devices (≥ 480px)
+   ========================= */
+@media (min-width: 480px) {
+  .icon-box {
+    padding: 36px 26px;
   }
 
-  .hero .icon-box:hover .title a {
+  .icon-box .title {
+    font-size: 17px;
+  }
+
+  .icon-box .description {
+    font-size: 14.5px;
+  }
+}
+
+/* =========================
+   Tablets (≥ 640px)
+   ========================= */
+@media (min-width: 640px) {
+  .icon-box {
+    text-align: left;
+    padding: 40px 30px;
+  }
+
+  .icon-box .icon {
+    font-size: 34px;
+  }
+
+  /* Hover only where hover exists */
+  .icon-box:hover {
+    transform: scale(1.06);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+  }
+
+  .icon-box:hover .title a {
     color: var(--accent-color);
   }
+
+  .icon-box:hover .icon {
+    transform: translateY(-4px);
+  }
 }
+
+/* =========================
+   Desktop (≥ 1024px)
+   ========================= */
+@media (min-width: 1024px) {
+  .icon-box {
+    padding: 50px 32px;
+  }
+
+  .icon-box .icon {
+    font-size: 36px;
+  }
+
+  .icon-box .title {
+    font-size: 18px;
+  }
+
+  .icon-box:hover {
+    transform: scale(1.08);
+  }
+}
+/* =========================
+   Common spacing for card sections
+   ========================= */
+.section-cards {
+  margin-top: 24px; /* desktop/tablet */
+}
+
+/* Tighter spacing on mobile */
+@media (max-width: 576px) {
+  .section-cards {
+    margin-top: 16px;
+  }
+}
+
 
 /*--------------------------------------------------------------
 # About Section
@@ -1021,6 +1001,12 @@ section,
   font-family: var(--heading-font);
   font-size: 15px;
   font-weight: 600;
+}
+.stats .stats-item span {
+  font-size: 48px;
+  display: block;
+  color: var(--accent-color);
+  font-weight: 700;
 }
 
 /*--------------------------------------------------------------
