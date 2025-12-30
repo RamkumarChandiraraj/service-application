@@ -1,5 +1,6 @@
 ﻿using Data.BaseEntity;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Data.Entities
 {
@@ -12,5 +13,11 @@ namespace Data.Entities
 
         public string? Description { get; set; }
 
+        public string? Icon { get; set; }
+
+        public long CategoryId { get; set; }
+
+        [ForeignKey(nameof(CategoryId))]
+        public virtual Category Category { get; set; }
     }
 }
