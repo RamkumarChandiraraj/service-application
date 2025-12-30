@@ -1,4 +1,5 @@
-﻿using System.Linq.Expressions;
+﻿using Data.Entities;
+using System.Linq.Expressions;
 
 namespace Data.Base
 {
@@ -17,6 +18,10 @@ namespace Data.Base
         IQueryable<T> FindByCondition(Expression<Func<T, bool>> expression);
 
         IQueryable<T> FindByCondition(Expression<Func<T, bool>> expression, Expression<Func<T, dynamic>> orderBySelector, int skip, int take, bool isAscending);
+        Task AddAsync(Announcements entity);
+        Task SaveChangesAsync();
+        Task GetByIdAsync(long id);
+        Task<IEnumerable<object>> GetAllAsync();
 
         //ValueTask<bool> IsAnyAsync(Expression<Func<T, bool>> expression);
 

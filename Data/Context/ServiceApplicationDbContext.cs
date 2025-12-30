@@ -14,6 +14,8 @@ namespace Data.Context
         public DbSet<User> User { get; set; }
         public DbSet<Registration> Registrations { get; set; }
         public DbSet<Attachment> Attachments { get; set; }
+        public DbSet<Announcements> Announcements { get; set; }
+
 
 
     }
