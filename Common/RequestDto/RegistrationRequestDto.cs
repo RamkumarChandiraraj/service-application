@@ -15,10 +15,10 @@ namespace Common.RequestDto
         public string CompanyName { get; set; }
 
 
-        public string Location { get; set; }
+        public long LocationId { get; set; }
 
 
-        public string Services { get; set; }
+        public long ServiceId { get; set; }
 
 
         public string Email { get; set; }
@@ -27,5 +27,8 @@ namespace Common.RequestDto
         public long PhoneNumber { get; set; }
 
         public string Description { get; set; }
+
+        public double Latitude { get; set; }
+        public double Longitude { get; set; }
     }
 }
