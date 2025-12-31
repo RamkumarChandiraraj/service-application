@@ -34,8 +34,11 @@ import ReadRegistration from "./components/RegistrationManagement/ReadRegistrati
 import UserList from "./components/UserManagement/UserList";
 import CreateUser from "./components/UserManagement/CreateUser";
 import ReadUser from "./components/UserManagement/ReadUser";
+import SearchProperties from "./components/SearchManagement/Search/SearchProperties";
+import Vendors from "./components/SearchManagement/Vendors/Vendors";
 
 
+// Search Properties
 
 
 function App() {
@@ -92,6 +95,10 @@ function App() {
 
                 {/* Attachment Management */}
                 <Route path="/attachmentlist" element={<AttachmentList />} />
+
+                {/* Search Properties */}
+                <Route path="/searchvendors" element={<SearchProperties />} />
+                <Route path="/vendors" element={<Vendors/>} />
 
             </Routes>
 
