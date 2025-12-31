@@ -31,6 +31,7 @@ builder.Services.AddScoped<ILocationService, LocationService>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IAttachmentService, AttachmentService>();
 builder.Services.AddScoped<IRegistrationService, RegistrationService>();
+builder.Services.AddScoped<IAnnouncementsService, AnnouncementsService>();
 
 //Repository Registration
 builder.Services.AddScoped(typeof(IRepositary<>), typeof(Repository<>));
