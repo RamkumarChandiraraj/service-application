@@ -21,11 +21,11 @@ namespace Services.Impl
             _userRepository = repository;
         }
 
-public async Task<bool> IsDuplicateAsync(string email, string password, long mobileNumber, int? currentUserId = null)
+public async Task<bool> IsDuplicateAsync(string email,string username, long mobileNumber, int? currentUserId = null)
     {
         var user = await _userRepository
             .FindByCondition(u =>
-                (u.Email == email || u.MobileNumber == mobileNumber || u.Password == password) &&
+                (u.Email == email || u.MobileNumber == mobileNumber ||u.UserName == username ) &&
                 (currentUserId == null || u.ID != currentUserId)
             )
             .FirstOrDefaultAsync();
@@ -102,14 +102,15 @@ public async Task<bool> IsDuplicateAsync(string email, string password, long mob
             {
                 var oldEntity = await _userRepository.FindByCondition(s => s.ID == req.ID).FirstOrDefaultAsync();
 
-                oldEntity.UserName = req.UserName;
-                oldEntity.Password = req.Password;
+                //oldEntity.UserName = req.UserName;
+                
                 oldEntity.Email = req.Email;
                 oldEntity.MobileNumber = req.MobileNumber;
                 oldEntity.Role = req.Role;
 
                 oldEntity.GenerateModifyHistory(1);
                 await _userRepository.UpdateAsync(oldEntity);
+                
 
             }
             catch (Exception ex)

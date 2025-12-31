@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Common.Base;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -7,9 +8,9 @@ using System.Threading.Tasks;
 
 namespace Common.RequestDto
 {
-    public class RegistrationRequestDto
+    public class RegistrationRequestDto : BaseDto
     {
-        public long ID { get; set; }
+       
 
         public string CompanyName { get; set; }
 

@@ -9,7 +9,7 @@ import {
 } from "../../api/registrationApi";
 
 function CreateRegistration() {
-    const { id } = useParams(); // if id exists ? EDIT MODE
+    const { id } = useParams();
     const navigate = useNavigate();
     const isEditMode = Boolean(id);
 
@@ -20,7 +20,7 @@ function CreateRegistration() {
         location: "",
         services: "",
         phoneNumber: "",
-        description: "",
+        description: ""
     });
 
     const [errors, setErrors] = useState({});
@@ -28,7 +28,7 @@ function CreateRegistration() {
     const [pageLoading, setPageLoading] = useState(false);
     const [error, setError] = useState(null);
 
-    // Load registration data in EDIT mode
+    // Load data in edit mode
     useEffect(() => {
         if (!isEditMode) return;
 
@@ -38,16 +38,15 @@ function CreateRegistration() {
                 const res = await getRegistrationById(id);
                 setFormData({
                     id: res.id,
-                    companyName: res.companyName,
-                    email: res.email,
-                    location: res.location,
-                    services: res.services,
-                    phoneNumber: res.phoneNumber,
-                    description: res.description,
+                    companyName: res.companyName || "",
+                    email: res.email || "",
+                    location: res.location || "",
+                    services: res.services || "",
+                    phoneNumber: res.phoneNumber || "",
+                    description: res.description || ""
                 });
             } catch (err) {
-                console.error("API fetch error:", err);
-                setError("Failed to load registration. Check backend URL and CORS.");
+                setError("Failed to load registration");
             } finally {
                 setPageLoading(false);
             }
@@ -56,39 +55,43 @@ function CreateRegistration() {
         fetchRegistration();
     }, [id, isEditMode]);
 
-    // Handle input change
+    // Handle change
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData({ ...formData, [name]: value });
         setErrors({ ...errors, [name]: "" });
     };
 
-    // Validation with duplicate check
+    // ✅ Validation + Duplicate check
     const validate = async () => {
         let temp = {};
-        if (!formData.companyName.trim())
-            temp.companyName = "Company Name is required";
-        if (!formData.email.trim())
-            temp.email = "Email is required";
-        if (!formData.phoneNumber.trim())
-            temp.phoneNumber = "Phone Number is required";
-        if (!formData.location.trim())
-            temp.location = "Location is required";
+
+        if (!formData.companyName) temp.companyName = "Company name is required";
+        if (!formData.email) temp.email = "Email is required";
+        if (!formData.location) temp.location = "Location is required";
+        if (!formData.services) temp.services = "Services is required";
+        if (!formData.phoneNumber) temp.phoneNumber = "Phone number is required";
+        if (!formData.description) temp.description = "Description is required";
+
+        if (Object.keys(temp).length > 0) {
+            setErrors(temp);
+            return false;
+        }
 
         try {
             const registrations = await getAllRegistrations();
-
-            // 🔁 Email duplicate check
+            //Email Duplicate checks
             const emailExists = registrations.find(
                 (r) =>
                     r.email?.toLowerCase() === formData.email.toLowerCase() &&
                     r.id !== formData.id
             );
+
             if (emailExists) {
                 temp.email = "Email already exists";
             }
+            //Mobile
 
-            // 🔁 Mobile duplicate check
             const phoneExists = registrations.find(
                 (r) =>
                     r.phoneNumber?.toString().trim() ===
@@ -97,16 +100,17 @@ function CreateRegistration() {
             );
 
             if (phoneExists) {
-                temp.phoneNumber = "Mobile number already exists";
+                temp.phoneNumber = "Phone number already exists";
             }
         } catch (err) {
-            console.error("Duplicate check failed:", err);
+            console.error("Duplicate check error:", err);
         }
 
         setErrors(temp);
         return Object.keys(temp).length === 0;
     };
-    // Submit (Create / Update)
+
+    // Submit
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError(null);
@@ -117,7 +121,7 @@ function CreateRegistration() {
         setLoading(true);
         try {
             if (isEditMode) {
-                await updateRegistration(formData);
+                await updateRegistration(id, formData);
                 alert("Registration updated successfully");
             } else {
                 await createRegistration(formData);
@@ -125,35 +129,31 @@ function CreateRegistration() {
             }
             navigate("/registrationlist");
         } catch (err) {
-            setError(
-                err.response?.data?.message ||
-                "Something went wrong. Please try again."
-            );
+            setError("Something went wrong. Please try again.");
         } finally {
             setLoading(false);
         }
     };
 
-    // Delete handler
+    // Delete
     const handleDelete = async () => {
-        if (window.confirm("Are you sure you want to delete this registration?")) {
-            try {
-                await deleteRegistration(id);
-                alert("Registration deleted successfully!");
-                navigate("/registrationlist");
-            } catch (err) {
-                console.error("Error deleting registration:", err);
-                alert("Failed to delete registration. Check console for details.");
-            }
+        if (!window.confirm("Are you sure you want to delete?")) return;
+        try {
+            await deleteRegistration(id);
+            alert("Registration deleted successfully");
+            navigate("/registrationlist");
+        } catch {
+            alert("Delete failed");
         }
     };
 
-    if (pageLoading)
-        return <p className="text-center mt-5">Loading registration data...</p>;
+    if (pageLoading) {
+        return <p className="text-center mt-5">Loading...</p>;
+    }
 
     return (
         <div className="d-flex justify-content-center align-items-center bg-light vh-100">
-            <div className="w-50 rounded bg-white border shadow p-4">
+            <div className="w-50 bg-white border rounded shadow p-4">
                 <h3 className="text-center mb-4">
                     {isEditMode ? "Update Registration" : "Create Registration"}
                 </h3>
@@ -163,26 +163,19 @@ function CreateRegistration() {
                 <form onSubmit={handleSubmit}>
                     {/* Company Name */}
                     <div className="mb-3">
-                        <label className="form-label">
-                            Company Name <span className="text-danger">*</span>
-                        </label>
+                        <label className="form-label">Company Name</label>
                         <input
-                            type="text"
                             name="companyName"
                             value={formData.companyName}
                             onChange={handleChange}
                             className={`form-control ${errors.companyName ? "is-invalid" : ""}`}
                         />
-                        {errors.companyName && (
-                            <div className="invalid-feedback">{errors.companyName}</div>
-                        )}
+                        <div className="invalid-feedback">{errors.companyName}</div>
                     </div>
 
                     {/* Email */}
                     <div className="mb-3">
-                        <label className="form-label">
-                            Email <span className="text-danger">*</span>
-                        </label>
+                        <label className="form-label">Email</label>
                         <input
                             type="email"
                             name="email"
@@ -190,9 +183,7 @@ function CreateRegistration() {
                             onChange={handleChange}
                             className={`form-control ${errors.email ? "is-invalid" : ""}`}
                         />
-                        {errors.email && (
-                            <div className="invalid-feedback">{errors.email}</div>
-                        )}
+                        <div className="invalid-feedback">{errors.email}</div>
                     </div>
 
                     {/* Location */}
@@ -202,14 +193,15 @@ function CreateRegistration() {
                             name="location"
                             value={formData.location}
                             onChange={handleChange}
-                            className="form-control"
+                            className={`form-control ${errors.location ? "is-invalid" : ""}`}
                         >
                             <option value="">-- Select Location --</option>
-                            <option value="Chennai">Chennai</option>
-                            <option value="Bangalore">Bangalore</option>
-                            <option value="Mumbai">Mumbai</option>
-                            <option value="Delhi">Delhi</option>
+                            <option>Chennai</option>
+                            <option>Bangalore</option>
+                            <option>Mumbai</option>
+                            <option>Delhi</option>
                         </select>
+                        <div className="invalid-feedback">{errors.location}</div>
                     </div>
 
                     {/* Services */}
@@ -219,30 +211,34 @@ function CreateRegistration() {
                             name="services"
                             value={formData.services}
                             onChange={handleChange}
-                            className="form-control"
+                            className={`form-control ${errors.services ? "is-invalid" : ""}`}
                         >
                             <option value="">-- Select Service --</option>
-                            <option value="Home Services">Home Services</option>
-                            <option value="Mechanical Services">Mechanical Services</option>
-                            <option value="Agriculture Solutions">Agriculture Solutions</option>
-                            <option value="Food Services">Food Services</option>
-                            <option value="Other Services">Other Services</option>
+                            <option>Home Services</option>
+                            <option>Mechanical Services</option>
+                            <option>Agriculture Solutions</option>
+                            <option>Food Services</option>
+                            <option>Other Services</option>
                         </select>
+                        <div className="invalid-feedback">{errors.services}</div>
                     </div>
 
-                    {/* Phone Number */}
+                    {/* Phone */}
                     <div className="mb-3">
                         <label className="form-label">Phone Number</label>
                         <input
-                            type="text"
                             name="phoneNumber"
                             value={formData.phoneNumber}
-                            onChange={handleChange}
+                            onChange={(e) => {
+                                const value = e.target.value.replace(/\D/g, ""); // numbers only
+                                if (value.length <= 10) {
+                                    setFormData({ ...formData, phoneNumber: value });
+                                    setErrors({ ...errors, phoneNumber: "" });
+                                }
+                            }}
                             className={`form-control ${errors.phoneNumber ? "is-invalid" : ""}`}
                         />
-                        {errors.phoneNumber && (
-                            <div className="invalid-feedback">{errors.phoneNumber}</div>
-                        )}
+                        <div className="invalid-feedback">{errors.phoneNumber}</div>
                     </div>
 
                     {/* Description */}
@@ -252,9 +248,9 @@ function CreateRegistration() {
                             name="description"
                             value={formData.description}
                             onChange={handleChange}
-                            className="form-control"
-                            rows="3"
+                            className={`form-control ${errors.description ? "is-invalid" : ""}`}
                         />
+                        <div className="invalid-feedback">{errors.description}</div>
                     </div>
 
                     {/* Buttons */}
@@ -262,21 +258,10 @@ function CreateRegistration() {
                         <Link to="/registrationlist" className="btn btn-secondary me-2">
                             Cancel
                         </Link>
-                        <button
-                            type="submit"
-                            className="btn btn-success"
-                            disabled={loading}
-                        >
-                            {loading
-                                ? isEditMode
-                                    ? "Updating..."
-                                    : "Saving..."
-                                : isEditMode
-                                    ? "Update"
-                                    : "Save"}
+                        <button className="btn btn-success" disabled={loading}>
+                            {loading ? "Saving..." : isEditMode ? "Update" : "Save"}
                         </button>
 
-                        {/* Delete button only in edit mode */}
                         {isEditMode && (
                             <button
                                 type="button"

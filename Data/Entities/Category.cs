@@ -15,5 +15,7 @@ namespace Data.Entities
 
         public string Link { get; set; } = null!;
 
+        public List<Service> Services { get; set; }
+
     }
 }

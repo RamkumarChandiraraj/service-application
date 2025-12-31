@@ -75,12 +75,14 @@ namespace service_application.Server.Controllers
         }
 
         // PUT: api/Registration
-        [HttpPut]
-        public async ValueTask<IActionResult> Update([FromBody] RegistrationRequestDto dto)
+        [HttpPut("{id}")]
+        public async ValueTask<IActionResult> Update(
+     int id,
+     [FromBody] RegistrationRequestDto dto)
         {
             try
             {
-                return await _registrationService.Update(dto);
+                return await _registrationService.Update(id, dto);
             }
             catch (Exception ex)
             {
