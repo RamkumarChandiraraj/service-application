@@ -2,6 +2,15 @@ import { useState, useEffect } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { createUser, updateUser, getUserById } from "../../api/UserApi";
 
+const validateEmail = (email) =>
+    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+
+const validateMobile = (mobile) =>
+    /^[6-9]\d{9}$/.test(mobile);
+
+const validatePassword = (password) =>
+    /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d@$!%*#?&]{6,}$/.test(password);
+
 function CreateUserManagement() {
     const { id } = useParams();
     const navigate = useNavigate();
@@ -38,8 +47,7 @@ function CreateUserManagement() {
                     mobilenumber: user.mobileNumber || "",
                     role: user.role || ""
                 });
-            } catch (err) {
-                console.error(err);
+            } catch {
                 setError("Failed to load user");
             } finally {
                 setPageLoading(false);
@@ -51,22 +59,35 @@ function CreateUserManagement() {
 
     const handleChange = (e) => {
         const { name, value } = e.target;
-
-        setFormData({
-            ...formData,
-            [name]: name === "role" ? Number(value) : value
-        });
-
+        setFormData({ ...formData, [name]: name === "role" ? Number(value) : value });
         setErrors({ ...errors, [name]: "" });
     };
 
     const validate = () => {
         let temp = {};
-        if (!formData.username.trim()) temp.username = "Username required";
-        if (!isEditMode && !formData.password.trim()) temp.password = "Password required";
-        if (!formData.email.trim()) temp.email = "Email required";
-        if (!formData.mobilenumber) temp.mobilenumber = "Mobile number required";
-        if (!formData.role) temp.role = "Role required";
+
+        if (!formData.username.trim())
+            temp.username = "Username is required";
+
+        if (!isEditMode) {
+            if (!formData.password.trim())
+                temp.password = "Password is required";
+            else if (!validatePassword(formData.password))
+                temp.password = "Password must be 6+ chars and include a number";
+        }
+
+        if (!formData.email.trim())
+            temp.email = "Email is required";
+        else if (!validateEmail(formData.email))
+            temp.email = "Invalid email format";
+
+        if (!formData.mobilenumber)
+            temp.mobilenumber = "Mobile number is required";
+        else if (!validateMobile(formData.mobilenumber))
+            temp.mobilenumber = "Enter valid 10-digit mobile number";
+
+        if (!formData.role)
+            temp.role = "Role is required";
 
         setErrors(temp);
         return Object.keys(temp).length === 0;
@@ -79,30 +100,15 @@ function CreateUserManagement() {
         setLoading(true);
         try {
             const payload = { ...formData };
+            if (isEditMode) delete payload.password;
 
-            if (isEditMode) {
-                delete payload.password;
-                await updateUser(formData.id, payload);
-                alert("User updated successfully!");
-            } else {
-                await createUser(payload);
-                alert("User created successfully!");
-            }
+            isEditMode ? await updateUser(formData.id, payload) : await createUser(payload);
 
+            alert(isEditMode ? "User updated successfully!" : "User created successfully!");
             navigate("/userlist");
         } catch (err) {
-            console.error(err);
-            const apiMessage = err.response?.data?.message || "";
-
-            if (apiMessage.toLowerCase().includes("email")) {
-                setError("Your email already exists");
-            } else if (apiMessage.toLowerCase().includes("mobile")) {
-                setError("Your mobile number already exists");
-            } else if (apiMessage.toLowerCase().includes("password")) {
-                setError("Your password already exists");
-            } else {
-                setError(apiMessage || "Save failed");
-            }
+            const msg = err.response?.data?.message || "Save failed";
+            setError(msg);
         } finally {
             setLoading(false);
         }
@@ -117,63 +123,35 @@ function CreateUserManagement() {
             {error && <div className="alert alert-danger">{error}</div>}
 
             <form onSubmit={handleSubmit} className="w-50">
-
                 <div className="mb-3">
                     <label>User Name</label>
-                    <input
-                        name="username"
-                        value={formData.username}
-                        onChange={handleChange}
-                        className="form-control"
-                        readOnly={isEditMode}
-                    />
+                    <input name="username" value={formData.username} onChange={handleChange} className="form-control" readOnly={isEditMode} />
                     {errors.username && <small className="text-danger">{errors.username}</small>}
                 </div>
 
                 {!isEditMode && (
                     <div className="mb-3">
                         <label>Password</label>
-                        <input
-                            type="password"
-                            name="password"
-                            value={formData.password}
-                            onChange={handleChange}
-                            className="form-control"
-                        />
+                        <input type="password" name="password" value={formData.password} onChange={handleChange} className="form-control" />
                         {errors.password && <small className="text-danger">{errors.password}</small>}
                     </div>
                 )}
 
                 <div className="mb-3">
                     <label>Email</label>
-                    <input
-                        name="email"
-                        value={formData.email}
-                        onChange={handleChange}
-                        className="form-control"
-                    />
+                    <input name="email" value={formData.email} onChange={handleChange} className="form-control" />
                     {errors.email && <small className="text-danger">{errors.email}</small>}
                 </div>
 
                 <div className="mb-3">
                     <label>Mobile Number</label>
-                    <input
-                        name="mobilenumber"
-                        value={formData.mobilenumber}
-                        onChange={handleChange}
-                        className="form-control"
-                    />
+                    <input name="mobilenumber" value={formData.mobilenumber} onChange={handleChange} className="form-control" />
                     {errors.mobilenumber && <small className="text-danger">{errors.mobilenumber}</small>}
                 </div>
 
                 <div className="mb-3">
                     <label>Role</label>
-                    <select
-                        name="role"
-                        value={formData.role}
-                        onChange={handleChange}
-                        className="form-control"
-                    >
+                    <select name="role" value={formData.role} onChange={handleChange} className="form-control">
                         <option value="">--Select Role--</option>
                         <option value={1}>Admin</option>
                         <option value={2}>Manager</option>
@@ -191,7 +169,6 @@ function CreateUserManagement() {
                         {loading ? "Saving..." : "Save"}
                     </button>
                 </div>
-
             </form>
         </div>
     );
