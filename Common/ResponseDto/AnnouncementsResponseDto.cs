@@ -11,7 +11,7 @@ namespace Common.ResponseDto
     public class AnnouncementsResponseDto: BaseDto
     {
         [Key]
-        public  long ID { get; set; }
+        public long ID { get; set; } 
 
         public string? Title { get; set; }
 
