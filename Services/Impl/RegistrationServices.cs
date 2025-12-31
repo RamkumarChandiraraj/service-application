@@ -1,4 +1,5 @@
-﻿using Common.Extension;
+﻿
+using Common.Extension;
 using Common.RequestDto;
 using Data.Base;
 using Data.Entities;
@@ -64,6 +65,8 @@ namespace Services.Impl
             entity.Location = dto.Location;
             entity.Services = dto.Services;
             entity.Description = dto.Description;
+            entity.Latitude = dto.Latitude;
+            entity.Longitude = dto.Longitude;
 
             await _registrationRepository.UpdateAsync(entity);
 
