@@ -4,11 +4,13 @@ using Common.Extension;
 using Common.RequestDto;
 using Common.ResponseDto;
 using Data.Entities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Services.Interface;
 
 namespace service_application.Server.Controllers
 {
+    
     [Route("api/[controller]")]
     [ApiController]
     public class CategoryController : ControllerBase
@@ -136,6 +138,7 @@ namespace service_application.Server.Controllers
             }
         }
 
+      
         [HttpGet("list")]
         public async ValueTask<IActionResult> GetAll()
         {

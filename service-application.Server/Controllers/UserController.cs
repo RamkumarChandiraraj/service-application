@@ -4,6 +4,7 @@ using Common.Extension;
 using Common.RequestDto;
 using Common.ResponseDto;
 using Data.Entities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Services.Impl;
@@ -11,6 +12,7 @@ using Services.Interface;
 
 namespace service_application.Server.Controllers
 {
+    //[Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class UserController(IUserService user, IApiMessage<IApiResponse> apiResponse) : ControllerBase
@@ -111,7 +113,7 @@ namespace service_application.Server.Controllers
                 return _apiResponse.InternalServerError(ex.Message);
             }
         }
-
+      
         [HttpGet("list")]
         public async ValueTask<IActionResult> GetAllUser(string? searchkeyword)
         {
