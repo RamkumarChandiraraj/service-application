@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Data.Migrations
 {
     [DbContext(typeof(ServiceApplicationDbContext))]
-    [Migration("20251231061123_AddLatitudeLongitudeToRegistration")]
+    [Migration("20251231062325_AddLatitudeLongitudeToRegistration")]
     partial class AddLatitudeLongitudeToRegistration
     {
         /// <inheritdoc />
