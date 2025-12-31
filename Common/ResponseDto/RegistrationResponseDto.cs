@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Common.Base;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,9 +7,9 @@ using System.Threading.Tasks;
 
 namespace Common.ResponseDto
 {
-    public class RegistrationResponseDto
+    public class RegistrationResponseDto : BaseDto
     {
-        public int Id { get; set; }
+        public long ID { get; set; }
 
         public string CompanyName { get; set; }
 
