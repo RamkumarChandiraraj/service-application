@@ -1,13 +1,9 @@
 ﻿using Common.Base;
 using Common.BaseResponse;
-using Common.Extension;
 using Common.RequestDto;
 using Common.ResponseDto;
-using Data.Entities;
 using Microsoft.AspNetCore.Mvc;
 using Services.Interface;
-
-// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
 namespace service_application.Server.Controllers
 {
@@ -15,52 +11,85 @@ namespace service_application.Server.Controllers
     [ApiController]
     public class AnnouncementsController : ControllerBase
     {
-        private readonly IAnnouncementsService _announcementsService;
+        private readonly IAnnouncementsService _announcementService;
+        private readonly IApiMessage<IApiResponse> _apiResponse;
 
-        public AnnouncementsController(IAnnouncementsService announcementsService)
+        public AnnouncementsController(
+            IAnnouncementsService announcementService,
+            IApiMessage<IApiResponse> apiResponse)
         {
-            _announcementsService = announcementsService;
+            _announcementService = announcementService;
+            _apiResponse = apiResponse;
         }
 
-        // GET: api/announcements
-        [HttpGet]
-        public async Task<IActionResult> GetAll()
-        {
-            var result = await _announcementsService.GetAllAsync();
-            return Ok(result);
-        }
-
-        // GET: api/announcements/5
-        [HttpGet("{id}")]
-        public async Task<IActionResult> GetById(long id)
-        {
-            var result = await _announcementsService.GetByIdAsync(id);
-            return Ok(result);
-        }
-
-        // POST: api/announcements
+        // ✅ CREATE
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] AnnouncementsRequestDto request)
+        public async ValueTask<IActionResult> Create([FromBody] AnnouncementsRequestDto dto)
         {
-            var result = await _announcementsService.CreateAsync(request);
-            return Ok(result);
+            if (dto == null)
+                return _apiResponse.BadRequest("Request body is required");
+
+            if (string.IsNullOrWhiteSpace(dto.Title))
+                return _apiResponse.BadRequest("Title is required");
+
+            if (string.IsNullOrWhiteSpace(dto.Description))
+                return _apiResponse.BadRequest("Description is required");
+
+            var result = await _announcementService.CreateAsync(dto);
+            return _apiResponse.Ok(result.ID);
         }
 
-        // PUT: api/announcements/5
-        [HttpPut("{id}")]
-        public async Task<IActionResult> Update(long id, [FromBody] AnnouncementsRequestDto request)
+        // ✅ GET BY ID
+        [HttpGet("{id:long}")]
+        public async ValueTask<IActionResult> GetById(long id)
         {
-            var result = await _announcementsService.UpdateAsync(id, request);
-            return Ok(result);
+            if (id <= 0)
+                return _apiResponse.BadRequest("Invalid Id");
+
+            var result = await _announcementService.GetByIdAsync(id);
+            if (result == null)
+                return _apiResponse.NotFound("Announcement not found");
+
+            return _apiResponse.Ok(result);
         }
 
-        // DELETE: api/announcements/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(long id)
+        // ✅ UPDATE
+        [HttpPut("{id:long}")]
+        public async ValueTask<IActionResult> Update(long id, [FromBody] AnnouncementsRequestDto dto)
         {
-            var result = await _announcementsService.DeleteAsync(id);
-            return Ok(result);
+            if (id <= 0)
+                return _apiResponse.BadRequest("Invalid Id");
 
+            if (dto == null)
+                return _apiResponse.BadRequest("Request body is required");
+
+            var updated = await _announcementService.UpdateAsync(id, dto);
+            if (!updated)
+                return _apiResponse.NotFound("Announcement not found");
+
+            return _apiResponse.Ok(true);
+        }
+
+        // ✅ DELETE
+        [HttpDelete("{id:long}")]
+        public async ValueTask<IActionResult> Delete(long id)
+        {
+            if (id <= 0)
+                return _apiResponse.BadRequest("Invalid Id");
+
+            var deleted = await _announcementService.DeleteAsync(id);
+            if (!deleted)
+                return _apiResponse.NotFound("Announcement not found");
+
+            return _apiResponse.Ok(true);
+        }
+
+        // ✅ GET ALL
+        [HttpGet("list")]
+        public async ValueTask<IActionResult> GetAll()
+        {
+            var data = await _announcementService.GetAllAsync();
+            return _apiResponse.Ok(data);
         }
     }
 }
