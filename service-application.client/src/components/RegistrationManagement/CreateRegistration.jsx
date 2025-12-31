@@ -1,5 +1,6 @@
 ﻿import { useState, useEffect } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
+
 import {
     createRegistration,
     updateRegistration,
@@ -8,11 +9,15 @@ import {
     getAllRegistrations
 } from "../../api/registrationApi";
 
+import { getAllLocations } from "../../api/locationList";
+import { getAllServices } from "../../api/serviceList";
+
 function CreateRegistration() {
     const { id } = useParams();
     const navigate = useNavigate();
     const isEditMode = Boolean(id);
 
+    /* ================= STATE ================= */
     const [formData, setFormData] = useState({
         id: 0,
         companyName: "",
@@ -20,15 +25,47 @@ function CreateRegistration() {
         location: "",
         services: "",
         phoneNumber: "",
-        description: ""
+        description: "",
+        latitude: "",
+        longitude: ""
     });
 
+    const [locations, setLocations] = useState([]);
+    const [servicesList, setServicesList] = useState([]);
     const [errors, setErrors] = useState({});
     const [loading, setLoading] = useState(false);
     const [pageLoading, setPageLoading] = useState(false);
     const [error, setError] = useState(null);
 
-    // Load data in edit mode
+    /* ================= LOAD LOCATIONS ================= */
+    useEffect(() => {
+        const fetchLocations = async () => {
+            try {
+                const res = await getAllLocations();
+                setLocations(res.data || []);   // ✅ FIX
+            } catch (err) {
+                console.error("Failed to load locations", err);
+                setLocations([]);
+            }
+        };
+        fetchLocations();
+    }, []);
+
+    /* ================= LOAD SERVICES ================= */
+    useEffect(() => {
+        const fetchServices = async () => {
+            try {
+                const res = await getAllServices();
+                setServicesList(res.data || []); // ✅ FIX
+            } catch (err) {
+                console.error("Failed to load services", err);
+                setServicesList([]);
+            }
+        };
+        fetchServices();
+    }, []);
+
+    /* ================= EDIT MODE ================= */
     useEffect(() => {
         if (!isEditMode) return;
 
@@ -43,9 +80,11 @@ function CreateRegistration() {
                     location: res.location || "",
                     services: res.services || "",
                     phoneNumber: res.phoneNumber || "",
-                    description: res.description || ""
+                    description: res.description || "",
+                    latitude: res.latitude ?? "",
+                    longitude: res.longitude ?? ""
                 });
-            } catch (err) {
+            } catch {
                 setError("Failed to load registration");
             } finally {
                 setPageLoading(false);
@@ -55,53 +94,58 @@ function CreateRegistration() {
         fetchRegistration();
     }, [id, isEditMode]);
 
-    // Handle change
+    /* ================= GEO LOCATION ================= */
+    useEffect(() => {
+        if (!isEditMode && navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                (pos) => {
+                    setFormData((prev) => ({
+                        ...prev,
+                        latitude: pos.coords.latitude,
+                        longitude: pos.coords.longitude
+                    }));
+                },
+                (err) => console.warn("Geolocation error:", err)
+            );
+        }
+    }, [isEditMode]);
+
+    /* ================= HANDLE CHANGE ================= */
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData({ ...formData, [name]: value });
         setErrors({ ...errors, [name]: "" });
     };
 
-    // ✅ Validation + Duplicate check
+    /* ================= VALIDATION ================= */
     const validate = async () => {
         let temp = {};
 
         if (!formData.companyName) temp.companyName = "Company name is required";
         if (!formData.email) temp.email = "Email is required";
         if (!formData.location) temp.location = "Location is required";
-        if (!formData.services) temp.services = "Services is required";
+        if (!formData.services) temp.services = "Service is required";
         if (!formData.phoneNumber) temp.phoneNumber = "Phone number is required";
+        if (formData.phoneNumber.length !== 10)
+            temp.phoneNumber = "Phone number must be 10 digits";
         if (!formData.description) temp.description = "Description is required";
-
-        if (Object.keys(temp).length > 0) {
-            setErrors(temp);
-            return false;
-        }
 
         try {
             const registrations = await getAllRegistrations();
-            //Email Duplicate checks
+
             const emailExists = registrations.find(
                 (r) =>
                     r.email?.toLowerCase() === formData.email.toLowerCase() &&
                     r.id !== formData.id
             );
-
-            if (emailExists) {
-                temp.email = "Email already exists";
-            }
-            //Mobile
+            if (emailExists) temp.email = "Email already exists";
 
             const phoneExists = registrations.find(
                 (r) =>
-                    r.phoneNumber?.toString().trim() ===
-                    formData.phoneNumber.toString().trim() &&
+                    r.phoneNumber === formData.phoneNumber &&
                     r.id !== formData.id
             );
-
-            if (phoneExists) {
-                temp.phoneNumber = "Phone number already exists";
-            }
+            if (phoneExists) temp.phoneNumber = "Phone number already exists";
         } catch (err) {
             console.error("Duplicate check error:", err);
         }
@@ -110,47 +154,48 @@ function CreateRegistration() {
         return Object.keys(temp).length === 0;
     };
 
-    // Submit
+    /* ================= SUBMIT ================= */
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError(null);
 
-        const isValid = await validate();
-        if (!isValid) return;
+        if (!(await validate())) return;
 
         setLoading(true);
         try {
+            const payload = {
+                ...formData,
+                email: formData.email.toLowerCase(),
+                latitude: Number(formData.latitude),
+                longitude: Number(formData.longitude)
+            };
+
             if (isEditMode) {
-                await updateRegistration(id, formData);
+                await updateRegistration(id, payload);
                 alert("Registration updated successfully");
             } else {
-                await createRegistration(formData);
+                await createRegistration(payload);
                 alert("Registration created successfully");
             }
+
             navigate("/registrationlist");
-        } catch (err) {
-            setError("Something went wrong. Please try again.");
+        } catch {
+            setError("Something went wrong");
         } finally {
             setLoading(false);
         }
     };
 
-    // Delete
+    /* ================= DELETE ================= */
     const handleDelete = async () => {
-        if (!window.confirm("Are you sure you want to delete?")) return;
-        try {
-            await deleteRegistration(id);
-            alert("Registration deleted successfully");
-            navigate("/registrationlist");
-        } catch {
-            alert("Delete failed");
-        }
+        if (!window.confirm("Are you sure?")) return;
+        await deleteRegistration(id);
+        navigate("/registrationlist");
     };
 
-    if (pageLoading) {
-        return <p className="text-center mt-5">Loading...</p>;
-    }
+    if (pageLoading) return <p className="text-center mt-5">Loading...</p>;
 
+    /* ================= UI ================= */
     return (
         <div className="d-flex justify-content-center align-items-center bg-light vh-100">
             <div className="w-50 bg-white border rounded shadow p-4">
@@ -161,105 +206,88 @@ function CreateRegistration() {
                 {error && <div className="alert alert-danger">{error}</div>}
 
                 <form onSubmit={handleSubmit}>
-                    {/* Company Name */}
-                    <div className="mb-3">
-                        <label className="form-label">Company Name</label>
-                        <input
-                            name="companyName"
-                            value={formData.companyName}
-                            onChange={handleChange}
-                            className={`form-control ${errors.companyName ? "is-invalid" : ""}`}
-                        />
-                        <div className="invalid-feedback">{errors.companyName}</div>
+                    <input
+                        className="form-control mb-3"
+                        name="companyName"
+                        placeholder="Company Name"
+                        value={formData.companyName}
+                        onChange={handleChange}
+                    />
+
+                    <input
+                        className="form-control mb-3"
+                        type="email"
+                        name="email"
+                        placeholder="Email"
+                        value={formData.email}
+                        onChange={handleChange}
+                    />
+
+                    {/* LOCATION DROPDOWN */}
+                    <select
+                        className="form-control mb-3"
+                        name="location"
+                        value={formData.location}
+                        onChange={handleChange}
+                    >
+                        <option value="">-- Select Location --</option>
+                        {locations.map((loc) => (
+                            <option key={loc.id} value={loc.name}>
+                                {loc.name}
+                            </option>
+                        ))}
+                    </select>
+
+                    {/* SERVICES DROPDOWN */}
+                    <select
+                        className="form-control mb-3"
+                        name="services"
+                        value={formData.services}
+                        onChange={handleChange}
+                    >
+                        <option value="">-- Select Service --</option>
+                        {servicesList.map((srv) => (
+                            <option key={srv.id} value={srv.name}>
+                                {srv.name}
+                            </option>
+                        ))}
+                    </select>
+
+                    <input
+                        className="form-control mb-3"
+                        placeholder="Phone Number"
+                        value={formData.phoneNumber}
+                        onChange={(e) => {
+                            const val = e.target.value.replace(/\D/g, "");
+                            if (val.length <= 10) {
+                                setFormData({ ...formData, phoneNumber: val });
+                            }
+                        }}
+                    />
+
+                    <textarea
+                        className="form-control mb-3"
+                        name="description"
+                        placeholder="Description"
+                        value={formData.description}
+                        onChange={handleChange}
+                    />
+
+                    <div className="row mb-3">
+                        <div className="col">
+                            <input className="form-control" value={formData.latitude} readOnly />
+                        </div>
+                        <div className="col">
+                            <input className="form-control" value={formData.longitude} readOnly />
+                        </div>
                     </div>
 
-                    {/* Email */}
-                    <div className="mb-3">
-                        <label className="form-label">Email</label>
-                        <input
-                            type="email"
-                            name="email"
-                            value={formData.email}
-                            onChange={handleChange}
-                            className={`form-control ${errors.email ? "is-invalid" : ""}`}
-                        />
-                        <div className="invalid-feedback">{errors.email}</div>
-                    </div>
-
-                    {/* Location */}
-                    <div className="mb-3">
-                        <label className="form-label">Location</label>
-                        <select
-                            name="location"
-                            value={formData.location}
-                            onChange={handleChange}
-                            className={`form-control ${errors.location ? "is-invalid" : ""}`}
-                        >
-                            <option value="">-- Select Location --</option>
-                            <option>Chennai</option>
-                            <option>Bangalore</option>
-                            <option>Mumbai</option>
-                            <option>Delhi</option>
-                        </select>
-                        <div className="invalid-feedback">{errors.location}</div>
-                    </div>
-
-                    {/* Services */}
-                    <div className="mb-3">
-                        <label className="form-label">Services</label>
-                        <select
-                            name="services"
-                            value={formData.services}
-                            onChange={handleChange}
-                            className={`form-control ${errors.services ? "is-invalid" : ""}`}
-                        >
-                            <option value="">-- Select Service --</option>
-                            <option>Home Services</option>
-                            <option>Mechanical Services</option>
-                            <option>Agriculture Solutions</option>
-                            <option>Food Services</option>
-                            <option>Other Services</option>
-                        </select>
-                        <div className="invalid-feedback">{errors.services}</div>
-                    </div>
-
-                    {/* Phone */}
-                    <div className="mb-3">
-                        <label className="form-label">Phone Number</label>
-                        <input
-                            name="phoneNumber"
-                            value={formData.phoneNumber}
-                            onChange={(e) => {
-                                const value = e.target.value.replace(/\D/g, ""); // numbers only
-                                if (value.length <= 10) {
-                                    setFormData({ ...formData, phoneNumber: value });
-                                    setErrors({ ...errors, phoneNumber: "" });
-                                }
-                            }}
-                            className={`form-control ${errors.phoneNumber ? "is-invalid" : ""}`}
-                        />
-                        <div className="invalid-feedback">{errors.phoneNumber}</div>
-                    </div>
-
-                    {/* Description */}
-                    <div className="mb-3">
-                        <label className="form-label">Description</label>
-                        <textarea
-                            name="description"
-                            value={formData.description}
-                            onChange={handleChange}
-                            className={`form-control ${errors.description ? "is-invalid" : ""}`}
-                        />
-                        <div className="invalid-feedback">{errors.description}</div>
-                    </div>
-
-                    {/* Buttons */}
-                    <div className="d-flex justify-content-end">
+                    <div className="text-end">
                         <Link to="/registrationlist" className="btn btn-secondary me-2">
                             Cancel
                         </Link>
                         <button className="btn btn-success" disabled={loading}>
-                            {loading ? "Saving..." : isEditMode ? "Update" : "Save"}
+                            {isEditMode ? "Update" : "Save"}
                         </button>
 
                         {isEditMode && (

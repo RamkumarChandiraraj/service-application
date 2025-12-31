@@ -39,6 +39,11 @@ function ReadRegistration() {
                 <div className="mb-3"><strong>Services:</strong> {registration.services}</div>
                 <div className="mb-3"><strong>PhoneNumber:</strong> {registration.phoneNumber}</div>
                 <div className="mb-3"><strong>Description:</strong> {registration.description}</div>
+                <div className="mb-3"><strong>Latitude:</strong> {registration.latitude}</div>
+                <div className="mb-3"><strong>Longitude:</strong> {registration.longitude}</div>
+
+                
+
 
                 <div className="d-flex justify-content-end">
                     <Link to="/registrationlist" className="btn btn-secondary">
