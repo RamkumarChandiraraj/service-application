@@ -27,13 +27,13 @@ namespace service_application.Server.Controllers
                     return _apiResponse.BadRequest("Name is required");
 
 
-                var isDuplicate = await _User.IsDuplicateAsync(dto.Email, dto.Password, dto.MobileNumber);
+                var isDuplicate = await _User.IsDuplicateAsync(dto.Email,dto.UserName, dto.MobileNumber);
 
 
 
                 if (isDuplicate)
                 {
-                    return _apiResponse.BadRequest("Email, Password, or Mobile number already exists");
+                    return _apiResponse.BadRequest("Email, UserName, or Mobile number already exists");
                 }
 
                 // No duplicates, create user
@@ -68,19 +68,19 @@ namespace service_application.Server.Controllers
         {
             try
             {
-                if (dto.ID != id || string.IsNullOrEmpty(dto.UserName) || string.IsNullOrEmpty(dto.Password))
+                if (dto.ID != id || string.IsNullOrEmpty(dto.UserName) )
                     return _apiResponse.BadRequest("Fields are required or ID mismatch");
 
                 
                 var isDuplicate = await _User.IsDuplicateAsync(
                     dto.Email,
-                    dto.Password,
+                    dto.UserName,
                     dto.MobileNumber,
                     (int?)dto.ID 
                 );
 
                 if (isDuplicate)
-                    return _apiResponse.BadRequest("Email, Password, or Mobile number already exists");
+                    return _apiResponse.BadRequest("Email, UserName or Mobile number already exists");
 
                 await _User.UpdateUserByIdAsync(dto);
 
@@ -90,7 +90,7 @@ namespace service_application.Server.Controllers
             {
                 return _apiResponse.InternalServerError(ex.Message);
             }
-        }
+            }
 
 
         [HttpDelete("{id}")]
