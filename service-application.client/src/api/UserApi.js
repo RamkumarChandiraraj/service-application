@@ -3,7 +3,7 @@ import api from "./baseapiinstance";
 // GET ALL USERS
 export const getAllUsers = async () => {
     try {
-        const { data } = await api.get("/api/user/list");
+        const { data } = await api.get("/api/User/list");
         return data;
     } catch (error) {
         console.error("Error fetching users:", error.response || error.message);
@@ -14,7 +14,7 @@ export const getAllUsers = async () => {
 // CREATE USER
 export const createUser = async (payload) => {
     try {
-        const { data } = await api.post("/api/user", payload);
+        const { data } = await api.post("/api/User", payload);
         return data;
     } catch (error) {
         console.error("Error creating user:", error.response || error.message);
@@ -25,7 +25,7 @@ export const createUser = async (payload) => {
 // UPDATE USER
 export const updateUser = async (id, payload) => {
     try {
-        const { data } = await api.put(`/api/user/${id}`, payload);
+        const { data } = await api.put(`/api/User/${id}`, payload);
         return data;
     } catch (error) {
         console.error("Error updating user:", error.response || error.message);
@@ -36,7 +36,7 @@ export const updateUser = async (id, payload) => {
 // GET USER BY ID
 export const getUserById = async (id) => {
     try {
-        const { data } = await api.get(`/api/user/${id}`);
+        const { data } = await api.get(`/api/User/${id}`);
         return data;
     } catch (error) {
         console.error("Error fetching user:", error.response || error.message);
@@ -47,7 +47,7 @@ export const getUserById = async (id) => {
 // DELETE USER
 export const deleteUser = async (id) => {
     try {
-        const { data } = await api.delete(`/api/user/${id}`);
+        const { data } = await api.delete(`/api/User/${id}`);
         return data;
     } catch (error) {
         console.error("Error deleting user:", error.response || error.message);

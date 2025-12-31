@@ -10,7 +10,6 @@ namespace Common.Enum
     {
         Admin = 1,
         Manager = 2,
-        
         Painting = 3,
         Accountant = 4,
         Cooking = 5,
