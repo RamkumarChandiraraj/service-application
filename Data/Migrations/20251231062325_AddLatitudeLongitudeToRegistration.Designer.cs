@@ -3,6 +3,7 @@ using System;
 using Data.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Data.Migrations
 {
     [DbContext(typeof(ServiceApplicationDbContext))]
-    partial class ServiceApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251231062325_AddLatitudeLongitudeToRegistration")]
+    partial class AddLatitudeLongitudeToRegistration
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -201,8 +204,9 @@ namespace Data.Migrations
                     b.Property<double>("Latitude")
                         .HasColumnType("double");
 
-                    b.Property<long>("LocationId")
-                        .HasColumnType("bigint");
+                    b.Property<string>("Location")
+                        .IsRequired()
+                        .HasColumnType("longtext");
 
                     b.Property<double>("Longitude")
                         .HasColumnType("double");
@@ -210,8 +214,9 @@ namespace Data.Migrations
                     b.Property<long>("PhoneNumber")
                         .HasColumnType("bigint");
 
-                    b.Property<long>("ServiceId")
-                        .HasColumnType("bigint");
+                    b.Property<string>("Services")
+                        .IsRequired()
+                        .HasColumnType("longtext");
 
                     b.Property<long?>("UpdatedBy")
                         .HasColumnType("bigint");

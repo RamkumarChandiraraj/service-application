@@ -1,4 +1,5 @@
-﻿using Common.Extension;
+﻿
+using Common.Extension;
 using Common.RequestDto;
 using Data.Base;
 using Data.Entities;
@@ -61,9 +62,11 @@ namespace Services.Impl
             entity.CompanyName = dto.CompanyName;
             entity.Email = dto.Email;
             entity.PhoneNumber = dto.PhoneNumber;
-            entity.Location = dto.Location;
-            entity.Services = dto.Services;
+            entity.LocationId = dto.LocationId;
+            entity.ServiceId = dto.ServiceId;
             entity.Description = dto.Description;
+            entity.Latitude = dto.Latitude;
+            entity.Longitude = dto.Longitude;
 
             await _registrationRepository.UpdateAsync(entity);
 
@@ -84,6 +87,7 @@ namespace Services.Impl
 
             return new OkObjectResult(true);
         }
+
 
         
     }

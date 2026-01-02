@@ -13,11 +13,13 @@ namespace Common.ResponseDto
 
         public string CompanyName { get; set; }
 
-        public string Location { get; set; }   // enum → string
-        public string Services { get; set; }   // enum → string
+        public long LocationId { get; set; }   
+        public long ServiceId { get; set; }   
 
         public string Email { get; set; }
         public long PhoneNumber { get; set; }
         public string Description { get; set; }
+        public double Latitude { get; set; }
+        public double Longitude { get; set; }
     }
 }
