@@ -6,6 +6,6 @@ namespace Services.Interface
 {
     public interface IUserSearchService
     {
-        ValueTask<List<RegistrationResponseDto>> SearchUsersAsync(UserSearchRequestDto dto);
+        ValueTask<List<UserSearchResponseDto>> SearchUsersAsync(UserSearchRequestDto dto);
     }
 }
