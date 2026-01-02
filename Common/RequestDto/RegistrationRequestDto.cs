@@ -10,7 +10,7 @@ namespace Common.RequestDto
 {
     public class RegistrationRequestDto : BaseDto
     {
-       
+        public readonly string ServicesId;
 
         public string CompanyName { get; set; }
 
