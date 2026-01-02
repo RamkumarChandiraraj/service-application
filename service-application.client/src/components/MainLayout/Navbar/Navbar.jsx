@@ -106,16 +106,6 @@ const Navbar = () => {
               </a>
 
               <ul className={openDropdowns["main"] ? "dropdown-active" : ""}>
-                <li>
-                  <NavLink
-                    to="/search"
-                    onClick={handleLinkClick}
-                    className={({ isActive }) => (isActive ? "active" : "")}
-                  >
-                    Search
-                  </NavLink>
-                </li>
-
                 <li className={`dropdown ${openDropdowns["deep"] ? "active" : ""}`}>
                   <a
                     href="#!"
@@ -189,15 +179,7 @@ const Navbar = () => {
                   </ul>
                 </li>
 
-                <li>
-                  <NavLink
-                    to="/vendors"
-                    onClick={handleLinkClick}
-                    className={({ isActive }) => (isActive ? "active" : "")}
-                  >
-                     Vendors
-                  </NavLink>
-                </li>
+                
                 <li>
                   <NavLink
                     to="/searchvendors"

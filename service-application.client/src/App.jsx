@@ -106,8 +106,8 @@ function App() {
         <Route path="/attachmentlist" element={<AttachmentList />} />
 
         {/* Search Properties */}
-        <Route path="/search" element={<SearchProperties />} />
-        <Route path="/vendors" element={<Vendors />} />
+        {/*<Route path="/search" element={<SearchProperties />} />*/}
+        {/*<Route path="/vendors" element={<Vendors />} />*/}
         <Route path="/searchvendors" element={<SearchVendors />} />
       </Routes>
       <Footer />

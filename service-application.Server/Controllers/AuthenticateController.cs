@@ -6,7 +6,7 @@ using Services.Interface;
 namespace service_application.Server.Controllers
 {
     
-    [Authorize]
+    //[Authorize]
     [ApiController]
     [Route("api/auth")]
     public class AuthenticateController : ControllerBase
