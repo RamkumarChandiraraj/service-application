@@ -34,7 +34,7 @@ namespace Services.Impl
         {
             return await _repository
                 .FindAll()
-                .OrderByDescending(x => x.ID)
+                 .OrderBy(x => x.ID)
                 .ToListAsync();
         }
 

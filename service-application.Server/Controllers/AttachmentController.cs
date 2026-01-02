@@ -4,11 +4,13 @@ using Common.Extension;
 using Common.RequestDto;
 using Common.ResponseDto;
 using Data.Entities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Services.Interface;
 
 namespace service_application.Server.Controllers
 {
+   // [Authorize]
     [ApiController]
     [Route("api/attachments")]
     public class AttachmentController : ControllerBase

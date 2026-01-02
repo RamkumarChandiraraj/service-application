@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import Card from "../Common/Card";
-import { getAllCategories } from "../../api/categoryApi"; // adjust path to your API file
+import { getAllCategories } from "../../api/categoryApi";
+import LoadingPage from "../Common/LoadingPage"; // import loading component
 
 const Category = () => {
   const [categories, setCategories] = useState([]);
@@ -10,41 +11,37 @@ const Category = () => {
     const fetchCategories = async () => {
       try {
         const response = await getAllCategories();
-        if (response?.data) {
-          setCategories(response.data);
-        }
+        const data = response?.data || [];
+        setCategories(data);
       } catch (error) {
         console.error("Failed to load categories:", error);
       } finally {
         setLoading(false);
       }
     };
-
     fetchCategories();
   }, []);
 
-  if (loading) return <p>Loading categories...</p>;
+  if (loading) return <LoadingPage />;
 
   return (
     <section id="categories" className="services section-bg py-5">
       <div className="container">
-        {/* Section Title */}
         <div className="section-title" data-aos="fade-up">
           <h2>Categories</h2>
           <p>Choose a service category to get started</p>
         </div>
 
-        {/* Category Cards */}
         <div className="row gy-4 section-cards">
-          {categories.map((service, index) => (
+          {categories.map((category, index) => (
             <Card
-              key={service.id}
+              key={category.id}
               data={{
-                icon: service.icon,
-                title: service.name,
-                description: service.description,
-                link: `/service/${service.link}`,
-                isActive: service.isActive, // optional: for styling inactive cards
+                icon: category.icon,
+                title: category.name,
+                description: category.description,
+                link: `/service/${category.link}`, // go to Service page
+                isActive: true,
               }}
               delay={(index + 1) * 100}
             />

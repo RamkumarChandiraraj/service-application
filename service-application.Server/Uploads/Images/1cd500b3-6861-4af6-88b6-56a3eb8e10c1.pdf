@@ -1,0 +1,4 @@
+PROJECTDESCRIPTION:
+Milk collection and milk procurement. Milk procurement data for each farmer is recorded separately and automatically updated in the dairy system. 
+This helps in maintaining the farmers milk procurement records easily. It gives accurate weight and rate depends upon the milk quality. Milk quality level is calculated by Milk Weighing Machine and Electronic Fat Testing Machine (External Hardware Devices).Our System maintains the individual customer records and bill details on a daily basis. Customers may now receive instant bill details for their milk, rather than waiting for days as under the previous system.
+Administrator can add N numbers of collection centers and users easily in the network. User have privilege to add the customers. This System  keeps the administrator and customer details up-to-date.
