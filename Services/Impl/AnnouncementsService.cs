@@ -58,7 +58,6 @@ namespace Services.Impl
 
             dto.Adapt(entity);
             await _repository.UpdateAsync(entity);
-
             return true;
         }
 
