@@ -24,9 +24,9 @@ export const createRegistration = async (payload) => {
 };
 
 // UPDATE
-export const updateRegistration = async (payload) => {
+export const updateRegistration = async (id,payload) => {
     try {
-        const response = await api.put(`/api/Registration`, payload);
+        const response = await api.put(`/api/Registration/${id}`, payload);
         return response.data;
     } catch (error) {
         console.error("Error updating registration:", error);

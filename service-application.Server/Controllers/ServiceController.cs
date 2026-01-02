@@ -36,6 +36,10 @@ namespace service_application.Server.Controllers
                 {
                     return _apiResponse.BadRequest("Description is required");
                 }
+                if (string.IsNullOrEmpty(dto.Icon))
+                    return _apiResponse.BadRequest("Icon is required");
+                if (dto.CategoryId <= 0)
+                    return _apiResponse.BadRequest("CategoryId is required");
 
                 var result = await _service.CreateServiceAsync(dto);
 
@@ -73,7 +77,7 @@ namespace service_application.Server.Controllers
         {
             try
             {
-                if(dto.ID<0||string.IsNullOrEmpty(dto.Name)||string.IsNullOrEmpty(dto.Description))
+                if(dto.ID<0||string.IsNullOrEmpty(dto.Name)||string.IsNullOrEmpty(dto.Description)||dto.CategoryId<0)
                 {
                     return _apiResponse.BadRequest("Fields are required");
                 }
