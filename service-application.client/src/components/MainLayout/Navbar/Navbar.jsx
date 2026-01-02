@@ -61,7 +61,7 @@ const Navbar = () => {
             alt="Aanaiyaan Logo"
             style={{ maxHeight: "40px", width: "auto", objectFit: "contain" }}
           />
-          {/* <h1>Mr LookUp</h1> */}
+          <h1>Mr LookUp</h1>
         </NavLink>
 
         <nav id="navmenu" className="navmenu">
