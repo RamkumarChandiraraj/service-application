@@ -9,7 +9,7 @@ const MainLayout = () => {
   return (
     <div>
       <Home />
-      {/* <CurrentLocation /> */}
+       <CurrentLocation /> 
       <About />
       <Stats />
       <Contact />
