@@ -4,11 +4,13 @@ using Common.Extension;
 using Common.RequestDto;
 using Common.ResponseDto;
 using Data.Entities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Services.Interface;
 
 namespace service_application.Server.Controllers
 {
+    //[Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class LocationController(ILocationService location, IApiMessage<IApiResponse> apiResponse) : ControllerBase

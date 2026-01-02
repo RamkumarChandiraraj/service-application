@@ -15,6 +15,5 @@ namespace Data.Context
         public DbSet<Registration> Registrations { get; set; }
         public DbSet<Attachment> Attachments { get; set; }
 
-
     }
 }
