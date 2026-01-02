@@ -1367,7 +1367,7 @@ section,
   width: 100%;
   border-top-left-radius: 20px;
   border-top-right-radius: 20px;
-  background: linear-gradient(90deg, #ff6ec7, #3b82f6, #06b6d4);
+  background: linear-gradient(90deg, #021220, #3b82f6, #06b6d4);
 }
 
 /* ================= VENDOR DETAILS ================= */
@@ -1388,7 +1388,7 @@ section,
 }
 
 .location-icon {
-  color: #ff6ec7;
+  color: #d23e1d;
 }
 
 /* Services badge */
@@ -1397,7 +1397,7 @@ section,
   font-size: 12px;
   font-weight: 600;
   color: #fff;
-  background: linear-gradient(90deg, #ff6ec7, #3b82f6);
+  background: linear-gradient(90deg, #185cf1, #3b83f6ba);
   padding: 5px 14px;
   border-radius: 25px;
   margin-bottom: 12px;

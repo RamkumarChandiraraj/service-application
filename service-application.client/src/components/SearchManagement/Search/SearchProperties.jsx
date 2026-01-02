@@ -45,8 +45,20 @@ const SearchProperties = ({ onSearch, onValidationError }) => {
         setCategories(catRes?.data || []);
         setServices(serviceRes?.data || []);
         setLocations(locRes?.data || []);
+
+        // ✅ Return the fetched data
+        return {
+          categories: catRes?.data || [],
+          services: serviceRes?.data || [],
+          locations: locRes?.data || [],
+        };
       } catch (err) {
         console.error(err);
+        return {
+          categories: [],
+          services: [],
+          locations: [],
+        };
       } finally {
         setLoading(false);
       }
@@ -210,7 +222,10 @@ const SearchProperties = ({ onSearch, onValidationError }) => {
           </div>
 
           {/* Location */}
-          <div className="sp-location-box" style={{ display: "flex", flexDirection: "column" }}>
+          <div
+            className="sp-location-box"
+            style={{ display: "flex", flexDirection: "column" }}
+          >
             <div>
               <label>
                 <input

@@ -19,7 +19,7 @@ const SearchVendors = () => {
       await new Promise((res) => setTimeout(res, 1000)); // Replace with your API call
       setSearchPayload(payload);
       setShowVendors(true);
-    } catch (err) {
+    } catch (error) {
       setSearchError("Failed to load vendors. Please try again.");
     } finally {
       setLoadingVendors(false);

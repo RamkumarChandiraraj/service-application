@@ -1,45 +1,63 @@
 import React, { useEffect, useState } from "react";
-import { vendorSampleData } from "./vendor"; 
 import { getAllLocations } from "../../../api/locationList";
 import { getAllServices } from "../../../api/serviceList";
+import { userSearch } from "../../../api/UsersearchApi"; // POST API
+import LoadingPage from "../../Common/LoadingPage"; // ✅ import loading
 
-const Vendors = () => {
+const Vendors = ({ searchPayload }) => {
   const [vendors, setVendors] = useState([]);
   const [locations, setLocations] = useState({});
   const [services, setServices] = useState({});
   const [searchTerm, setSearchTerm] = useState("");
+  const [loading, setLoading] = useState(true); // ✅ loading state
 
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchVendors = async () => {
+      if (!searchPayload) return;
+
+      setLoading(true); // start loading
       try {
-        setVendors(vendorSampleData);
+        // Fetch vendors
+        const vendorResponse = await userSearch(searchPayload);
+        setVendors(vendorResponse?.data || []);
 
-        // Fetch locations and services
-        const locationData = (await getAllLocations()).data; 
-        const serviceData = (await getAllServices()).data;
-
-        console.log("Locations:", locationData);
-        console.log("Services:", serviceData);
+        // Fetch locations & services
+        const [locationRes, serviceRes] = await Promise.all([
+          getAllLocations(),
+          getAllServices()
+        ]);
 
         const locationMap = {};
-        locationData.forEach(loc => (locationMap[loc.id] = loc.name));
+        (locationRes?.data || []).forEach(loc => {
+          locationMap[loc.id] = loc.name;
+        });
 
         const serviceMap = {};
-        serviceData.forEach(ser => (serviceMap[ser.id] = ser.name));
+        (serviceRes?.data || []).forEach(ser => {
+          serviceMap[ser.id] = ser.name;
+        });
 
         setLocations(locationMap);
         setServices(serviceMap);
-      } catch (error) {
-        console.error("Failed to fetch locations or services", error);
+
+      } catch (err) {
+        console.error("Failed to fetch vendors, locations, or services", err);
+      } finally {
+        setLoading(false); // stop loading
       }
     };
 
-    fetchData();
-  }, []);
+    fetchVendors();
+  }, [searchPayload]);
 
-  const filteredVendors = vendors.filter(vendor =>
-    vendor.companyName.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredVendors = Array.isArray(vendors)
+    ? vendors.filter(vendor =>
+        vendor.companyName.toLowerCase().includes(searchTerm.toLowerCase())
+      )
+    : [];
+
+  // ✅ Show loading until all data is fetched
+  if (loading) return <LoadingPage />;
 
   return (
     <div className="vendor-wrapper">
