@@ -108,7 +108,7 @@ const Navbar = () => {
               <ul className={openDropdowns["main"] ? "dropdown-active" : ""}>
                 <li>
                   <NavLink
-                    to="/searchvendors"
+                    to="/search"
                     onClick={handleLinkClick}
                     className={({ isActive }) => (isActive ? "active" : "")}
                   >
@@ -200,11 +200,11 @@ const Navbar = () => {
                 </li>
                 <li>
                   <NavLink
-                    to="/example3"
+                    to="/searchvendors"
                     onClick={handleLinkClick}
                     className={({ isActive }) => (isActive ? "active" : "")}
                   >
-                    Dropdown 3
+                    Search
                   </NavLink>
                 </li>
                 <li>

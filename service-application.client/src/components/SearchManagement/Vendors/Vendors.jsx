@@ -1,134 +1,78 @@
+import React, { useEffect, useState } from "react";
+import { vendorSampleData } from "./vendor"; 
+import { getAllLocations } from "../../../api/locationList";
+import { getAllServices } from "../../../api/serviceList";
+
 const Vendors = () => {
+  const [vendors, setVendors] = useState([]);
+  const [locations, setLocations] = useState({});
+  const [services, setServices] = useState({});
+  const [searchTerm, setSearchTerm] = useState("");
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setVendors(vendorSampleData);
+
+        // Fetch locations and services
+        const locationData = (await getAllLocations()).data; 
+        const serviceData = (await getAllServices()).data;
+
+        console.log("Locations:", locationData);
+        console.log("Services:", serviceData);
+
+        const locationMap = {};
+        locationData.forEach(loc => (locationMap[loc.id] = loc.name));
+
+        const serviceMap = {};
+        serviceData.forEach(ser => (serviceMap[ser.id] = ser.name));
+
+        setLocations(locationMap);
+        setServices(serviceMap);
+      } catch (error) {
+        console.error("Failed to fetch locations or services", error);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  const filteredVendors = vendors.filter(vendor =>
+    vendor.companyName.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   return (
-    <section id="team" className="team section light-background">
-      {/* Section Title */}
-      <div className="container section-title" data-aos="fade-up">
-        <h2>Team</h2>
-        <p>
-          Necessitatibus eius consequatur ex aliquid fuga eum quidem sint
-          consectetur velit
-        </p>
+    <div className="vendor-wrapper">
+      <div className="search-bar-container">
+        <input
+          type="text"
+          placeholder="Search by company name..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="search-bar"
+        />
       </div>
-      {/* End Section Title */}
 
-      <div className="container">
-        <div className="row gy-4">
-
-          {/* Team Member 1 */}
-          <div
-            className="col-lg-3 col-md-6 d-flex align-items-stretch"
-            data-aos="fade-up"
-            data-aos-delay="100"
-          >
-            <div className="team-member">
-              <div className="member-img">
-                <img
-                  src="assets/img/team/team-1.jpg"
-                  className="img-fluid"
-                  alt="Walter White"
-                />
-                <div className="social">
-                  <a href="#"><i className="bi bi-twitter-x"></i></a>
-                  <a href="#"><i className="bi bi-facebook"></i></a>
-                  <a href="#"><i className="bi bi-instagram"></i></a>
-                  <a href="#"><i className="bi bi-linkedin"></i></a>
-                </div>
-              </div>
-              <div className="member-info">
-                <h4>Walter White</h4>
-                <span>Chief Executive Officer</span>
-              </div>
+      <div className="vendor-container">
+        {filteredVendors.length > 0 ? (
+          filteredVendors.map(vendor => (
+            <div className="vendor-card" key={vendor.id}>
+              <h2 className="vendor-name">{vendor.companyName}</h2>
+              <p className="vendor-location">
+                <i className="bi bi-geo-alt location-icon"></i>
+                {locations[vendor.locationId] || "Unknown"}
+              </p>
+              <p className="vendor-services">
+                {services[vendor.serviceId] || "Unknown Service"}
+              </p>
+              <p className="vendor-description">{vendor.description}</p>
             </div>
-          </div>
-          {/* End Team Member */}
-
-          {/* Team Member 2 */}
-          <div
-            className="col-lg-3 col-md-6 d-flex align-items-stretch"
-            data-aos="fade-up"
-            data-aos-delay="200"
-          >
-            <div className="team-member">
-              <div className="member-img">
-                <img
-                  src="assets/img/team/team-2.jpg"
-                  className="img-fluid"
-                  alt="Sarah Johnson"
-                />
-                <div className="social">
-                  <a href="#"><i className="bi bi-twitter-x"></i></a>
-                  <a href="#"><i className="bi bi-facebook"></i></a>
-                  <a href="#"><i className="bi bi-instagram"></i></a>
-                  <a href="#"><i className="bi bi-linkedin"></i></a>
-                </div>
-              </div>
-              <div className="member-info">
-                <h4>Sarah Johnson</h4>
-                <span>Product Manager</span>
-              </div>
-            </div>
-          </div>
-          {/* End Team Member */}
-
-          {/* Team Member 3 */}
-          <div
-            className="col-lg-3 col-md-6 d-flex align-items-stretch"
-            data-aos="fade-up"
-            data-aos-delay="300"
-          >
-            <div className="team-member">
-              <div className="member-img">
-                <img
-                  src="assets/img/team/team-3.jpg"
-                  className="img-fluid"
-                  alt="William Anderson"
-                />
-                <div className="social">
-                  <a href="#"><i className="bi bi-twitter-x"></i></a>
-                  <a href="#"><i className="bi bi-facebook"></i></a>
-                  <a href="#"><i className="bi bi-instagram"></i></a>
-                  <a href="#"><i className="bi bi-linkedin"></i></a>
-                </div>
-              </div>
-              <div className="member-info">
-                <h4>William Anderson</h4>
-                <span>CTO</span>
-              </div>
-            </div>
-          </div>
-          {/* End Team Member */}
-
-          {/* Team Member 4 */}
-          <div
-            className="col-lg-3 col-md-6 d-flex align-items-stretch"
-            data-aos="fade-up"
-            data-aos-delay="400"
-          >
-            <div className="team-member">
-              <div className="member-img">
-                <img
-                  src="assets/img/team/team-4.jpg"
-                  className="img-fluid"
-                  alt="Amanda Jepson"
-                />
-                <div className="social">
-                  <a href="#"><i className="bi bi-twitter-x"></i></a>
-                  <a href="#"><i className="bi bi-facebook"></i></a>
-                  <a href="#"><i className="bi bi-instagram"></i></a>
-                  <a href="#"><i className="bi bi-linkedin"></i></a>
-                </div>
-              </div>
-              <div className="member-info">
-                <h4>Amanda Jepson</h4>
-                <span>Accountant</span>
-              </div>
-            </div>
-          </div>
-          {/* End Team Member */}
-
-        </div>
+          ))
+        ) : (
+          <p className="no-results">No vendors found.</p>
+        )}
       </div>
-    </section>
+    </div>
   );
 };
 
