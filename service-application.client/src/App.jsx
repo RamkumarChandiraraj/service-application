@@ -34,8 +34,12 @@ import ReadRegistration from "./components/RegistrationManagement/ReadRegistrati
 import UserList from "./components/UserManagement/UserList";
 import CreateUser from "./components/UserManagement/CreateUser";
 import ReadUser from "./components/UserManagement/ReadUser";
+import AnnouncementsManagement from "./components/AnnouncementsManagement/AnnouncementsManagement";
 
 
+
+
+//Annoucements
 
 
 function App() {
@@ -92,6 +96,9 @@ function App() {
 
                 {/* Attachment Management */}
                 <Route path="/attachmentlist" element={<AttachmentList />} />
+
+              {/* Announcement Management */}
+              <Route path="/announcementlist" element={<AnnouncementsManagement />} />
 
             </Routes>
 

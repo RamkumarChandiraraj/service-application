@@ -185,7 +185,16 @@ const Navbar = () => {
                         Attachments
                       </NavLink>
                     </li>
-                    
+
+                                      <li>
+                                          <NavLink
+                                              to="/announcementlist"
+                                              onClick={handleLinkClick}
+                                              className={({ isActive }) => (isActive ? "active" : "")}
+                                          >
+                                              Announcement
+                                          </NavLink>
+                                      </li>
                   </ul>
                 </li>
 
