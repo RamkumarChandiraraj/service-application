@@ -4,6 +4,7 @@ using Common.Extension;
 using Common.RequestDto;
 using Common.ResponseDto;
 using Data.Entities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
@@ -13,6 +14,7 @@ using static Org.BouncyCastle.Math.EC.ECCurve;
 
 namespace service_application.Server.Controllers
 {
+    //[Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class ServiceController(IServiceService service, IApiMessage<IApiResponse> apiResponse) : ControllerBase
