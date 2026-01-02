@@ -175,8 +175,11 @@ namespace Data.Migrations
                     .IsRequired()
                     .HasColumnType("longtext");
 
-                b.Property<long>("CreatedBy")
-                    .HasColumnType("bigint");
+                    b.Property<long>("CategoryId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("CreatedBy")
+                        .HasColumnType("bigint");
 
                 b.Property<DateTime>("CreatedDate")
                     .HasColumnType("datetime(6)");
@@ -195,19 +198,22 @@ namespace Data.Migrations
                     .IsRequired()
                     .HasColumnType("longtext");
 
-                b.Property<bool>("IsActive")
-                    .HasColumnType("tinyint(1)");
+                    b.Property<string>("Icon")
+                        .HasColumnType("longtext");
 
-                b.Property<string>("Location")
-                    .IsRequired()
-                    .HasColumnType("longtext");
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("tinyint(1)");
 
-                b.Property<long>("PhoneNumber")
-                    .HasColumnType("bigint");
+                    b.Property<string>("Location")
+                        .IsRequired()
+                        .HasColumnType("longtext");
 
-                b.Property<string>("Services")
-                    .IsRequired()
-                    .HasColumnType("longtext");
+                    b.Property<long>("PhoneNumber")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("Services")
+                        .IsRequired()
+                        .HasColumnType("longtext");
 
                 b.Property<long?>("UpdatedBy")
                     .HasColumnType("bigint");
@@ -217,20 +223,22 @@ namespace Data.Migrations
 
                 b.HasKey("ID");
 
-                b.ToTable("Registrations");
-            });
+                    b.ToTable("Registrations");
+                    b.HasIndex("CategoryId");
+
+                    b.ToTable("Service");
+                });
 
             modelBuilder.Entity("Data.Entities.Service", b =>
-            {
-                b.Property<long>("ID")
-                    .ValueGeneratedOnAdd()
-                    .HasColumnType("bigint");
+                {
+                    b.HasOne("Data.Entities.Category", "Category")
+                        .WithMany("Services")
+                        .HasForeignKey("CategoryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
-                b.Property<long>("CategoryId")
-                    .HasColumnType("bigint");
-
-                b.Property<long>("CreatedBy")
-                    .HasColumnType("bigint");
+                    b.Navigation("Category");
+                
 
                 b.Property<DateTime>("CreatedDate")
                     .HasColumnType("datetime(6)");
@@ -244,11 +252,8 @@ namespace Data.Migrations
                 b.Property<string>("Description")
                     .HasColumnType("longtext");
 
-                b.Property<string>("Icon")
-                    .HasColumnType("longtext");
-
-                b.Property<bool>("IsActive")
-                    .HasColumnType("tinyint(1)");
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("tinyint(1)");
 
                 b.Property<string>("Name")
                     .IsRequired()
@@ -262,72 +267,8 @@ namespace Data.Migrations
 
                 b.HasKey("ID");
 
-                b.HasIndex("CategoryId");
-
-                b.ToTable("Service");
-            });
-
-            modelBuilder.Entity("Data.Entities.User", b =>
-            {
-                b.Property<long>("ID")
-                    .ValueGeneratedOnAdd()
-                    .HasColumnType("bigint");
-
-                b.Property<long>("CreatedBy")
-                    .HasColumnType("bigint");
-
-                b.Property<DateTime>("CreatedDate")
-                    .HasColumnType("datetime(6)");
-
-                b.Property<long?>("DeletedBy")
-                    .HasColumnType("bigint");
-
-                b.Property<DateTime?>("DeletedDate")
-                    .HasColumnType("datetime(6)");
-
-                b.Property<string>("Email")
-                    .IsRequired()
-                    .HasColumnType("longtext");
-
-                b.Property<bool>("IsActive")
-                    .HasColumnType("tinyint(1)");
-
-                b.Property<long>("MobileNumber")
-                    .HasColumnType("bigint");
-
-                b.Property<string>("Password")
-                    .IsRequired()
-                    .HasColumnType("longtext");
-
-                b.Property<int>("Role")
-                    .HasColumnType("int");
-
-                b.Property<long?>("UpdatedBy")
-                    .HasColumnType("bigint");
-
-                b.Property<DateTime?>("UpdatedDate")
-                    .HasColumnType("datetime(6)");
-
-                b.Property<string>("UserName")
-                    .IsRequired()
-                    .HasColumnType("longtext");
-
-                b.HasKey("ID");
-
-                b.ToTable("User");
-            });
-
-            modelBuilder.Entity("Data.Entities.Service", b =>
-            {
-                b.HasOne("Data.Entities.Category", "Category")
-                    .WithMany("Services")
-                    .HasForeignKey("CategoryId")
-                    .OnDelete(DeleteBehavior.Cascade)
-                    .IsRequired();
-
-                b.Navigation("Category");
-            });
-
+                    b.ToTable("Service");
+                });
             modelBuilder.Entity("Data.Entities.Category", b =>
             {
                 b.Navigation("Services");
