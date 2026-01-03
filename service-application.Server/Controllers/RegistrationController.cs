@@ -38,6 +38,25 @@ namespace service_application.Server.Controllers
                 if (string.IsNullOrWhiteSpace(dto.Email))
                     return _apiResponse.BadRequest("Email is required");
 
+                //  Phone number validation for LONG
+                if (dto.PhoneNumber <= 0)
+                    return _apiResponse.BadRequest("PhoneNumber is required");
+
+                //  10-digit check for long
+                if (dto.PhoneNumber < 1000000000 || dto.PhoneNumber > 9999999999)
+                    return _apiResponse.BadRequest("PhoneNumber must be exactly 10 digits");
+
+                //  Normalize email
+                dto.Email = dto.Email.ToLower();
+
+                //  Duplicate Email Check
+                if (await _registrationService.EmailExists(dto.Email))
+                    return _apiResponse.BadRequest("Email already exists");
+
+                //  Duplicate Phone Number Check
+                if (await _registrationService.PhoneNumberExists(dto.PhoneNumber))
+                    return _apiResponse.BadRequest("PhoneNumber already exists");
+
                 return await _registrationService.Create(dto);
             }
             catch (Exception ex)
@@ -45,6 +64,8 @@ namespace service_application.Server.Controllers
                 return _apiResponse.InternalServerError(ex.Message);
             }
         }
+
+
 
         // GET: api/Registration/{id}
         [HttpGet("{id:long}")]

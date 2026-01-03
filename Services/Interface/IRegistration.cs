@@ -11,12 +11,13 @@ namespace Services.Interface
 {
     public interface IRegistrationService
     {
-       
-            ValueTask<IActionResult> Create(RegistrationRequestDto dto);
-            ValueTask<IActionResult> Get(long id);
-            ValueTask<IActionResult> GetAll();
-        ValueTask<IActionResult> Update(int id, RegistrationRequestDto dto);
-        ValueTask<IActionResult> Delete(long id);
+         Task<bool> EmailExists(string email);
+         Task<bool> PhoneNumberExists(long phoneNumber);
+         ValueTask<IActionResult> Create(RegistrationRequestDto dto);
+         ValueTask<IActionResult> Get(long id);
+         ValueTask<IActionResult> GetAll();
+         ValueTask<IActionResult> Update(int id, RegistrationRequestDto dto);
+         ValueTask<IActionResult> Delete(long id);
         
     }
 }

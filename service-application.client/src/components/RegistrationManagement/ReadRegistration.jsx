@@ -37,8 +37,6 @@ function ReadRegistration() {
                 <p><strong>ID:</strong> {registration.id}</p>
                 <p><strong>Company Name:</strong> {registration.companyName}</p>
                 <p><strong>Email:</strong> {registration.email}</p>
-
-                {/* ✅ SHOW IDS */}
                 <p><strong>Location ID:</strong> {registration.locationId}</p>
                 <p><strong>Service ID:</strong> {registration.serviceId}</p>
 

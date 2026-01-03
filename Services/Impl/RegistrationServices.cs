@@ -23,10 +23,26 @@ namespace Services.Impl
             _registrationRepository = registrationRepository;
         }
 
+        public async Task<bool> EmailExists(string email)
+        {
+            return await _registrationRepository
+                .FindByCondition(r => r.Email.ToLower() == email.ToLower())
+                .AnyAsync();
+        }
+
+        public async Task<bool> PhoneNumberExists(long phoneNumber)
+        {
+            return await _registrationRepository
+                .FindByCondition(r => r.PhoneNumber == phoneNumber)
+                .AnyAsync();
+        }
+
         public async ValueTask<IActionResult> Create(RegistrationRequestDto dto)
         {
             var entity = dto.ToMap<RegistrationRequestDto, Registration>();
-            entity.GenerateCreateHistory(1); // Assuming 1 is the current user ID
+            entity.Email = dto.Email.ToLower(); // ensure lowercase
+            entity.GenerateCreateHistory(1);
+
             await _registrationRepository.CreateAsync(entity);
             return new OkObjectResult(entity);
         }
