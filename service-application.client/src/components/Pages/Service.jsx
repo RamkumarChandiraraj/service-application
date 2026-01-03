@@ -3,90 +3,97 @@ import { useParams } from "react-router-dom";
 import Card from "../Common/Card";
 import { getAllServices } from "../../api/serviceList";
 import { getAllCategories } from "../../api/categoryApi";
+import LoadingPage from "../Common/LoadingPage"; // import loading component
+
+// Helper function to map slug -> categoryName
+const slugToCategoryName = (slug, categories) => {
+  const cat = categories.find(c => c.link.toLowerCase() === slug.toLowerCase());
+  return cat ? cat.title || cat.name || cat.categoryName : "";
+};
 
 const Service = () => {
-    const { category } = useParams(); // category link from URL
+  const { category } = useParams(); // slug from URL
+  const [services, setServices] = useState([]);
+  const [selectedCategory, setSelectedCategory] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-    const [services, setServices] = useState([]);
-    const [selectedCategory, setSelectedCategory] = useState(null);
-    const [loading, setLoading] = useState(true);
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [serviceRes, categoryRes] = await Promise.all([
+          getAllServices(),
+          getAllCategories(),
+        ]);
 
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const [serviceRes, categoryRes] = await Promise.all([
-                    getAllServices(),
-                    getAllCategories(),
-                ]);
+        const serviceData = serviceRes?.data || [];
+        const categoryData = categoryRes?.data || [];
 
-                const serviceData = serviceRes?.data || [];
-                const categoryData = categoryRes?.data || [];
+        // Get category object from slug
+        const categoryObj = categoryData.find(
+          c => c.link.toLowerCase() === category.toLowerCase()
+        );
+        setSelectedCategory(categoryObj || null);
 
-                // find category by link
-                const categoryObj = categoryData.find(
-                    (cat) => cat.link === category
-                );
+        // Map slug to categoryName
+        const selectedCategoryName = slugToCategoryName(category, categoryData);
 
-                setSelectedCategory(categoryObj || null);
+        // Filter services by categoryName
+        const filtered = serviceData.filter(
+          service => service.categoryName.toLowerCase() === selectedCategoryName.toLowerCase()
+        );
 
-                // filter services by categoryId
-                if (categoryObj) {
-                    const filtered = serviceData.filter(
-                        (service) => service.categoryId === categoryObj.id
-                    );
-                    setServices(filtered);
-                } else {
-                    setServices([]);
-                }
-            } catch (error) {
-                console.error("Failed to load services:", error);
-            } finally {
-                setLoading(false);
-            }
-        };
+        setServices(filtered);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-        fetchData();
-    }, [category]);
+    fetchData();
+  }, [category]);
 
-    if (loading) return <p>Loading services...</p>;
+  if (loading) return <LoadingPage />;
 
-    return (
-        <section id="services" className="services section-bg py-5">
-            <div className="container">
-                {/* Section Title */}
-                <div className="section-title" data-aos="fade-up">
-                    <h2>{selectedCategory?.name || "Services"}</h2>
-                    <p>
-                        Choose a service from{" "}
-                        {selectedCategory?.name || "this"} category
-                    </p>
-                </div>
+  return (
+    <section id="services" className="services section-bg py-5">
+      <div className="container">
+        <div className="section-title" data-aos="fade-up">
+          <h2>{selectedCategory?.title || selectedCategory?.name || "Services"}</h2>
+          <p>
+            Choose a service from {selectedCategory?.title || selectedCategory?.name || "this"} category
+          </p>
+        </div>
 
-                {/* Service Cards */}
-                <div className="row gy-4 section-cards">
-                    {services.length > 0 ? (
-                        services.map((service, index) => (
-                            <Card
-                                key={service.id}
-                                data={{
-                                    icon: service.icon,
-                                    title: service.name,
-                                    description: service.description,
-                                    link: `/service/${category}/${service.id}`,
-                                    isActive: service.isActive,
-                                }}
-                                delay={(index + 1) * 100}
-                            />
-                        ))
-                    ) : (
-                        <div className="col-12 text-center text-muted">
-                            No services available in this category.
-                        </div>
-                    )}
-                </div>
+        <div className="row gy-4 section-cards">
+          {services.length > 0 ? (
+            services.map((service, idx) => {
+              const serviceSlug = service.name.toLowerCase().replace(/\s+/g, "-");
+              const categorySlug = selectedCategory?.link;
+
+              return (
+                <Card
+                  key={service.id}
+                  data={{
+                    icon: service.icon,
+                    title: service.name,
+                    description: service.description,
+                    link: `/searchvendors?category=${categorySlug}&service=${serviceSlug}&location=`,
+                    isActive: service.isActive,
+                  }}
+                  delay={(idx + 1) * 100}
+                />
+              );
+            })
+          ) : (
+            <div className="col-12 text-center text-muted">
+              No services available in this category.
             </div>
-        </section>
-    );
+          )}
+        </div>
+      </div>
+    </section>
+  );
 };
 
 export default Service;

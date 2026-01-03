@@ -55,6 +55,7 @@ namespace Services.Impl
 
                 oldEntity.Name = req.Name;
                 oldEntity.Description = req.Description;
+                oldEntity.Icon = req.Icon;
                 oldEntity.CategoryId = req.CategoryId;
 
                 oldEntity.GenerateModifyHistory(1);

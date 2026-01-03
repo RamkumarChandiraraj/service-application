@@ -1,24 +1,36 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
-const CurrentLocation = () => {
+const CurrentLocation = ({ onLocationSelect }) => {
   const [location, setLocation] = useState({ lat: null, lon: null });
   const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);
 
-  const getLocation = () => {
+  useEffect(() => {
     if (!navigator.geolocation) {
       setError("Geolocation is not supported by your browser.");
       return;
     }
 
+    setLoading(true);
+
     navigator.geolocation.getCurrentPosition(
       (position) => {
-        setLocation({
+        const coords = {
           lat: position.coords.latitude,
           lon: position.coords.longitude,
-        });
+        };
+
+        setLocation(coords);
         setError(null);
+        setLoading(false);
+
+        // send location back to parent as object
+        if (onLocationSelect) {
+          onLocationSelect(coords);
+        }
       },
       (err) => {
+        setLoading(false);
         switch (err.code) {
           case err.PERMISSION_DENIED:
             setError("Permission denied. Please allow location access.");
@@ -34,23 +46,9 @@ const CurrentLocation = () => {
         }
       }
     );
-  };
+  }, [onLocationSelect]);
 
-  return (
-    <div>
-      <h3>Current Location</h3>
-      <button onClick={getLocation}>Get Location</button>
-
-      {location.lat && location.lon && (
-        <p>
-          Latitude: {location.lat} <br />
-          Longitude: {location.lon}
-        </p>
-      )}
-
-      {error && <p style={{ color: "red" }}>{error}</p>}
-    </div>
-  );
+  return null; // hidden component, no visible UI needed
 };
 
 export default CurrentLocation;
