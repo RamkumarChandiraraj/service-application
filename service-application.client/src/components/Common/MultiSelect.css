@@ -1,0 +1,187 @@
+/*--------------------------------------------------------------
+# MultiSelect (Styled like .sp-select)
+--------------------------------------------------------------*/
+
+.multiselect {
+    width: 100%;
+    position: relative;
+}
+
+/* Label – same scale as form */
+.multiselect-label {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--default-color);
+}
+
+/* ==============================
+   CONTROL (same as .sp-select)
+============================== */
+.multiselect-control {
+    min-height: 54px;
+    padding: 8px 40px 8px 16px;
+    border-radius: 6px;
+    border: 1px solid #e5e5e5;
+    font-size: 16px;
+    color: var(--default-color);
+    background-color: var(--surface-color);
+    cursor: pointer;
+    display: flex;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 6px;
+    position: relative;
+    transition: border-color 0.3s ease;
+}
+
+    .multiselect-control:hover,
+    .multiselect-control.open {
+        border-color: var(--accent-color);
+    }
+
+    .multiselect-control.open {
+        box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.15);
+    }
+
+    /* Placeholder */
+    .multiselect-control .placeholder {
+        color: #9ca3af;
+        line-height: 36px;
+    }
+
+    /* Arrow */
+    .multiselect-control .arrow {
+        position: absolute;
+        right: 14px;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 12px;
+        pointer-events: none;
+    }
+
+/* ==============================
+   TAGS (selected values)
+============================== */
+.tags {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    width: 100%;
+}
+
+.tag {
+    background: var(--accent-color);
+    color: var(--contrast-color);
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 13px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+    .tag button {
+        background: none;
+        border: none;
+        color: inherit;
+        cursor: pointer;
+        font-size: 14px;
+        line-height: 1;
+    }
+
+/* ==============================
+   DROPDOWN PANEL
+============================== */
+.multiselect-dropdown {
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+    width: 100%;
+    background: var(--surface-color);
+    border: 1px solid #e5e5e5;
+    border-radius: 6px;
+    padding: 10px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+    z-index: 1000;
+}
+
+    /* Search box */
+    .multiselect-dropdown input[type="text"] {
+        width: 100%;
+        height: 40px;
+        padding: 0 12px;
+        border-radius: 6px;
+        border: 1px solid #e5e5e5;
+        font-size: 14px;
+        margin-bottom: 10px;
+    }
+
+        .multiselect-dropdown input[type="text"]:focus {
+            outline: none;
+            border-color: var(--accent-color);
+        }
+
+/* ==============================
+   ACTION BUTTONS
+============================== */
+.multiselect-actions {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 10px;
+}
+
+    .multiselect-actions button {
+        flex: 1;
+        height: 36px;
+        border-radius: 6px;
+        border: none;
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+    }
+
+        .multiselect-actions button:first-child {
+            background: var(--accent-color);
+            color: var(--contrast-color);
+        }
+
+        .multiselect-actions button:last-child {
+            background: #f3f4f6;
+            color: var(--default-color);
+        }
+
+/* ==============================
+   OPTIONS LIST
+============================== */
+.multiselect-dropdown ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    max-height: 220px;
+    overflow-y: auto;
+}
+
+.multiselect-dropdown li {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+    .multiselect-dropdown li:hover {
+        background: #f5f8ff;
+    }
+
+    .multiselect-dropdown li input {
+        pointer-events: none;
+    }
+
+    .multiselect-dropdown li.empty {
+        justify-content: center;
+        color: #9ca3af;
+    }
