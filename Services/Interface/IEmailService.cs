@@ -4,10 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Common.RequestDto
+namespace Services.Interface
 {
-    public class ForgotPasswordRequestDto
+    public interface IEmailService
     {
-        public string UserNameOrEmail { get; set; }
+        Task SendEmailAsync(string to, string subject, string body);
     }
+
 }

@@ -1,114 +1,72 @@
 ﻿using Common.RequestDto;
 using Common.ResponseDto;
-using Data.Context;
-using Data.Entities;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Org.BouncyCastle.Crypto.Generators;
+using Services.Interface;
 using System;
-using System.Net;
-using System.Net.Mail;
+using System.Threading.Tasks;
 
-namespace service_application.Server.Controllers
+[ApiController]
+[Route("api/auth")]
+public class AuthController : ControllerBase
 {
-    [ApiController]
-    [Route("api/auth")]
-    public class AuthController : ControllerBase
+    private readonly IForgotPasswordService _forgotService;
+
+    public AuthController(IForgotPasswordService forgotService)
     {
-        private readonly ServiceApplicationDbContext _context;
+        _forgotService = forgotService;
+    }
 
-        public AuthController(ServiceApplicationDbContext context)
+    // ================= SEND OTP =================
+    [HttpPost("forgot-password")]
+    public async Task<IActionResult> SendOtp([FromBody] ForgotPasswordRequestDto dto)
+    {
+        try
         {
-            _context = context;
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var response = await _forgotService.SendOtpAsync(dto);
+
+            if (!response.Success)
+                return BadRequest(response);
+
+            return Ok(response);
         }
-
-        [HttpPost("forgot-password")]
-        public async Task<IActionResult> ForgotPassword(ForgotPasswordRequestDto request)
+        catch (Exception)
         {
-            var user = await _context.User
-                .FirstOrDefaultAsync(x =>
-                    x.Email == request.UserNameOrEmail ||
-                    x.UserName == request.UserNameOrEmail);
-
-            if (user == null)
-                return Ok(new ApiResponseDto
-                {
-                    Success = true,
-                    Message = "If account exists, OTP sent to registered email"
-                });
-
-            var otp = new Random().Next(100000, 999999).ToString();
-
-            var otpEntity = new PasswordResetOtp
+            // TODO: log exception
+            return StatusCode(500, new ApiResponse
             {
-                UserId = user.ID,
-                Otp = otp,
-                ExpiryTime = DateTime.UtcNow.AddMinutes(10),
-                IsUsed = false
-            };
-
-            _context.PasswordResetOtps.Add(otpEntity);
-            await _context.SaveChangesAsync();
-
-            // TODO: Send Email
-            SendOtpEmail(user.Email, otp);
-
-            return Ok(new ApiResponseDto
-            {
-                Success = true,
-                Message = "OTP sent to registered email"
+                Success = false,
+                Message = "Internal server error while sending OTP"
             });
         }
-        [HttpPost("reset-password")]
-        public async Task<IActionResult> ResetPassword(ResetPasswordRequestDto request)
+    }
+
+    // ================= VERIFY OTP + RESET PASSWORD =================
+    [HttpPost("verify-otp")]
+    public async Task<IActionResult> VerifyOtp([FromBody] VerifyOtpRequestDto dto)
+    {
+        try
         {
-            var user = await _context.User
-                .FirstOrDefaultAsync(x =>
-                    x.Email == request.UserNameOrEmail ||
-                    x.UserName == request.UserNameOrEmail);
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
 
-            if (user == null)
-                return BadRequest("Invalid user");
+            var response = await _forgotService.VerifyOtpAsync(dto);
 
-            var otpEntry = await _context.PasswordResetOtps
-                .Where(x => x.UserId == user.ID && !x.IsUsed && x.ExpiryTime > DateTime.UtcNow)
-                .OrderByDescending(x => x.CreatedOn)
-                .FirstOrDefaultAsync();
+            if (!response.Success)
+                return BadRequest(response);
 
-            if (otpEntry == null || otpEntry.Otp != request.Otp)
-                return BadRequest("Invalid or expired OTP");
-
-            user.Password = BCrypt.Net.BCrypt.HashPassword(request.NewPassword);
-            otpEntry.IsUsed = true;
-
-            await _context.SaveChangesAsync();
-
-            return Ok(new ApiResponseDto
+            return Ok(response);
+        }
+        catch (Exception)
+        {
+            // TODO: log exception
+            return StatusCode(500, new ApiResponse
             {
-                Success = true,
-                Message = "Password reset successful"
+                Success = false,
+                Message = "error while verifying OTP"
             });
         }
-
-        private void SendOtpEmail(string email, string otp)
-        {
-            var message = new MailMessage("noreply@app.com", email)
-            {
-                Subject = "Password Reset OTP",
-                Body = $"Your OTP is {otp}. Valid for 10 minutes."
-            };
-
-            using var smtp = new SmtpClient("smtp.gmail.com", 587)
-            {
-                Credentials = new NetworkCredential("your@gmail.com", "app-password"),
-                EnableSsl = true
-            };
-
-            smtp.Send(message);
-        }
-
-
-
     }
 }
-

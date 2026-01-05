@@ -9,12 +9,12 @@ namespace Services.Mapper
 {
     public static class ForgotPasswordMapper
     {
-        public static ForgotPasswordOtp ToOtpEntity(long userId, string otp)
+        public static Otp ToOtpEntity(long userId, string otp)
         {
-            return new ForgotPasswordOtp
+            return new Otp
             {
                 UserId = userId,
-                Otp = otp,
+                OtpValue = otp,
                 ExpiresAt = DateTime.UtcNow.AddMinutes(5),
                 IsUsed = false
             };

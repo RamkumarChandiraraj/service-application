@@ -229,4 +229,116 @@ form a {
                 background: var(--primary-color);
                 color: #fff;
             }
+    /* ================= SINGLE PANEL MODE (FORGOT / OTP) ================= */
+
+    .signup-slider-container.single-panel {
+        width: 420px;
+        min-height: auto;
+    }
+
+        /* Make form take full width */
+        .signup-slider-container.single-panel
+        .signup-slider-form-container {
+            position: relative;
+            width: 100%;
+            transform: none;
+            left: 0;
+        }
+
+        /* Center form vertically with natural height */
+        .signup-slider-container.single-panel form {
+            padding: 20px 0;
+        }
+
+        /* Hide unused slider elements */
+        .signup-slider-container.single-panel
+        .signup-slider-sign-up-container,
+        .signup-slider-container.single-panel
+        .signup-slider-overlay-container {
+            display: none;
+        }
+
+    /* ================= MOBILE ================= */
+
+    @media (max-width: 900px) {
+        .signup-slider-container.single-panel {
+            width: 100%;
+            margin: 0;
+            border-radius: 0;
+            box-shadow: none;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+    }}
+/* ================= STEP TRANSITION ================= */
+
+.auth-step {
+    width: 100%;
+    display: flex;
+    justify-content: center;
 }
+
+.slide-in {
+    animation: slideFade .4s ease;
+}
+
+@keyframes slideFade {
+    from {
+        opacity: 0;
+        transform: translateX(30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* ================= OTP TIMER ================= */
+
+.otp-timer {
+    margin-top: 10px;
+    font-size: 14px;
+    color: #555;
+}
+
+    .otp-timer span {
+        color: var(--secondary-color);
+        cursor: pointer;
+        font-weight: 600;
+    }
+
+/* ================= PASSWORD STRENGTH ================= */
+
+.strength {
+    height: 6px;
+    width: 100%;
+    background: #ddd;
+    border-radius: 4px;
+    margin-top: 6px;
+    overflow: hidden;
+}
+
+    .strength span {
+        display: block;
+        height: 100%;
+        width: 0;
+        transition: .3s;
+    }
+
+    .strength.weak span {
+        width: 33%;
+        background: #e74c3c;
+    }
+
+    .strength.medium span {
+        width: 66%;
+        background: #f1c40f;
+    }
+
+    .strength.strong span {
+        width: 100%;
+        background: #2ecc71;
+    }

@@ -2,94 +2,140 @@
 using Common.ResponseDto;
 using Data.Base;
 using Data.Entities;
-using System.Security.Cryptography;
-using System.Text;
+using Services.Interface;
+using System;
+using System.Linq;
+using System.Threading.Tasks;
 
-public class ForgotPasswordService : IForgotPasswordService
+namespace Services.Impl
 {
-    private readonly IRepositary<User> _userRepo;
-    private readonly IRepositary<ForgotPasswordOtp> _otpRepo;
-    private readonly IEmailService _emailService;
-
-    public ForgotPasswordService(
-        IRepositary<User> userRepo,
-        IRepositary<ForgotPasswordOtp> otpRepo,
-        IEmailService emailService)
+    public class ForgotPasswordService : IForgotPasswordService
     {
-        _userRepo = userRepo;
-        _otpRepo = otpRepo;
-        _emailService = emailService;
-    }
+        private readonly IRepositary<User> _userRepo;
+        private readonly IRepositary<Otp> _otpRepo;
+        private readonly IEmailService _emailService;
 
-    public async Task<ApiResponseDto> SendOtpAsync(ForgotPasswordRequestDto request)
-    {
-        var user = _userRepo.FindByCondition(x =>
-            x.UserName == request.UserNameOrEmail ||
-            x.Email == request.UserNameOrEmail)
-            .FirstOrDefault();
-
-        if (user == null)
-            return new ApiResponseDto { Success = false, Message = "User not found" };
-
-        var otp = new Random().Next(100000, 999999).ToString();
-
-        await _otpRepo.CreateAsync(new ForgotPasswordOtp
+        public ForgotPasswordService(
+            IRepositary<User> userRepo,
+            IRepositary<Otp> otpRepo,
+            IEmailService emailService)
         {
-            UserId = user.ID,
-            Otp = otp,
-            ExpiresAt = DateTime.UtcNow.AddMinutes(5),
-            IsUsed = false
-        });
+            _userRepo = userRepo;
+            _otpRepo = otpRepo;
+            _emailService = emailService;
+        }
 
-        await _emailService.SendAsync(
-            user.Email,
-            "Password Reset OTP",
-            $"Your OTP is {otp}. It expires in 5 minutes.");
-
-        return new ApiResponseDto
+        // ================= SEND OTP =================
+        public async Task<ApiResponse> SendOtpAsync(ForgotPasswordRequestDto request)
         {
-            Success = true,
-            Message = "OTP sent to registered email"
-        };
-    }
+            try
+            {
+                var user = _userRepo.FindByCondition(u =>
+                    u.Email == request.UserNameOrEmail ||
+                    u.UserName == request.UserNameOrEmail
+                ).FirstOrDefault();
 
-    public async Task<ApiResponseDto> ResetPasswordAsync(ResetPasswordRequestDto request)
-    {
-        var user = _userRepo.FindByCondition(x =>
-            x.UserName == request.UserNameOrEmail ||
-            x.Email == request.UserNameOrEmail)
-            .FirstOrDefault();
+                if (user == null)
+                    return new ApiResponse
+                    {
+                        Success = false,
+                        Message = "User not found"
+                    };
 
-        if (user == null)
-            return new ApiResponseDto { Success = false, Message = "User not found" };
+                if (string.IsNullOrWhiteSpace(user.Email))
+                    return new ApiResponse
+                    {
+                        Success = false,
+                        Message = "User email is not registered"
+                    };
 
-        var otpEntity = _otpRepo.FindByCondition(x =>
-            x.UserId == user.ID &&
-            x.Otp == request.Otp &&
-            !x.IsUsed &&
-            x.ExpiresAt > DateTime.UtcNow)
-            .FirstOrDefault();
+                var otp = new Random().Next(100000, 999999).ToString();
 
-        if (otpEntity == null)
-            return new ApiResponseDto { Success = false, Message = "Invalid or expired OTP" };
+                await _otpRepo.CreateAsync(new Otp
+                {
+                    UserId = user.ID,
+                    Email = user.Email,
+                    OtpValue = otp,
+                    ExpiryTime = DateTime.UtcNow.AddMinutes(5),
+                    IsUsed = false,
+                    CreatedDate = DateTime.UtcNow
+                });
 
-        user.Password = HashPassword(request.NewPassword);
-        await _userRepo.UpdateAsync(user);
+                await _emailService.SendEmailAsync(
+                    user.Email,
+                    "Password Reset OTP",
+                    $"Your OTP is {otp}. It is valid for 5 minutes."
+                );
 
-        otpEntity.IsUsed = true;
-        await _otpRepo.UpdateAsync(otpEntity);
+                return new ApiResponse
+                {
+                    Success = true,
+                    Message = "OTP sent successfully"
+                };
+            }
+            catch (Exception ex)
+            {
+                // TODO: log exception (Serilog / NLog / ILogger)
+                return new ApiResponse
+                {
+                    Success = false,
+                    Message = "Something went wrong while sending OTP"
+                };
+            }
+        }
 
-        return new ApiResponseDto
+        // ================= VERIFY OTP & RESET PASSWORD =================
+        public async Task<ApiResponse> VerifyOtpAsync(VerifyOtpRequestDto request)
         {
-            Success = true,
-            Message = "Password reset successful"
-        };
-    }
+            try
+            {
+                var otpEntry = _otpRepo.FindByCondition(o =>
+                    o.Email == request.Email &&
+                    o.OtpValue == request.Otp &&
+                    !o.IsUsed &&
+                    o.ExpiryTime > DateTime.UtcNow
+                ).FirstOrDefault();
 
-    private string HashPassword(string password)
-    {
-        using var sha = SHA256.Create();
-        return Convert.ToBase64String(
-            sha.ComputeHash(Encoding.UTF8.GetBytes(password)));
+                if (otpEntry == null)
+                    return new ApiResponse
+                    {
+                        Success = false,
+                        Message = "Invalid or expired OTP"
+                    };
+
+                var user = _userRepo
+                    .FindByCondition(u => u.ID == otpEntry.UserId)
+                    .FirstOrDefault();
+
+                if (user == null)
+                    return new ApiResponse
+                    {
+                        Success = false,
+                        Message = "User not found"
+                    };
+
+                // 🔐 IMPORTANT: Hash password here (do NOT store plain text)
+                user.Password = request.NewPassword;
+                await _userRepo.UpdateAsync(user);
+
+                otpEntry.IsUsed = true;
+                await _otpRepo.UpdateAsync(otpEntry);
+
+                return new ApiResponse
+                {
+                    Success = true,
+                    Message = "Password updated successfully"
+                };
+            }
+            catch (Exception ex)
+            {
+                // TODO: log exception
+                return new ApiResponse
+                {
+                    Success = false,
+                    Message = "Something went wrong while verifying OTP"
+                };
+            }
+        }
     }
 }

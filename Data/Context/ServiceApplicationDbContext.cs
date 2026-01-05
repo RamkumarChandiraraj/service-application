@@ -16,7 +16,8 @@ namespace Data.Context
         public DbSet<User> User { get; set; }
         public DbSet<Registration> Registrations { get; set; }
         public DbSet<Attachment> Attachments { get; set; }
-        public DbSet<PasswordResetOtp> PasswordResetOtps { get; set; }
+        public DbSet<Otp> Otp { get; set; } = null!;
+
 
     }
 }

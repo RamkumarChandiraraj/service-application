@@ -7,11 +7,12 @@ using System.Threading.Tasks;
 using Common.RequestDto;
 using Common.ResponseDto;
 
-namespace Server.Interfaces
+namespace Services.Interface
 {
     public interface IForgotPasswordService
     {
         Task<ApiResponse> SendOtpAsync(ForgotPasswordRequestDto request);
-        Task<ApiResponse> ResetPasswordAsync(ResetPasswordRequestDto request);
+        Task<ApiResponse> VerifyOtpAsync(VerifyOtpRequestDto request);
     }
 }
+

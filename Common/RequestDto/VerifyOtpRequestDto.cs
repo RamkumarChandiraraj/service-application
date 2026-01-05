@@ -6,10 +6,11 @@ using System.Threading.Tasks;
 
 namespace Common.RequestDto
 {
-    public class ResetPasswordRequestDto
+    public class VerifyOtpRequestDto
     {
-        public string UserNameOrEmail { get; set; }
+        public string Email { get; set; }
         public string Otp { get; set; }
         public string NewPassword { get; set; }
     }
 }
+
