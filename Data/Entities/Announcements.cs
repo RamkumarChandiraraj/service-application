@@ -11,8 +11,8 @@ namespace Data.Entities
     public class Announcements : BaseEntityModel 
     {
 
-       // [Key]
-       // public override long ID { get; set; }
+        [Key]
+        public override long ID { get; set; }
 
         public string? Title { get; set; } 
 

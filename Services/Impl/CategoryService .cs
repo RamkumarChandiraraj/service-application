@@ -46,7 +46,7 @@ namespace Services.Impl
 
             entity.Name = dto.Name;
             entity.Icon = dto.Icon;
-            entity.Link = dto.Link;
+            entity.Link = dto.Link; 
             entity.Description = dto.Description;
 
             await _repository.UpdateAsync(entity);

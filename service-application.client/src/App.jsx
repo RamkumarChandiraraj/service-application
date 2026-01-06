@@ -120,6 +120,10 @@ function App() {
               <Route path="/forgot-password" element={<ForgotPasswordModal />} />
               <Route path="/verify-otp" element={<VerifyOtpModal />} />
 
+
+              {/* Announcements Management */}
+              <Route path="/announcements" element={<AnnouncementsManagement />} />
+
             </Routes>
 
       <Footer />

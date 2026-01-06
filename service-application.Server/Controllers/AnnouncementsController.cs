@@ -1,9 +1,13 @@
 ﻿using Common.Base;
 using Common.BaseResponse;
+using Common.Extension;
 using Common.RequestDto;
 using Common.ResponseDto;
+using Data.Entities;
 using Microsoft.AspNetCore.Mvc;
 using Services.Interface;
+using Mapster;
+
 
 namespace service_application.Server.Controllers
 {
@@ -26,70 +30,118 @@ namespace service_application.Server.Controllers
         [HttpPost]
         public async ValueTask<IActionResult> Create([FromBody] AnnouncementsRequestDto dto)
         {
-            if (dto == null)
-                return _apiResponse.BadRequest("Request body is required");
+            try
+            {
+                if (dto == null)
+                    return _apiResponse.BadRequest("Request body is required");
 
-            if (string.IsNullOrWhiteSpace(dto.Title))
-                return _apiResponse.BadRequest("Title is required");
+                if (string.IsNullOrWhiteSpace(dto.Title))
+                    return _apiResponse.BadRequest("Title is required");
 
-            if (string.IsNullOrWhiteSpace(dto.Description))
-                return _apiResponse.BadRequest("Description is required");
+                if (string.IsNullOrWhiteSpace(dto.Description))
+                    return _apiResponse.BadRequest("Description is required");
 
-            var result = await _announcementService.CreateAsync(dto);
-            return _apiResponse.Ok(result.ID);
+                var result = await _announcementService.CreateAsync(dto);
+                return _apiResponse.Ok(result.ID);
+            }
+            catch (Exception ex)
+            {
+                return _apiResponse.InternalServerError(ex.Message);
+            }
         }
 
         // ✅ GET BY ID
         [HttpGet("{id:long}")]
         public async ValueTask<IActionResult> GetById(long id)
         {
-            if (id <= 0)
-                return _apiResponse.BadRequest("Invalid Id");
+            try
+            {
+                if (id <= 0)
+                    return _apiResponse.BadRequest("Invalid Id");
 
-            var result = await _announcementService.GetByIdAsync(id);
-            if (result == null)
-                return _apiResponse.NotFound("Announcement not found");
+                var entity = await _announcementService.GetByIdAsync(id);
+                if (entity == null)
+                    return _apiResponse.NotFound("Announcement not found");
 
-            return _apiResponse.Ok(result);
+                // ✅ Use ToMap now
+              
+                //var dto = entity.ToMap<AnnouncementsResponseDto,Announcements>();
+                return _apiResponse.Ok(entity);
+            }
+            catch (Exception ex)
+            {
+                return _apiResponse.InternalServerError(ex.Message);
+            }
         }
 
         // ✅ UPDATE
         [HttpPut("{id:long}")]
         public async ValueTask<IActionResult> Update(long id, [FromBody] AnnouncementsRequestDto dto)
         {
-            if (id <= 0)
-                return _apiResponse.BadRequest("Invalid Id");
+            try
+            {
+                if (id <= 0)
+                    return _apiResponse.BadRequest("Invalid Id");
 
-            if (dto == null)
-                return _apiResponse.BadRequest("Request body is required");
+                if (dto == null)
+                    return _apiResponse.BadRequest("Request body is required");
 
-            var updated = await _announcementService.UpdateAsync(id, dto);
-            if (!updated)
-                return _apiResponse.NotFound("Announcement not found");
+                if (string.IsNullOrWhiteSpace(dto.Title))
+                    return _apiResponse.BadRequest("Title is required");
 
-            return _apiResponse.Ok(true);
+                if (string.IsNullOrWhiteSpace(dto.Description))
+                    return _apiResponse.BadRequest("Description is required");
+
+                // 🔑 Sync route id with DTO
+                dto.ID = id;
+
+                //var updated = await _announcementService.UpdateAsync(dto);
+                //if (!updated)
+                //    return _apiResponse.NotFound("Announcement not found");
+
+                return _apiResponse.Ok(true);
+            }
+            catch (Exception ex)
+            {
+                return _apiResponse.InternalServerError(ex.Message);
+            }
         }
 
         // ✅ DELETE
         [HttpDelete("{id:long}")]
         public async ValueTask<IActionResult> Delete(long id)
         {
-            if (id <= 0)
-                return _apiResponse.BadRequest("Invalid Id");
+            try
+            {
+                if (id <= 0)
+                    return _apiResponse.BadRequest("Invalid Id");
 
-            var deleted = await _announcementService.DeleteAsync(id);
-            if (!deleted)
-                return _apiResponse.NotFound("Announcement not found");
+                var deleted = await _announcementService.DeleteAsync(id);
+                if (!deleted)
+                    return _apiResponse.NotFound("Announcement not found");
 
-            return _apiResponse.Ok(true);
+                return _apiResponse.Ok(true);
+            }
+            catch (Exception ex)
+            {
+                return _apiResponse.InternalServerError(ex.Message);
+            }
         }
 
         // ✅ GET ALL
         [HttpGet("list")]
         public async ValueTask<IActionResult> GetAll()
         {
-            var data = await _announcementService.GetAllAsync();
-            return _apiResponse.Ok(data);
+            try
+            {
+                var data = await _announcementService.GetAllAsync();
+                //var result = data.ToMap<List<Announcements>, List<AnnouncementsResponseDto>>();
+                return _apiResponse.Ok(data);
+            }
+            catch (Exception ex)
+            {
+                return _apiResponse.InternalServerError(ex.Message);
+            }
         }
     }
 }

@@ -49,15 +49,15 @@ namespace Services.Impl
 
         public async Task<bool> UpdateAsync(long id, AnnouncementsRequestDto dto)
         {
-            var entity = await _repository
-                .FindByCondition(x => x.ID == id)
-                .FirstOrDefaultAsync();
+            //var entity = await _repository
+            //    .findbycondition(x => x.id == id)
+            //    .firstordefaultasync();
 
-            if (entity == null)
-                return false;
+            //if (entity == null)
+            //    return false;
 
-            dto.Adapt(entity);
-            await _repository.UpdateAsync(entity);
+            //dto.adapt(entity);
+            //await _repository.updateasync(entity);
             return true;
         }
 
