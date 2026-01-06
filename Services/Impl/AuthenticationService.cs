@@ -42,9 +42,6 @@ namespace Services.Impl
                 return new LoginResponseDto
                 {
                     Token = token,
-                    UserId = user.ID,
-                    UserName = user.UserName,
-                    Role = user.Role.ToString()
                 };
             }
             catch
