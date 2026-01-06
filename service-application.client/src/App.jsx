@@ -15,6 +15,9 @@ import SearchVendors from "./components/Pages/SearchVendorsPage";
 import Category from "./components/Pages/Category";
 import Service from "./components/Pages/Service";
 import Unauthorized from "./components/Common/Unauthorized";
+//ForgotPassWord
+import ForgotPasswordModal from "./components/ForgotPasswordManagement/ForgotPasswordModal";
+import VerifyOtpModal from "./components/ForgotPasswordManagement/VerifyOtpModal";
 
 /* Management */
 import ManagementRoutes from "./components/ManagementRoutes/ManagementRoutes";
@@ -48,6 +51,17 @@ function App() {
         <Route path="/" element={<MainLayout />} />
       </Routes>
 
+        {/* Search Properties */}
+        {/*<Route path="/search" element={<SearchProperties />} />*/}
+        {/*<Route path="/vendors" element={<Vendors />} />*/}
+              <Route path="/searchvendors" element={<SearchVendors />} />
+
+
+              {/*forgotpassword*/}
+              <Route path="/forgot-password" element={<ForgotPasswordModal />} />
+              <Route path="/verify-otp" element={<VerifyOtpModal />} />
+
+          </Routes>
       <Footer />
     </AuthProvider>
   );
