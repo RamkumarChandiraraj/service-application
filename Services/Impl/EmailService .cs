@@ -1,9 +1,9 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Services.Interface;
+using System;
 using System.Net;
 using System.Net.Mail;
 using System.Threading.Tasks;
-using static Org.BouncyCastle.Math.EC.ECCurve;
 
 namespace Services.Impl
 {
@@ -11,43 +11,42 @@ namespace Services.Impl
     {
         private readonly IConfiguration _config;
 
-        public EmailService(IConfiguration configuration)
+        public EmailService(IConfiguration config)
         {
-            _config = configuration;
+            _config = config;
         }
 
-        public async Task SendEmailAsync(string to, string subject, string body)
+        public async Task SendEmailAsync(string to, string subject, string htmlBody)
         {
             if (string.IsNullOrWhiteSpace(to))
-                throw new ArgumentException("Recipient email address is null or empty");
+                throw new ArgumentException("Recipient email address is required");
 
             var smtpHost = _config["EmailSettings:SmtpHost"];
             var smtpPort = _config["EmailSettings:SmtpPort"];
             var username = _config["EmailSettings:Username"];
             var password = _config["EmailSettings:Password"];
-            var from = _config["EmailSettings:FromEmail"];
+            var fromEmail = _config["EmailSettings:FromEmail"];
 
-            if (string.IsNullOrWhiteSpace(from))
-                throw new ArgumentException("FromEmail is missing in configuration");
+            if (string.IsNullOrWhiteSpace(fromEmail))
+                throw new ArgumentException("FromEmail is missing in EmailSettings");
 
-            using var message = new MailMessage
+            var mail = new MailMessage
             {
-                From = new MailAddress(from),
+                From = new MailAddress(fromEmail),
                 Subject = subject,
-                Body = body,
-                IsBodyHtml = false
+                Body = htmlBody,
+                IsBodyHtml = true // 🔥 IMPORTANT
             };
 
-            message.To.Add(new MailAddress(to));
+            mail.To.Add(to);
 
-            using var client = new SmtpClient(smtpHost!, int.Parse(smtpPort!))
+            using var smtp = new SmtpClient(smtpHost!, int.Parse(smtpPort!))
             {
                 Credentials = new NetworkCredential(username, password),
                 EnableSsl = true
             };
 
-            await client.SendMailAsync(message);
+            await smtp.SendMailAsync(mail);
         }
     }
 }
-
