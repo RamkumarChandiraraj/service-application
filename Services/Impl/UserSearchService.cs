@@ -17,23 +17,9 @@ namespace Services.Impl
         public async ValueTask<List<UserSearchResponseDto>> SearchUsersAsync(UserSearchRequestDto request)
         {
             // Step 1: Filter Services
-            var serviceQuery = _serviceRepo.FindAll();
+            var serviceQuery = _serviceRepo.FindByCondition(x=> request.CategoryIds.Contains(x.CategoryId)  && request.ServiceIds.Contains(x.ID));
 
-            if (request.CategoryIds != null && request.CategoryIds.Any())
-            {
-                serviceQuery = serviceQuery
-                    .Where(s => request.CategoryIds.Contains(s.CategoryId));
-            }
-
-            if (request.ServiceIds != null && request.ServiceIds.Any())
-            {
-                serviceQuery = serviceQuery
-                    .Where(s => request.ServiceIds.Contains(s.ID));
-            }
-
-            var services = await serviceQuery
-                .Include(s => s.Category)
-                .ToListAsync();
+            var services = await serviceQuery.Include(s => s.Category).ToListAsync();
 
             if (!services.Any())
                 return new List<UserSearchResponseDto>();
@@ -41,9 +27,11 @@ namespace Services.Impl
             var serviceIds = services.Select(s => s.ID).ToList();
 
             // Step 2: Get Registrations
-            var registrations = await _registrationRepo.FindAll()
-                .Where(r => serviceIds.Contains(r.ServiceId))
-                .ToListAsync();
+            var registrations = await _registrationRepo
+                                .FindByCondition(x => serviceIds.Contains(x.ServiceId))
+                                .Include(x=> x.Location)
+                                .Include(y=> y.Service)
+                                .ToListAsync();
 
             // Step 3: Sort by nearest (distance NOT returned)
             var result = registrations
@@ -65,6 +53,8 @@ namespace Services.Impl
                     CompanyName = x.Registration.CompanyName,
                     Description = x.Registration.Description,
                     LocationId = x.Registration.LocationId,
+                    LocationName = x.Registration.Location.Name,
+                    ServiceName = x.Registration.Service.Name,
                     ServiceId = x.Registration.ServiceId
                 })
                 .ToList();
