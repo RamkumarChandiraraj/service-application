@@ -41,6 +41,8 @@ function UserList() {
       { header: "Email", field: "email" },
       { header: "Mobile", field: "mobileNumber" },
       { header: "Role", field: "role" },
+      { header: "ProfileId", field: "profileId" },
+
       {
         header: "Actions",
         field: "actions",

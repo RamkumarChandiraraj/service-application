@@ -26,6 +26,7 @@ function ReadUserManagement() {
                     <tr><th>Email</th><td>{user.email}</td></tr>
                     <tr><th>MobileNumber</th><td>{user.mobileNumber}</td></tr>
                     <tr><th>Role</th><td>{user.role}</td></tr>
+                    <tr><th>ProfileId</th><td>{user.profileId}</td></tr>
                 </tbody>
             </table>
 

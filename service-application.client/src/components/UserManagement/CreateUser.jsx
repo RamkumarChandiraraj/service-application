@@ -1,6 +1,13 @@
-import { useState, useEffect } from "react";
+﻿import { useState, useEffect } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { createUser, updateUser, getUserById } from "../../api/UserApi";
+import {
+    uploadAttachment,
+    getAllAttachments,
+    downloadAttachmentById,
+    deleteAttachment,
+    updateAttachment,
+} from "../../api/attachmentApi";
 
 const validateEmail = (email) =>
     /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -22,7 +29,8 @@ function CreateUserManagement() {
         password: "",
         email: "",
         mobilenumber: "",
-        role: ""
+        role: "",
+        profileid: 0
     });
 
     const [errors, setErrors] = useState({});
@@ -45,7 +53,8 @@ function CreateUserManagement() {
                     email: user.email || "",
                     password: "",
                     mobilenumber: user.mobileNumber || "",
-                    role: user.role || ""
+                    role: user.role || "",
+                    profileid: user.profileId || 0
                 });
             } catch {
                 setError("Failed to load user");
@@ -162,6 +171,21 @@ function CreateUserManagement() {
                     </select>
                     {errors.role && <small className="text-danger">{errors.role}</small>}
                 </div>
+                <div className="mb-3">
+                    <label>ProfileId</label>
+                    <input
+
+                        name="profileId"
+                        className="form-control"
+
+                        value={formData.profileId}
+                        onChange={(e) =>
+                            setFormData({ ...formData, profileId: Number(e.target.value) })
+                        }
+                    />
+                    {errors.profileId && <small className="text-danger">{errors.profileId}</small>}
+                </div>
+
 
                 <div>
                     <Link to="/userlist" className="btn btn-secondary me-2">Cancel</Link>
