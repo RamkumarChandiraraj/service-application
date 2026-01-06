@@ -61,7 +61,7 @@ const Navbar = () => {
             alt="Aanaiyaan Logo"
             style={{ maxHeight: "40px", width: "auto", objectFit: "contain" }}
           />
-          {/* <h1>Mr LookUp</h1> */}
+          <h1>Mr LookUp</h1>
         </NavLink>
 
         <nav id="navmenu" className="navmenu">
@@ -106,16 +106,6 @@ const Navbar = () => {
               </a>
 
               <ul className={openDropdowns["main"] ? "dropdown-active" : ""}>
-                <li>
-                  <NavLink
-                    to="/example1"
-                    onClick={handleLinkClick}
-                    className={({ isActive }) => (isActive ? "active" : "")}
-                  >
-                    Dropdown 1
-                  </NavLink>
-                </li>
-
                 <li className={`dropdown ${openDropdowns["deep"] ? "active" : ""}`}>
                   <a
                     href="#!"
@@ -198,22 +188,14 @@ const Navbar = () => {
                   </ul>
                 </li>
 
+                
                 <li>
                   <NavLink
-                    to="/example2"
+                    to="/searchvendors"
                     onClick={handleLinkClick}
                     className={({ isActive }) => (isActive ? "active" : "")}
                   >
-                    Dropdown 2
-                  </NavLink>
-                </li>
-                <li>
-                  <NavLink
-                    to="/example3"
-                    onClick={handleLinkClick}
-                    className={({ isActive }) => (isActive ? "active" : "")}
-                  >
-                    Dropdown 3
+                    Search
                   </NavLink>
                 </li>
                 <li>

@@ -203,6 +203,60 @@ namespace Data.Migrations
                     b.ToTable("Locations");
                 });
 
+            modelBuilder.Entity("Data.Entities.Otp", b =>
+                {
+                    b.Property<long>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("CreatedBy")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<long?>("DeletedBy")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("Email")
+                        .HasColumnType("longtext");
+
+                    b.Property<DateTime>("ExpiresAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<DateTime>("ExpiryTime")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<bool>("IsUsed")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<string>("Mobile")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("OtpValue")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<long?>("UpdatedBy")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<long>("UserId")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("ID");
+
+                    b.ToTable("Otp");
+                });
+
             modelBuilder.Entity("Data.Entities.Registration", b =>
                 {
                     b.Property<long>("ID")
@@ -236,16 +290,16 @@ namespace Data.Migrations
                     b.Property<bool>("IsActive")
                         .HasColumnType("tinyint(1)");
 
-                    b.Property<string>("Location")
-                        .IsRequired()
-                        .HasColumnType("longtext");
+                b.Property<string>("Location")
+                    .IsRequired()
+                    .HasColumnType("longtext");
 
                     b.Property<long>("PhoneNumber")
                         .HasColumnType("bigint");
 
-                    b.Property<string>("Services")
-                        .IsRequired()
-                        .HasColumnType("longtext");
+                b.Property<string>("Services")
+                    .IsRequired()
+                    .HasColumnType("longtext");
 
                     b.Property<long?>("UpdatedBy")
                         .HasColumnType("bigint");
@@ -254,6 +308,10 @@ namespace Data.Migrations
                         .HasColumnType("datetime(6)");
 
                     b.HasKey("ID");
+
+                    b.HasIndex("LocationId");
+
+                    b.HasIndex("ServiceId");
 
                     b.ToTable("Registrations");
                 });
@@ -353,6 +411,25 @@ namespace Data.Migrations
                     b.HasKey("ID");
 
                     b.ToTable("User");
+                });
+
+            modelBuilder.Entity("Data.Entities.Registration", b =>
+                {
+                    b.HasOne("Data.Entities.Location", "Location")
+                        .WithMany()
+                        .HasForeignKey("LocationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Data.Entities.Service", "Service")
+                        .WithMany()
+                        .HasForeignKey("ServiceId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Location");
+
+                    b.Navigation("Service");
                 });
 
             modelBuilder.Entity("Data.Entities.Service", b =>

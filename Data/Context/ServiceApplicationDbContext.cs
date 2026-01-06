@@ -5,6 +5,8 @@ namespace Data.Context
 {
     public class ServiceApplicationDbContext :DbContext
     {
+        public readonly object ForgotPasswordOtps;
+
         public ServiceApplicationDbContext(DbContextOptions<ServiceApplicationDbContext> options) : base(options)
         { 
         }
@@ -14,6 +16,7 @@ namespace Data.Context
         public DbSet<User> User { get; set; }
         public DbSet<Registration> Registrations { get; set; }
         public DbSet<Attachment> Attachments { get; set; }
+        public DbSet<Otp> Otp { get; set; } = null!;
         public DbSet<Announcements> Announcement { get; set; }
 
 
