@@ -34,17 +34,30 @@ function ReadRegistration() {
             <div className="w-50 bg-white border rounded shadow p-4">
                 <h3 className="text-center mb-4">Registration Details</h3>
 
+                {/* PROFILE IMAGE */}
+                {registration.profileImageUrl && (
+                    <div className="text-center mb-3">
+                        <img
+                            src={registration.profileImageUrl}
+                            alt="Profile"
+                            width={150}
+                            style={{ borderRadius: "8px", border: "1px solid #ccc" }}
+                        />
+                    </div>
+                )}
+
+                {/* REGISTRATION DETAILS */}
                 <p><strong>ID:</strong> {registration.id}</p>
                 <p><strong>Company Name:</strong> {registration.companyName}</p>
                 <p><strong>Email:</strong> {registration.email}</p>
                 <p><strong>Location ID:</strong> {registration.locationId}</p>
                 <p><strong>Service ID:</strong> {registration.serviceId}</p>
-
                 <p><strong>Phone Number:</strong> {registration.phoneNumber}</p>
                 <p><strong>Description:</strong> {registration.description}</p>
                 <p><strong>Latitude:</strong> {registration.latitude}</p>
                 <p><strong>Longitude:</strong> {registration.longitude}</p>
 
+                {/* BACK BUTTON */}
                 <div className="text-end mt-3">
                     <Link to="/registrationlist" className="btn btn-secondary">
                         Back

@@ -2,10 +2,8 @@
 using Common.BaseResponse;
 using Common.RequestDto;
 using Common.ResponseDto;
-using Data.Context;
+using Data.Base;
 using Data.Entities;
-using Mapster;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -19,15 +17,19 @@ namespace service_application.Server.Controllers
     {
         private readonly IRegistrationService _registrationService;
         private readonly IApiMessage<IApiResponse> _apiResponse;
+        private readonly IRepositary<Attachment> _attachmentRepository;
 
-        public RegistrationController(IRegistrationService registrationService,
-                                      IApiMessage<IApiResponse> apiResponse)
+        public RegistrationController(
+            IRegistrationService registrationService,
+            IApiMessage<IApiResponse> apiResponse,
+            IRepositary<Attachment> attachmentRepository)
         {
             _registrationService = registrationService;
             _apiResponse = apiResponse;
+            _attachmentRepository = attachmentRepository;
         }
 
-        // POST: api/Registration
+        // ================== CREATE ==================
         [HttpPost]
         public async ValueTask<IActionResult> Create([FromBody] RegistrationRequestDto dto)
         {
@@ -39,24 +41,27 @@ namespace service_application.Server.Controllers
                 if (string.IsNullOrWhiteSpace(dto.Email))
                     return _apiResponse.BadRequest("Email is required");
 
-                //  Phone number validation for LONG
-                if (dto.PhoneNumber <= 0)
-                    return _apiResponse.BadRequest("PhoneNumber is required");
-
-                //  10-digit check for long
-                if (dto.PhoneNumber < 1000000000 || dto.PhoneNumber > 9999999999)
+                if (dto.PhoneNumber <= 0 || dto.PhoneNumber < 1000000000 || dto.PhoneNumber > 9999999999)
                     return _apiResponse.BadRequest("PhoneNumber must be exactly 10 digits");
 
-                //  Normalize email
                 dto.Email = dto.Email.ToLower();
 
-                //  Duplicate Email Check
                 if (await _registrationService.EmailExists(dto.Email))
                     return _apiResponse.BadRequest("Email already exists");
 
-                //  Duplicate Phone Number Check
                 if (await _registrationService.PhoneNumberExists(dto.PhoneNumber))
                     return _apiResponse.BadRequest("PhoneNumber already exists");
+
+                // Optional: validate ProfileImageId
+                if (dto.ProfileImageId != null)
+                {
+                    var exists = await _attachmentRepository
+                        .FindByCondition(a => a.ID == dto.ProfileImageId)
+                        .AnyAsync();
+
+                    if (!exists)
+                        return _apiResponse.BadRequest("Invalid ProfileImageId");
+                }
 
                 return await _registrationService.Create(dto);
             }
@@ -66,9 +71,7 @@ namespace service_application.Server.Controllers
             }
         }
 
-
-
-        // GET: api/Registration/{id}
+        // ================== GET BY ID ==================
         [HttpGet("{id:long}")]
         public async ValueTask<IActionResult> Get(long id)
         {
@@ -82,7 +85,7 @@ namespace service_application.Server.Controllers
             }
         }
 
-        // GET: api/Registration/list
+        // ================== GET ALL ==================
         [HttpGet("list")]
         public async ValueTask<IActionResult> GetAll()
         {
@@ -96,14 +99,23 @@ namespace service_application.Server.Controllers
             }
         }
 
-        // PUT: api/Registration
+        // ================== UPDATE ==================
         [HttpPut("{id}")]
-        public async ValueTask<IActionResult> Update(
-     int id,
-     [FromBody] RegistrationRequestDto dto)
+        public async ValueTask<IActionResult> Update(long id, [FromBody] RegistrationRequestDto dto)
         {
             try
             {
+                // Optional: validate ProfileImageId
+                if (dto.ProfileImageId != null)
+                {
+                    var exists = await _attachmentRepository
+                        .FindByCondition(a => a.ID == dto.ProfileImageId)
+                        .AnyAsync();
+
+                    if (!exists)
+                        return _apiResponse.BadRequest("Invalid ProfileImageId");
+                }
+
                 return await _registrationService.Update(id, dto);
             }
             catch (Exception ex)
@@ -112,13 +124,57 @@ namespace service_application.Server.Controllers
             }
         }
 
-        // DELETE: api/Registration/{id}
+        // ================== DELETE ==================
         [HttpDelete("{id:long}")]
         public async ValueTask<IActionResult> Delete(long id)
         {
             try
             {
                 return await _registrationService.Delete(id);
+            }
+            catch (Exception ex)
+            {
+                return _apiResponse.InternalServerError(ex.Message);
+            }
+        }
+
+        // ================== UPLOAD PROFILE IMAGE ==================
+        [HttpPost("upload")]
+        public async Task<IActionResult> Upload(IFormFile file)
+        {
+            try
+            {
+                if (file == null || file.Length == 0)
+                    return _apiResponse.BadRequest("File is required");
+
+                var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "Uploads");
+
+                if (!Directory.Exists(uploadsFolder))
+                    Directory.CreateDirectory(uploadsFolder);
+
+                var fileName = Guid.NewGuid() + Path.GetExtension(file.FileName);
+                var filePath = Path.Combine(uploadsFolder, fileName);
+
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                {
+                    await file.CopyToAsync(stream);
+                }
+
+                var attachment = new Attachment
+                {
+                    FileName = fileName,
+                    FilePath = filePath
+                };
+
+                await _attachmentRepository.CreateAsync(attachment);
+
+                // Return the ID and URL
+                return Ok(new
+                {
+                    attachment.ID,
+                    FileName = attachment.FileName,
+                    FileUrl = "/Uploads/" + attachment.FileName
+                });
             }
             catch (Exception ex)
             {

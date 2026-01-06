@@ -11,6 +11,7 @@ import {
 
 import { getAllLocations } from "../../api/locationList";
 import { getAllServices } from "../../api/serviceList";
+import api from "../../api/baseapiinstance"; // your axios instance
 
 function CreateRegistration() {
     const { id } = useParams();
@@ -27,7 +28,8 @@ function CreateRegistration() {
         phoneNumber: "",
         description: "",
         latitude: "",
-        longitude: ""
+        longitude: "",
+        profileImageId: null // <--- store attachment ID
     });
 
     const [locations, setLocations] = useState([]);
@@ -36,6 +38,9 @@ function CreateRegistration() {
     const [loading, setLoading] = useState(false);
     const [pageLoading, setPageLoading] = useState(false);
     const [error, setError] = useState(null);
+
+    const [selectedFile, setSelectedFile] = useState(null); // file state
+    const [previewUrl, setPreviewUrl] = useState(null);      // preview
 
     /* ================= LOAD LOCATIONS ================= */
     useEffect(() => {
@@ -67,8 +72,11 @@ function CreateRegistration() {
                     phoneNumber: res.phoneNumber || "",
                     description: res.description || "",
                     latitude: res.latitude ?? "",
-                    longitude: res.longitude ?? ""
+                    longitude: res.longitude ?? "",
+                    profileImageId: res.profileImageId || null
                 });
+
+                if (res.profileImage?.fileUrl) setPreviewUrl(res.profileImage.fileUrl);
             })
             .catch(() => setError("Failed to load registration"))
             .finally(() => setPageLoading(false));
@@ -101,59 +109,59 @@ function CreateRegistration() {
         setErrors(prev => ({ ...prev, [name]: "" }));
     };
 
+    /* ================= HANDLE FILE SELECTION ================= */
+    const handleFileChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            setSelectedFile(file);
+            setPreviewUrl(URL.createObjectURL(file)); // show preview
+        }
+    };
+
+    /* ================= UPLOAD FILE API ================= */
+    const uploadProfileImage = async () => {
+        if (!selectedFile) return null;
+
+        const formDataFile = new FormData();
+        formDataFile.append("file", selectedFile);
+
+        try {
+            const res = await api.post("/api/Registration/upload", formDataFile, {
+                headers: { "Content-Type": "multipart/form-data" },
+            });
+            return res.data.ID; // attachment ID
+        } catch (err) {
+            console.error("Error uploading file:", err);
+            return null;
+        }
+    };
+
     /* ================= VALIDATION ================= */
     const validate = async () => {
         let temp = {};
 
-        // Required fields
-        if (!formData.companyName)
-            temp.companyName = "Company name is required";
+        if (!formData.companyName) temp.companyName = "Company name is required";
+        if (!formData.email) temp.email = "Email is required";
+        if (!formData.locationId) temp.locationId = "Location is required";
+        if (!formData.serviceId) temp.serviceId = "Service is required";
+        if (!formData.phoneNumber) temp.phoneNumber = "Phone number is required";
+        else if (formData.phoneNumber.length !== 10) temp.phoneNumber = "Phone number must be 10 digits";
+        if (!formData.description) temp.description = "Description is required";
 
-        if (!formData.email)
-            temp.email = "Email is required";
-
-        if (!formData.locationId)
-            temp.locationId = "Location is required";
-
-        if (!formData.serviceId)
-            temp.serviceId = "Service is required";
-
-        if (!formData.phoneNumber)
-            temp.phoneNumber = "Phone number is required";
-        else if (formData.phoneNumber.length !== 10)
-            temp.phoneNumber = "Phone number must be 10 digits";
-
-        if (!formData.description)
-            temp.description = "Description is required";
-
-        // DUPLICATE CHECKS
         try {
             const registrations = await getAllRegistrations();
-
-            //  MOBILE DUPLICATE CHECK
             const phoneExists = registrations.find(
-                r =>
-                    r.phoneNumber === formData.phoneNumber &&
-                    r.id !== formData.id // allow same record in edit
+                r => r.phoneNumber === formData.phoneNumber && r.id !== formData.id
             );
+            if (phoneExists) temp.phoneNumber = "Mobile number already exists";
 
-            if (phoneExists) {
-                temp.phoneNumber = "Mobile number already exists";
-            }
-
-            //  EMAIL DUPLICATE CHECK
             const emailExists = registrations.find(
-                r =>
-                    r.email?.toLowerCase() === formData.email.toLowerCase() &&
-                    r.id !== formData.id
+                r => r.email?.toLowerCase() === formData.email.toLowerCase() && r.id !== formData.id
             );
-
-            if (emailExists) {
-                temp.email = "Email already exists";
-            }
+            if (emailExists) temp.email = "Email already exists";
 
         } catch (err) {
-            console.error("Duplicate check error:", err);
+            console.error(err);
         }
 
         setErrors(temp);
@@ -169,19 +177,22 @@ function CreateRegistration() {
 
         setLoading(true);
         try {
+            // Upload image first
+            const attachmentId = await uploadProfileImage();
             const payload = {
                 ...formData,
                 email: formData.email.toLowerCase(),
                 latitude: Number(formData.latitude),
-                longitude: Number(formData.longitude)
+                longitude: Number(formData.longitude),
+                profileImageId: attachmentId || formData.profileImageId
             };
 
-            isEditMode
-                ? await updateRegistration(id, payload)
-                : await createRegistration(payload);
+            if (isEditMode) await updateRegistration(id, payload);
+            else await createRegistration(payload);
 
             navigate("/registrationlist");
-        } catch {
+        } catch (err) {
+            console.error(err);
             setError("Something went wrong");
         } finally {
             setLoading(false);
@@ -197,13 +208,10 @@ function CreateRegistration() {
 
     if (pageLoading) return <p className="text-center mt-5">Loading...</p>;
 
-    /* ================= UI ================= */
     return (
         <div className="d-flex justify-content-center align-items-center bg-light vh-100">
             <div className="w-50 bg-white border rounded shadow p-4">
-                <h3 className="text-center mb-4">
-                    {isEditMode ? "Update Registration" : "Create Registration"}
-                </h3>
+                <h3 className="text-center mb-4">{isEditMode ? "Update Registration" : "Create Registration"}</h3>
 
                 {error && <div className="alert alert-danger">{error}</div>}
 
@@ -271,15 +279,11 @@ function CreateRegistration() {
                         value={formData.phoneNumber}
                         onChange={(e) => {
                             const val = e.target.value.replace(/\D/g, "");
-                            if (val.length <= 10) {
-                                setFormData({ ...formData, phoneNumber: val });
-                                setErrors({ ...errors, phoneNumber: "" });
-                            }
+                            if (val.length <= 10) setFormData({ ...formData, phoneNumber: val });
+                            setErrors({ ...errors, phoneNumber: "" });
                         }}
                     />
-                    {errors.phoneNumber && (
-                        <div className="invalid-feedback">{errors.phoneNumber}</div>
-                    )}
+                    <div className="invalid-feedback">{errors.phoneNumber}</div>
 
                     {/* DESCRIPTION */}
                     <label>Description *</label>
@@ -290,6 +294,14 @@ function CreateRegistration() {
                         onChange={handleChange}
                     />
                     <div className="invalid-feedback">{errors.description}</div>
+
+                    {/* PROFILE IMAGE */}
+                    <label>Profile Image</label>
+                    <input type="file" onChange={handleFileChange} />
+                    {previewUrl && <div className="mb-3">
+                        <p>Preview:</p>
+                        <img src={previewUrl} alt="Profile Preview" width={150} />
+                    </div>}
 
                     {/* LAT / LNG */}
                     <label>Company Current Location</label>
@@ -304,24 +316,17 @@ function CreateRegistration() {
 
                     {/* ACTIONS */}
                     <div className="text-end">
-                        <Link to="/registrationlist" className="btn btn-secondary me-2">
-                            Cancel
-                        </Link>
+                        <Link to="/registrationlist" className="btn btn-secondary me-2">Cancel</Link>
                         <button className="btn btn-success" disabled={loading}>
                             {isEditMode ? "Update" : "Save"}
                         </button>
 
                         {isEditMode && (
-                            <button
-                                type="button"
-                                className="btn btn-danger ms-2"
-                                onClick={handleDelete}
-                            >
+                            <button type="button" className="btn btn-danger ms-2" onClick={handleDelete}>
                                 Delete
                             </button>
                         )}
                     </div>
-
                 </form>
             </div>
         </div>

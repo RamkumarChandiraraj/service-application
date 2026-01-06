@@ -15,5 +15,17 @@ namespace Data.Context
         public DbSet<Registration> Registrations { get; set; }
         public DbSet<Attachment> Attachments { get; set; }
 
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<Registration>()
+                .HasOne(r => r.ProfileImage)
+                .WithMany()
+                .HasForeignKey(r => r.ProfileImageId)
+                .OnDelete(DeleteBehavior.SetNull);
+
+            base.OnModelCreating(modelBuilder);
+        }
+
+
     }
 }
