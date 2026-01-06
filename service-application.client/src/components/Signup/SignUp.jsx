@@ -2,6 +2,8 @@
 import { useNavigate } from "react-router-dom";
 import { loginApi } from "../../api/authApi";
 import { createUser } from "../../api/UserApi";
+import { useAuth } from "../Auth/useAuth";       // 🔑 NEW: AuthContext
+import { ROLES } from "../../constants/roles";     // 🔑 NEW: Roles constants
 import "./SignUp.css";
 
 // Validation helpers
@@ -10,6 +12,7 @@ const validateMobile = (mobile) => /^[6-9]\d{9}$/.test(mobile);
 
 const SignUp = () => {
     const navigate = useNavigate();
+    const { login } = useAuth();                  // 🔑 NEW: login function from context
     const [rightPanelActive, setRightPanelActive] = useState(false);
 
     // 🔑 Login state
@@ -73,11 +76,23 @@ const SignUp = () => {
         }
     };
 
+    // 🔑 UPDATED: Login with role-based redirect
     const handleLogin = async () => {
         try {
             setLoginError("");
-            await loginApi({ userName, password });
-            navigate("/");
+            const data = await loginApi({ userName, password });
+
+            // 🔑 Save auth data in context (token + role + user info)
+            login(data);
+
+            // 🔑 Redirect based on role
+            if (data.role === ROLES.ADMIN) {
+                navigate("/");      // Admin goes to full management
+            } else if (data.role === ROLES.MANAGER) {
+                navigate("/"); // Manager goes to limited area
+            } else {
+                navigate("/");                          // Others go to main site
+            }
         } catch {
             setLoginError("Invalid username or password");
         }

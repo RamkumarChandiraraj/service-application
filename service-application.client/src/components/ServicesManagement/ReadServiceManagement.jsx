@@ -31,7 +31,7 @@ function ReadServiceManagement() {
                 </p>
 
                 <div className="text-end">
-                    <Link to="/servicelist" className="btn btn-secondary">
+                    <Link to="/management/services/" className="btn btn-secondary">
                         Back
                     </Link>
                 </div>

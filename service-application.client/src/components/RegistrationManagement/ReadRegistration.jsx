@@ -48,7 +48,7 @@ function ReadRegistration() {
                 <p><strong>Longitude:</strong> {registration.longitude}</p>
 
                 <div className="text-end mt-3">
-                    <Link to="/registrationlist" className="btn btn-secondary">
+                    <Link to="/management/registrations" className="btn btn-secondary">
                         Back
                     </Link>
                 </div>

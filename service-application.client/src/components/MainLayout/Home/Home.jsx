@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import heroBg from "./hero-bg-abstract.jpg";
+import heroBg from "../../../assets/images/hero-bg-abstract.jpg";
 
 const HeroSection = () => {
   const navigate = useNavigate();
@@ -33,7 +33,7 @@ const HeroSection = () => {
         <div className="text-center" data-aos="zoom-out" data-aos-delay="100">
           <button
             className="btn-get-started"
-            onClick={() => navigate("/categories")}
+            onClick={() => navigate("category")}
           >
             Find a Service
           </button>
