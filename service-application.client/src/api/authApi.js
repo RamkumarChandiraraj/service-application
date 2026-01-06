@@ -1,24 +1,24 @@
-﻿import api, { setAuthToken } from "./baseapiinstance"; // or "./api"
+﻿
+import api from "./baseapiinstance";
 
-export async function loginApi(payload) {
-  const res = await api.post("/api/auth/login", payload);
+export const loginApi = async (credentials) => {
+  const res = await api.post("/api/auth/login", credentials);
 
-  const { token } = res.data;
+  const token = res.data.token;
 
-  setAuthToken(token);
+  localStorage.setItem("token", token);
+  api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
 
+  return res.data;
+};
+// Forgot password
+export async function sendOtp(payload) {
+  const res = await api.post("/api/auth/forgot-password", payload);
   return res.data;
 }
 
-
-// SEND OTP
-export async function sendOtp(payload) {
-    const res = await api.post("/api/auth/forgot-password", payload);
-    return res.data;
-}
-
-// VERIFY OTP + RESET PASSWORD
+// Verify OTP
 export async function verifyOtp(payload) {
-    const res = await api.post("/api/auth/verify-otp", payload);
-    return res.data;
+  const res = await api.post("/api/auth/verify-otp", payload);
+  return res.data;
 }

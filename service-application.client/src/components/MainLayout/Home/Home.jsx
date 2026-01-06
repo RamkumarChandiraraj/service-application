@@ -33,7 +33,7 @@ const HeroSection = () => {
         <div className="text-center" data-aos="zoom-out" data-aos-delay="100">
           <button
             className="btn-get-started"
-            onClick={() => navigate("category")}
+            onClick={() => navigate("/categories")}
           >
             Find a Service
           </button>

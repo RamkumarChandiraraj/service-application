@@ -1,6 +1,4 @@
 import { Routes, Route } from "react-router-dom";
-import RequireManagementRole from "../Auth/RouteGuards/RequireRole";
-import { ROLES } from "../../constants/roles";
 
 // Category
 import CategoryList from "../CategoryManagement/CategoryList";
@@ -31,191 +29,42 @@ import ReadRegistration from "../RegistrationManagement/ReadRegistration";
 import AttachmentList from "../AttachmentManagement/AttachmentList";
 
 export default function ManagementRoutes() {
-  return (
-    <Routes>
+    return (
+        <Routes>
 
-      {/* ================= ADMIN ONLY ================= */}
+            {/* CATEGORY MANAGEMENT */}
+            <Route path="categories" element={<CategoryList />} />
+            <Route path="categories/create" element={<CreateCategoryManagement />} />
+            <Route path="categories/edit/:id" element={<CreateCategoryManagement />} />
+            <Route path="categories/read/:id" element={<ReadCategoryManagement />} />
 
-      <Route
-        path="categories"
-        element={
-          <RequireManagementRole allowedRoles={[ROLES.ADMIN]}>
-            <CategoryList />
-          </RequireManagementRole>
-        }
-      />
-      <Route
-        path="categories/create"
-        element={
-          <RequireManagementRole allowedRoles={[ROLES.ADMIN]}>
-            <CreateCategoryManagement />
-          </RequireManagementRole>
-        }
-      />
-      <Route
-        path="categories/edit/:id"
-        element={
-          <RequireManagementRole allowedRoles={[ROLES.ADMIN]}>
-            <CreateCategoryManagement />
-          </RequireManagementRole>
-        }
-      />
-      <Route
-        path="categories/read/:id"
-        element={
-          <RequireManagementRole allowedRoles={[ROLES.ADMIN]}>
-            <ReadCategoryManagement />
-          </RequireManagementRole>
-        }
-      />
- 
-      {/* SERVICE MANAGEMENT (ADMIN ONLY) */}
-      <Route
-        path="services"
-        element={
-          <RequireManagementRole allowedRoles={[ROLES.ADMIN]}>
-            <Home />
-          </RequireManagementRole>
-        }
-      />
-      <Route
-        path="services/create" 
-        element={
-          <RequireManagementRole allowedRoles={[ROLES.ADMIN]}>
-            <CreateServiceManagement />
-          </RequireManagementRole>
-        }
-      />
-      <Route
-        path="services/edit/:id"
-        element={
-          <RequireManagementRole allowedRoles={[ROLES.ADMIN]}>
-            <CreateServiceManagement />
-          </RequireManagementRole>
-        }
-      />
-      <Route
-        path="services/read/:id"
-        element={
-          <RequireManagementRole allowedRoles={[ROLES.ADMIN]}>
-            <ReadServiceManagement />
-          </RequireManagementRole>
-        }
-      />
+            {/* SERVICE MANAGEMENT */}
+            <Route path="services" element={<Home />} />
+            <Route path="services/create" element={<CreateServiceManagement />} />
+            <Route path="services/edit/:id" element={<CreateServiceManagement />} />
+            <Route path="services/read/:id" element={<ReadServiceManagement />} />
 
-      {/* LOCATION MANAGEMENT (ADMIN ONLY) */}
-      <Route
-        path="locations"
-        element={
-          <RequireManagementRole allowedRoles={[ROLES.ADMIN]}>
-            <LocationHome />
-          </RequireManagementRole>
-        }
-      />
-      <Route
-        path="locations/create"
-        element={
-          <RequireManagementRole allowedRoles={[ROLES.ADMIN]}>
-            <CreateLocation />
-          </RequireManagementRole>
-        }
-      />
-      <Route
-        path="locations/edit/:id"
-        element={
-          <RequireManagementRole allowedRoles={[ROLES.ADMIN]}>
-            <CreateLocation />
-          </RequireManagementRole>
-        }
-      />
-      <Route
-        path="locations/read/:id"
-        element={
-          <RequireManagementRole allowedRoles={[ROLES.ADMIN]}>
-            <ReadLocation />
-          </RequireManagementRole>
-        }
-      />
+            {/* LOCATION MANAGEMENT */}
+            <Route path="locations" element={<LocationHome />} />
+            <Route path="locations/create" element={<CreateLocation />} />
+            <Route path="locations/edit/:id" element={<CreateLocation />} />
+            <Route path="locations/read/:id" element={<ReadLocation />} />
 
-      {/* ============ ADMIN + MANAGER ================= */}
+            {/* REGISTRATION MANAGEMENT */}
+            <Route path="registrations" element={<RegistrationList />} />
+            <Route path="registrations/create" element={<CreateRegistration />} />
+            <Route path="registrations/edit/:id" element={<CreateRegistration />} />
+            <Route path="registrations/read/:id" element={<ReadRegistration />} />
 
-      {/* REGISTRATION MANAGEMENT */}
-      <Route
-        path="registrations"
-        element={
-          <RequireManagementRole allowedRoles={[ROLES.ADMIN, ROLES.MANAGER]}>
-            <RegistrationList />
-          </RequireManagementRole>
-        }
-      />
-      <Route
-        path="registrations/create"
-        element={
-          <RequireManagementRole allowedRoles={[ROLES.ADMIN, ROLES.MANAGER]}>
-            <CreateRegistration />
-          </RequireManagementRole>
-        }
-      />
-      <Route
-        path="registrations/edit/:id"
-        element={
-          <RequireManagementRole allowedRoles={[ROLES.ADMIN, ROLES.MANAGER]}>
-            <CreateRegistration />
-          </RequireManagementRole>
-        }
-      />
-      <Route
-        path="registrations/read/:id"
-        element={
-          <RequireManagementRole allowedRoles={[ROLES.ADMIN, ROLES.MANAGER]}>
-            <ReadRegistration />
-          </RequireManagementRole>
-        }
-      />
+            {/* USER MANAGEMENT */}
+            <Route path="users" element={<UserList />} />
+            <Route path="users/create" element={<CreateUser />} />
+            <Route path="users/edit/:id" element={<CreateUser />} />
+            <Route path="users/read/:id" element={<ReadUser />} />
 
-      {/* USER MANAGEMENT */}
-      <Route
-        path="users"
-        element={
-          <RequireManagementRole allowedRoles={[ROLES.ADMIN, ROLES.MANAGER]}>
-            <UserList />
-          </RequireManagementRole>
-        }
-      />
-      <Route
-        path="users/create"
-        element={
-          <RequireManagementRole allowedRoles={[ROLES.ADMIN, ROLES.MANAGER]}>
-            <CreateUser />
-          </RequireManagementRole>
-        }
-      />
-      <Route
-        path="users/edit/:id"
-        element={
-          <RequireManagementRole allowedRoles={[ROLES.ADMIN, ROLES.MANAGER]}>
-            <CreateUser />
-          </RequireManagementRole>
-        }
-      />
-      <Route
-        path="users/read/:id"
-        element={
-          <RequireManagementRole allowedRoles={[ROLES.ADMIN, ROLES.MANAGER]}>
-            <ReadUser />
-          </RequireManagementRole>
-        }
-      />
+            {/* ATTACHMENTS */}
+            <Route path="attachments" element={<AttachmentList />} />
 
-      {/* ATTACHMENTS (ADMIN ONLY) */}
-      <Route
-        path="attachments"
-        element={
-          <RequireManagementRole allowedRoles={[ROLES.ADMIN]}>
-            <AttachmentList />
-          </RequireManagementRole>
-        }
-      />
-    </Routes>
-  );
+        </Routes>
+    );
 }
