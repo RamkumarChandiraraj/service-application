@@ -39,6 +39,9 @@ import ReadUser from "./components/UserManagement/ReadUser";
 import SearchProperties from "./components/SearchManagement/Search/SearchProperties";
 import Vendors from "./components/SearchManagement/Vendors/Vendors";
 import SearchVendors from "./components/Pages/SearchVendorsPage";
+//ForgotPassWord
+import ForgotPasswordModal from "./components/ForgotPasswordManagement/ForgotPasswordModal";
+import VerifyOtpModal from "./components/ForgotPasswordManagement/VerifyOtpModal";
 
 function App() {
   return (
@@ -108,8 +111,14 @@ function App() {
         {/* Search Properties */}
         {/*<Route path="/search" element={<SearchProperties />} />*/}
         {/*<Route path="/vendors" element={<Vendors />} />*/}
-        <Route path="/searchvendors" element={<SearchVendors />} />
-      </Routes>
+              <Route path="/searchvendors" element={<SearchVendors />} />
+
+
+              {/*forgotpassword*/}
+              <Route path="/forgot-password" element={<ForgotPasswordModal />} />
+              <Route path="/verify-otp" element={<VerifyOtpModal />} />
+
+          </Routes>
       <Footer />
     </>
   );
