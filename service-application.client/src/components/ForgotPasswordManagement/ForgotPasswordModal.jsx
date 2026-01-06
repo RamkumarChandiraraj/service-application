@@ -1,6 +1,7 @@
 ﻿import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { sendOtp } from "../../api/authApi";
+import "./ForgotPasswordModal.css";
 
 const ForgotPasswordModal = () => {
     const navigate = useNavigate();
@@ -30,36 +31,39 @@ const ForgotPasswordModal = () => {
             setLoading(false);
         }
     };
-    return (
-        <div className="signup-slider-container single-panel">
-            <div className="signup-slider-form-container signup-slider-sign-in-container">
-                <form onSubmit={handleSubmit}>
-                    <h2>Forgot Password</h2>
-                    <span>Enter your registered email or username</span>
 
+    return (
+        <div className="auth-modal-container">
+            <div className="auth-modal-box">
+                <h2>Forgot Password</h2>
+                <p className="auth-modal-text">
+                    Enter your registered email or username
+                </p>
+
+                <form onSubmit={handleSubmit}>
                     <input
+                        className="auth-input"
                         type="text"
                         placeholder="Username or Email"
                         value={userNameOrEmail}
                         onChange={(e) => setUserNameOrEmail(e.target.value)}
                     />
 
-                    {error && <span style={{ color: "red" }}>{error}</span>}
+                    {error && <div className="auth-error">{error}</div>}
 
-                    <button disabled={loading}>
-                        {loading ? "Sending OTP..."
-                            : "Send OTP"}
+                    <button className="auth-btn" disabled={loading}>
+                        {loading ? "Sending OTP..." : "Send OTP"}
                     </button>
-
-                    <a onClick={() => navigate("/")}>
-
-                        <h6> Back to Sign In</h6>  
-                    </a>
                 </form>
+
+                <div className="auth-back">
+                    <a onClick={() => navigate("/signup")}>
+                        Back to Sign In
+                    </a>
+                </div>
             </div>
         </div>
     );
-
 };
 
 export default ForgotPasswordModal;

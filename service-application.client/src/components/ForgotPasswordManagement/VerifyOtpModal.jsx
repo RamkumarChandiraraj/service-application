@@ -1,8 +1,7 @@
 ﻿import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { verifyOtp } from "../../api/authApi";
-
-
+import "./ForgotPasswordModal.css";
 const VerifyOtpModal = () => {
     const navigate = useNavigate();
     const { state } = useLocation();
@@ -28,13 +27,7 @@ const VerifyOtpModal = () => {
 
         try {
             setLoading(true);
-
-            await verifyOtp({
-                email,
-                otp,
-                newPassword
-            });
-
+            await verifyOtp({ email, otp, newPassword });
             navigate("/");
         } catch (err) {
             setError(err?.response?.data?.message || "Invalid OTP");
@@ -44,19 +37,23 @@ const VerifyOtpModal = () => {
     };
 
     return (
-        <div className="signup-slider-container">
-            <div className="signup-slider-form-container signup-slider-sign-in-container">
-                <form onSubmit={handleSubmit}>
-                    <h2>Verify OTP</h2>
-                    <span>OTP sent to {email}</span>
+        <div className="auth-modal-container">
+            <div className="auth-modal-box">
+                <h2>Verify OTP</h2>
+                <p className="auth-modal-text">
+                    OTP sent to {email}
+                </p>
 
+                <form onSubmit={handleSubmit}>
                     <input
+                        className="auth-input"
                         placeholder="Enter OTP"
                         value={otp}
                         onChange={(e) => setOtp(e.target.value)}
                     />
 
                     <input
+                        className="auth-input"
                         type="password"
                         placeholder="New Password"
                         value={newPassword}
@@ -64,22 +61,25 @@ const VerifyOtpModal = () => {
                     />
 
                     <input
+                        className="auth-input"
                         type="password"
                         placeholder="Confirm Password"
                         value={confirmPassword}
                         onChange={(e) => setConfirmPassword(e.target.value)}
                     />
 
-                    {error && <span style={{ color: "red" }}>{error}</span>}
+                    {error && <div className="auth-error">{error}</div>}
 
-                    <button disabled={loading}>
+                    <button className="auth-btn" disabled={loading}>
                         {loading ? "Verifying..." : "Reset Password"}
                     </button>
+                </form>
 
-                    <a onClick={() => navigate("/")}>
+                <div className="auth-back">
+                    <a onClick={() => navigate("/signup")}>
                         Back to Sign In
                     </a>
-                </form>
+                </div>
             </div>
         </div>
     );
