@@ -4,9 +4,10 @@ using Common.Extension;
 using Common.RequestDto;
 using Common.ResponseDto;
 using Data.Entities;
-using Microsoft.AspNetCore.Mvc;
-using Services.Interface;
 using Mapster;
+using Microsoft.AspNetCore.Mvc;
+using Services.Impl;
+using Services.Interface;
 
 
 namespace service_application.Server.Controllers
@@ -93,9 +94,9 @@ namespace service_application.Server.Controllers
                     return _apiResponse.BadRequest("Description is required");
 
                 // 🔑 Sync route id with DTO
-                dto.ID = id;
+                //dto.ID = id;
 
-                //var updated = await _announcementService.UpdateAsync(dto);
+                var updated = await _announcementService.UpdateByIdAsync(id,dto);
                 //if (!updated)
                 //    return _apiResponse.NotFound("Announcement not found");
 
@@ -116,7 +117,8 @@ namespace service_application.Server.Controllers
                 if (id <= 0)
                     return _apiResponse.BadRequest("Invalid Id");
 
-                var deleted = await _announcementService.DeleteAsync(id);
+                var deleted = await _announcementService.DeleteByIdAsync(id);
+
                 if (!deleted)
                     return _apiResponse.NotFound("Announcement not found");
 

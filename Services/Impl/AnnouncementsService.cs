@@ -18,15 +18,19 @@ namespace Services.Impl
             _repository = repository;
         }
 
-        public async Task<AnnouncementsResponseDto> CreateAsync(AnnouncementsRequestDto dto)
+        // CREATE
+        public async ValueTask<AnnouncementsResponseDto> CreateAsync(AnnouncementsRequestDto dto)
         {
             var entity = dto.ToMap<AnnouncementsRequestDto, Announcements>();
+            entity.GenerateCreateHistory(1);
+
             await _repository.CreateAsync(entity);
 
             return entity.ToMap<Announcements, AnnouncementsResponseDto>();
         }
 
-        public async Task<AnnouncementsResponseDto?> GetByIdAsync(long id)
+        // READ BY ID
+        public async ValueTask<AnnouncementsResponseDto?> GetByIdAsync(long id)
         {
             var entity = await _repository
                 .FindByCondition(x => x.ID == id)
@@ -35,7 +39,8 @@ namespace Services.Impl
             return entity?.ToMap<Announcements, AnnouncementsResponseDto>();
         }
 
-        public async Task<List<AnnouncementsResponseDto>> GetAllAsync()
+        // READ ALL
+        public async ValueTask<List<AnnouncementsResponseDto>> GetAllAsync()
         {
             var entities = await _repository
                 .FindAll()
@@ -47,21 +52,29 @@ namespace Services.Impl
                 .ToList();
         }
 
-        public async Task<bool> UpdateAsync(long id, AnnouncementsRequestDto dto)
+        // UPDATE
+        public async ValueTask<bool> UpdateByIdAsync(long id, AnnouncementsRequestDto dto)
         {
-            //var entity = await _repository
-            //    .findbycondition(x => x.id == id)
-            //    .firstordefaultasync();
+            var oldEntity = await _repository
+                .FindByCondition(x => x.ID == id)
+                .FirstOrDefaultAsync();
 
-            //if (entity == null)
-            //    return false;
+            if (oldEntity == null)
+                return false;
 
-            //dto.adapt(entity);
-            //await _repository.updateasync(entity);
+            oldEntity.Title = dto.Title;
+            oldEntity.Description = dto.Description;
+
+            oldEntity.GenerateModifyHistory(1);
+
+            await _repository.UpdateAsync(oldEntity);
+            //await _repository.SaveChangesAsync(oldEntity); // ensures update persists
+
             return true;
         }
 
-        public async Task<bool> DeleteAsync(long id)
+        // DELETE
+        public async ValueTask<bool> DeleteByIdAsync(long id)
         {
             var entity = await _repository
                 .FindByCondition(x => x.ID == id)
@@ -70,7 +83,11 @@ namespace Services.Impl
             if (entity == null)
                 return false;
 
+            entity.GenerateDeleteHistory(1);
+
             await _repository.DeleteAsync(entity);
+            await _repository.SaveChangesAsync(entity);
+
             return true;
         }
     }

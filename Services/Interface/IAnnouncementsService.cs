@@ -5,14 +5,19 @@ namespace Services.Interface
 {
     public interface IAnnouncementsService
     {
-        Task<AnnouncementsResponseDto> CreateAsync(AnnouncementsRequestDto dto);
+        // CREATE
+        ValueTask<AnnouncementsResponseDto> CreateAsync(AnnouncementsRequestDto dto);
 
-        Task<AnnouncementsResponseDto?> GetByIdAsync(long id);
+        // READ BY ID
+        ValueTask<AnnouncementsResponseDto?> GetByIdAsync(long id);
 
-        Task<List<AnnouncementsResponseDto>> GetAllAsync();
+        // READ ALL
+        ValueTask<List<AnnouncementsResponseDto>> GetAllAsync();
 
-        Task<bool> UpdateAsync(long id, AnnouncementsRequestDto dto);
+        // UPDATE
+        ValueTask<bool> UpdateByIdAsync(long id, AnnouncementsRequestDto dto);
 
-        Task<bool> DeleteAsync(long id);
+        // DELETE
+        ValueTask<bool> DeleteByIdAsync(long id);
     }
 }
