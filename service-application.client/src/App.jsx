@@ -11,7 +11,8 @@ import ForgotPasswordModal from "./components/ForgotPasswordManagement/ForgotPas
 import VerifyOtpModal from "./components/ForgotPasswordManagement/VerifyOtpModal";
 import ManagementRoutes from "./components/ManagementRoutes/ManagementRoutes";
 import RequireAuth from "./Auth/RequireAuth";
-
+import Unauthorized from "./components/Common/Unauthorized"
+import AuthSlider from "./components/Signup/AuthSlider";
 /* ✅ SCROLL HELPERS */
 import ScrollToHash from "./components/Common/ScrollToHash";
 import ScrollToTop from "./components/Common/ScrollToTop";
@@ -29,12 +30,13 @@ function App() {
       <Routes>
         {/* PUBLIC */}
         <Route path="/" element={<MainLayout />} />
-        <Route path="/signup" element={<SignUp />} />
+        <Route path="/auth" element={<AuthSlider />} />
         <Route path="/categories" element={<CategoriesPage />} />
         <Route path="/service/:category" element={<Service />} />
         <Route path="/searchvendors" element={<SearchVendors />} />
         <Route path="/forgot-password" element={<ForgotPasswordModal />} />
         <Route path="/verify-otp" element={<VerifyOtpModal />} />
+        <Route path="/unauthorized" element={<Unauthorized />} />
 
         {/* PROTECTED MANAGEMENT ROUTES */}
         <Route element={<RequireAuth allowedRoles={["Admin", "Manager"]} />}>

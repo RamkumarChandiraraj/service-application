@@ -26,7 +26,7 @@ const Navbar = () => {
   const handleLogout = () => {
     clearAuthTokens();
     logout();
-    navigate("/signup");
+    navigate("/auth");
   };
 
   const scrollToSection = (id) => {
@@ -228,7 +228,7 @@ const Navbar = () => {
         {/* AUTH BUTTON */}
         {!auth ? (
           <NavLink
-            to="/signup"
+            to="/auth"
             className="btn-getstarted"
             onClick={handleLinkClick}
           >

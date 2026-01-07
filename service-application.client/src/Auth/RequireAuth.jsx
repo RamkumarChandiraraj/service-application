@@ -7,7 +7,7 @@ const RequireAuth = ({ allowedRoles }) => {
 
   // Not logged in
   if (!auth) {
-    return <Navigate to="/signup" state={{ from: location }} replace />;
+    return <Navigate to="/auth" state={{ from: location }} replace />;
   }
 
   // Role not allowed
