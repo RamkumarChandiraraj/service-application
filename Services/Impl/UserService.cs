@@ -71,30 +71,37 @@ public async Task<bool> IsDuplicateAsync(string email,string username, long mobi
         {
             try
             {
-                var user = await ValueTask.FromResult(_userRepository.FindAll().ToList());
-                return user;
+                return await _userRepository
+                    .FindAll()
+                    .Include(x => x.Profile)
+                    .ToListAsync();
             }
-            catch (Exception ex)
+            catch
             {
                 throw;
             }
         }
+
         public async ValueTask<User> GetUserById(long id)
         {
             try
             {
-                var service = await ValueTask.FromResult(_userRepository.FindByCondition(x => x.ID == id).FirstOrDefault());
-                if (service == null)
-                {
+                var user = await _userRepository
+                    .FindByCondition(x => x.ID == id)
+                    .Include(x => x.Profile)
+                    .FirstOrDefaultAsync();
+
+                if (user == null)
                     throw new InvalidDataException($"Id '{id}' not exists.");
-                }
-                return service;
+
+                return user;
             }
-            catch (Exception ex)
+            catch
             {
                 throw;
             }
         }
+
 
         public async ValueTask UpdateUserByIdAsync(UserRequestDto req)
         {
@@ -107,6 +114,7 @@ public async Task<bool> IsDuplicateAsync(string email,string username, long mobi
                 oldEntity.Email = req.Email;
                 oldEntity.MobileNumber = req.MobileNumber;
                 oldEntity.Role = req.Role;
+                oldEntity.ProfileId = req.ProfileId;
 
                 oldEntity.GenerateModifyHistory(1);
                 await _userRepository.UpdateAsync(oldEntity);

@@ -1,13 +1,6 @@
 ﻿import { useState, useEffect } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { createUser, updateUser, getUserById } from "../../api/UserApi";
-import {
-    uploadAttachment,
-    getAllAttachments,
-    downloadAttachmentById,
-    deleteAttachment,
-    updateAttachment,
-} from "../../api/attachmentApi";
 
 const validateEmail = (email) =>
     /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -30,7 +23,7 @@ function CreateUserManagement() {
         email: "",
         mobilenumber: "",
         role: "",
-        profileid: 0
+        profileId: ""
     });
 
     const [errors, setErrors] = useState({});
@@ -54,7 +47,7 @@ function CreateUserManagement() {
                     password: "",
                     mobilenumber: user.mobileNumber || "",
                     role: user.role || "",
-                    profileid: user.profileId || 0
+                    profileId: user.profileId ? String(user.profileId) : ""
                 });
             } catch {
                 setError("Failed to load user");
@@ -68,8 +61,8 @@ function CreateUserManagement() {
 
     const handleChange = (e) => {
         const { name, value } = e.target;
-        setFormData({ ...formData, [name]: name === "role" ? Number(value) : value });
-        setErrors({ ...errors, [name]: "" });
+        setFormData(prev => ({ ...prev, [name]: value }));
+        setErrors(prev => ({ ...prev, [name]: "" }));
     };
 
     const validate = () => {
@@ -108,16 +101,24 @@ function CreateUserManagement() {
 
         setLoading(true);
         try {
-            const payload = { ...formData };
+            const payload = {
+                ...formData,
+                role: Number(formData.role),
+                profileId: formData.profileId ? Number(formData.profileId) : null
+            };
+
             if (isEditMode) delete payload.password;
 
-            isEditMode ? await updateUser(formData.id, payload) : await createUser(payload);
+            console.log("Payload:", payload);
+
+            isEditMode
+                ? await updateUser(formData.id, payload)
+                : await createUser(payload);
 
             alert(isEditMode ? "User updated successfully!" : "User created successfully!");
             navigate("/userlist");
         } catch (err) {
-            const msg = err.response?.data?.message || "Save failed";
-            setError(msg);
+            setError(err.response?.data?.message || "Save failed");
         } finally {
             setLoading(false);
         }
@@ -132,6 +133,7 @@ function CreateUserManagement() {
             {error && <div className="alert alert-danger">{error}</div>}
 
             <form onSubmit={handleSubmit} className="w-50">
+
                 <div className="mb-3">
                     <label>User Name</label>
                     <input name="username" value={formData.username} onChange={handleChange} className="form-control" readOnly={isEditMode} />
@@ -149,13 +151,11 @@ function CreateUserManagement() {
                 <div className="mb-3">
                     <label>Email</label>
                     <input name="email" value={formData.email} onChange={handleChange} className="form-control" />
-                    {errors.email && <small className="text-danger">{errors.email}</small>}
                 </div>
 
                 <div className="mb-3">
-                    <label>Mobile Number</label>
+                    <label>Mobile</label>
                     <input name="mobilenumber" value={formData.mobilenumber} onChange={handleChange} className="form-control" />
-                    {errors.mobilenumber && <small className="text-danger">{errors.mobilenumber}</small>}
                 </div>
 
                 <div className="mb-3">
@@ -169,23 +169,18 @@ function CreateUserManagement() {
                         <option value={5}>Cooking</option>
                         <option value={6}>Plumbing</option>
                     </select>
-                    {errors.role && <small className="text-danger">{errors.role}</small>}
                 </div>
+
                 <div className="mb-3">
-                    <label>ProfileId</label>
+                    <label> Profile ID</label>
                     <input
-
                         name="profileId"
-                        className="form-control"
-
                         value={formData.profileId}
-                        onChange={(e) =>
-                            setFormData({ ...formData, profileId: Number(e.target.value) })
-                        }
+                        onChange={handleChange}
+                        className="form-control"
+                        
                     />
-                    {errors.profileId && <small className="text-danger">{errors.profileId}</small>}
                 </div>
-
 
                 <div>
                     <Link to="/userlist" className="btn btn-secondary me-2">Cancel</Link>
@@ -193,6 +188,7 @@ function CreateUserManagement() {
                         {loading ? "Saving..." : "Save"}
                     </button>
                 </div>
+
             </form>
         </div>
     );

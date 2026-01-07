@@ -3,6 +3,7 @@ using Data.BaseEntity;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -19,6 +20,10 @@ namespace Data.Entities
         public long MobileNumber { get; set; }
         public UserRole Role { get; set; }
         public long? ProfileId { get; set; }
-     }
-   
+
+        [ForeignKey(nameof(ProfileId))]
+        public virtual Attachment Profile { get; set; }
+
+    }
+
 }
