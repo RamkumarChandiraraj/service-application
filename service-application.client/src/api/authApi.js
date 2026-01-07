@@ -1,16 +1,18 @@
-﻿
-import api from "./baseapiinstance";
+﻿import api from "./baseApiInstance";
+import { storeTokenAndUser } from "../utils/jwtUtils";
 
 export const loginApi = async (credentials) => {
   const res = await api.post("/api/auth/login", credentials);
 
   const token = res.data.token;
 
-  localStorage.setItem("token", token);
-  api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+  // ✅ decode + persist payload
+  const decodedUser = storeTokenAndUser(token);
 
-  return res.data;
+  return decodedUser;
 };
+
+
 // Forgot password
 export async function sendOtp(payload) {
   const res = await api.post("/api/auth/forgot-password", payload);

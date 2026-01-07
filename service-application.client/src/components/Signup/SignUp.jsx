@@ -2,6 +2,7 @@
 import { useNavigate, Link } from "react-router-dom";
 import { loginApi } from "../../api/authApi";
 import { createUser } from "../../api/UserApi";
+import { useAuth } from "../../Auth/AuthProvider";
 import "./SignUp.css";
 
 // Validation helpers
@@ -10,22 +11,24 @@ const validateMobile = (mobile) => /^[6-9]\d{9}$/.test(mobile);
 
 const SignUp = () => {
   const navigate = useNavigate();
+  const { setAuth } = useAuth(); // ✅ REQUIRED
+
   const [rightPanelActive, setRightPanelActive] = useState(false);
 
-  // Login state
+  // LOGIN STATE (same UI)
   const [userName, setUserName] = useState("");
   const [password, setPassword] = useState("");
   const [loginError, setLoginError] = useState("");
   const [loginSuccess, setLoginSuccess] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  // Signup state
+  // SIGNUP STATE (same UI)
   const [signUpForm, setSignUpForm] = useState({
     userName: "",
     mobileNumber: "",
     email: "",
     password: "",
   });
-
   const [errors, setErrors] = useState({});
 
   const handleSignUpChange = (e) => {
@@ -34,6 +37,7 @@ const SignUp = () => {
 
   const handleSignUp = async (e) => {
     e.preventDefault();
+
     const newErrors = {};
 
     if (!signUpForm.userName.trim()) newErrors.userName = "Name is required";
@@ -56,7 +60,7 @@ const SignUp = () => {
     if (Object.keys(newErrors).length > 0) return;
 
     try {
-      await createUser({ ...signUpForm, role: 1 });
+      await createUser({ ...signUpForm, role: "User" });
       alert("User created successfully");
       setRightPanelActive(false);
       setSignUpForm({
@@ -71,23 +75,26 @@ const SignUp = () => {
     }
   };
 
-  // 🔐 LOGIN (FIXED)
+  // 🔐 LOGIN (LOGIC FIXED, UI SAME)
   const handleLogin = async () => {
     try {
       setLoginError("");
       setLoginSuccess("");
+      setLoading(true);
 
-      const res = await loginApi({ userName, password });
+      // 🔑 loginApi now returns DECODED PAYLOAD
+      const decodedUser = await loginApi({ userName, password });
 
-      if (res?.token) {
-        setLoginSuccess("Login successful! Redirecting...");
-        setTimeout(() => {
-          navigate("/"); // admin landing
-        }, 800);
-      }
+      // ✅ STORE PAYLOAD IN CONTEXT
+      setAuth(decodedUser);
+
+      setLoginSuccess("Login successful! Redirecting...");
+      setTimeout(() => navigate("/"), 800);
     } catch {
       setLoginError("Invalid username or password");
       setLoginSuccess("");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -139,8 +146,8 @@ const SignUp = () => {
           {loginError && <p style={{ color: "red" }}>{loginError}</p>}
           {loginSuccess && <p style={{ color: "green" }}>{loginSuccess}</p>}
 
-          <button type="button" onClick={handleLogin}>
-            Sign In
+          <button type="button" disabled={loading} onClick={handleLogin}>
+            {loading ? "Signing in..." : "Sign In"}
           </button>
 
           <Link to="/forgot-password">Forgot Password?</Link>
@@ -198,21 +205,17 @@ const SignUp = () => {
         </form>
       </div>
 
-      {/* OVERLAY */}
+      {/* OVERLAY (UNCHANGED UI) */}
       <div className="signup-slider-overlay-container">
         <div className="signup-slider-overlay">
           <div className="signup-slider-overlay-panel signup-slider-overlay-left">
             <h1>Welcome Back!</h1>
-            <button onClick={() => setRightPanelActive(false)}>
-              Sign In
-            </button>
+            <button onClick={() => setRightPanelActive(false)}>Sign In</button>
           </div>
 
           <div className="signup-slider-overlay-panel signup-slider-overlay-right">
             <h1>Hello, Friend!</h1>
-            <button onClick={() => setRightPanelActive(true)}>
-              Sign Up
-            </button>
+            <button onClick={() => setRightPanelActive(true)}>Sign Up</button>
           </div>
         </div>
       </div>

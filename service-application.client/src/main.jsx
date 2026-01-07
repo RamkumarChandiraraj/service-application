@@ -25,15 +25,11 @@ import "swiper/css/bundle";
 import "glightbox/dist/css/glightbox.min.css";
 
 // Initialize AOS
-AOS.init({
-  duration: 800,
-  easing: "ease-in-out",
-  once: true,
-});
+AOS.init({ duration: 800, easing: "ease-in-out", once: true });
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
-     <BrowserRouter>
+    <BrowserRouter>
       <AuthProvider>
         <App />
       </AuthProvider>

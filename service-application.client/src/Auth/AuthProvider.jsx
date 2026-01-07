@@ -1,31 +1,23 @@
-import { useState, useEffect } from "react";
-import AuthContext from "./AuthContext";
-import { jwtDecode } from "jwt-decode";
+import { createContext, useContext, useState, useEffect } from "react";
+import { getDecodedUser, clearDecodedUser } from "../utils/jwtUtils";
+
+const AuthContext = createContext(null);
+
+export const useAuth = () => useContext(AuthContext);
 
 const AuthProvider = ({ children }) => {
-  const [auth, setAuth] = useState(null);
-
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-
-    if (token) {
-      try {
-        const decoded = jwtDecode(token);
-        if (decoded.exp * 1000 > Date.now()) {
-          setAuth(decoded);
-        } else {
-          localStorage.clear();
-        }
-      } catch {
-        localStorage.clear();
-      }
-    }
-  }, []);
+  // ✅ Restore user from localStorage on load
+  const [auth, setAuth] = useState(() => getDecodedUser());
 
   const logout = () => {
-    localStorage.clear();
+    clearDecodedUser();
     setAuth(null);
   };
+
+  // ✅ Safety: resync auth if localStorage changes
+  useEffect(() => {
+    setAuth(getDecodedUser());
+  }, []);
 
   return (
     <AuthContext.Provider value={{ auth, setAuth, logout }}>

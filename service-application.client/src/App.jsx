@@ -1,4 +1,5 @@
 ﻿import { Routes, Route } from "react-router-dom";
+
 import Navbar from "./components/MainLayout/Navbar/Navbar";
 import Footer from "./components/MainLayout/Footer/Footer";
 import MainLayout from "./components/MainLayout/MainLayout";
@@ -10,11 +11,19 @@ import ForgotPasswordModal from "./components/ForgotPasswordManagement/ForgotPas
 import VerifyOtpModal from "./components/ForgotPasswordManagement/VerifyOtpModal";
 import ManagementRoutes from "./components/ManagementRoutes/ManagementRoutes";
 import RequireAuth from "./Auth/RequireAuth";
-import ProtectedRoute from "./routes/ProtectedRoute";
+
+/* ✅ SCROLL HELPERS */
+import ScrollToHash from "./components/Common/ScrollToHash";
+import ScrollToTop from "./components/Common/ScrollToTop";
+import ScrollToTopButton from "./components/Common/ScrollToTopButton";
 
 function App() {
   return (
     <>
+      {/* GLOBAL SCROLL HANDLERS */}
+      <ScrollToTop />
+      <ScrollToHash />
+
       <Navbar />
 
       <Routes>
@@ -27,13 +36,16 @@ function App() {
         <Route path="/forgot-password" element={<ForgotPasswordModal />} />
         <Route path="/verify-otp" element={<VerifyOtpModal />} />
 
-        {/* 🔐 ADMIN ONLY */}
-        <Route element={<ProtectedRoute />}>
+        {/* PROTECTED MANAGEMENT ROUTES */}
+        <Route element={<RequireAuth allowedRoles={["Admin", "Manager"]} />}>
           <Route path="/management/*" element={<ManagementRoutes />} />
         </Route>
       </Routes>
 
       <Footer />
+
+      {/* FLOATING SCROLL BUTTON */}
+      <ScrollToTopButton />
     </>
   );
 }
