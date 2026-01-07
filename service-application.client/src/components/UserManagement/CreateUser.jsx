@@ -105,7 +105,7 @@ function CreateUserManagement() {
             isEditMode ? await updateUser(formData.id, payload) : await createUser(payload);
 
             alert(isEditMode ? "User updated successfully!" : "User created successfully!");
-            navigate("/userlist");
+            navigate("/management/users");
         } catch (err) {
             const msg = err.response?.data?.message || "Save failed";
             setError(msg);
@@ -164,7 +164,7 @@ function CreateUserManagement() {
                 </div>
 
                 <div>
-                    <Link to="/userlist" className="btn btn-secondary me-2">Cancel</Link>
+                    <Link to="/management/users" className="btn btn-secondary me-2">Cancel</Link>
                     <button type="submit" className="btn btn-success" disabled={loading}>
                         {loading ? "Saving..." : "Save"}
                     </button>

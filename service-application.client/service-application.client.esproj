@@ -9,8 +9,11 @@
     <BuildOutputFolder>$(MSBuildProjectDirectory)\dist</BuildOutputFolder>
   </PropertyGroup>
   <ItemGroup>
+    <None Remove="src\components\Navbar\**" />
+    <TypeScriptConfiguration Remove="src\components\Navbar\**" />
+  </ItemGroup>
+  <ItemGroup>
     <Folder Include="src\assets\base-html\" />
-    <Folder Include="src\components\Navbar\" />
     <Folder Include="src\components\UserManagement\" />
     <Folder Include="src\components\RegistrationManagement\" />
   </ItemGroup>

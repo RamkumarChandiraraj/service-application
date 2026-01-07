@@ -1,39 +1,36 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { NavLink, useNavigate, useLocation } from "react-router-dom";
-import logo from "../logo.jpeg";
+import logo from "../../../assets/images/logo.jpeg";
+import { useAuth } from "../../../Auth/AuthProvider.jsx";
+import { clearAuthTokens } from "../../../api/baseApiInstance";
 
 const Navbar = () => {
   const [mobileActive, setMobileActive] = useState(false);
   const [openDropdowns, setOpenDropdowns] = useState({});
   const [activeHash, setActiveHash] = useState("");
+
+  const { auth, logout } = useAuth();
+
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Update active hash on location change
-  useEffect(() => {
-    setActiveHash(location.hash);
-  }, [location]);
-
-  const toggleMobileNav = () => {
-    setMobileActive(!mobileActive);
-  };
-
-  const toggleDropdown = (name) => {
-    setOpenDropdowns((prev) => ({
-      ...prev,
-      [name]: !prev[name],
-    }));
-  };
+  const toggleMobileNav = () => setMobileActive(!mobileActive);
+  const toggleDropdown = (name) =>
+    setOpenDropdowns((prev) => ({ ...prev, [name]: !prev[name] }));
 
   const handleLinkClick = () => {
     setMobileActive(false);
     setOpenDropdowns({});
   };
 
-  // Smooth scroll for anchors
+  const handleLogout = () => {
+    clearAuthTokens();
+    logout();
+    navigate("/signup");
+  };
+
   const scrollToSection = (id) => {
     handleLinkClick();
-
     if (location.pathname !== "/") {
       navigate("/");
       setTimeout(() => {
@@ -44,28 +41,32 @@ const Navbar = () => {
     }
   };
 
-  // Helper to determine if hash link is active
   const isHashActive = (hash) => activeHash === hash;
+
+  const isAdmin = auth?.role === "Admin";
+  const isManager = auth?.role === "Manager";
 
   return (
     <header
-      id="header"
       className={`header d-flex align-items-center sticky-top ${
         mobileActive ? "mobile-nav-active" : ""
       }`}
     >
       <div className="container-fluid container-xl position-relative d-flex align-items-center">
-        <NavLink to="/" className="logo d-flex align-items-center me-auto" onClick={handleLinkClick}>
-          <img
-            src={logo}
-            alt="Aanaiyaan Logo"
-            style={{ maxHeight: "40px", width: "auto", objectFit: "contain" }}
-          />
+        {/* LOGO */}
+        <NavLink
+          to="/"
+          className="logo d-flex align-items-center me-auto"
+          onClick={handleLinkClick}
+        >
+          <img src={logo} alt="Logo" style={{ maxHeight: "40px" }} />
           <h1>Mr LookUp</h1>
         </NavLink>
 
+        {/* NAV */}
         <nav id="navmenu" className="navmenu">
           <ul className="ms-auto align-items-center">
+            {/* HOME */}
             <li>
               <a
                 href="#hero"
@@ -79,6 +80,7 @@ const Navbar = () => {
               </a>
             </li>
 
+            {/* ABOUT */}
             <li>
               <a
                 href="#about"
@@ -91,116 +93,118 @@ const Navbar = () => {
                 About
               </a>
             </li>
-
-            <li className={`dropdown ${openDropdowns["main"] ? "active" : ""}`}>
-              <a
-                href="#!"
-                onClick={(e) => {
-                  e.preventDefault();
-                  toggleDropdown("main");
-                }}
-                className={openDropdowns["main"] ? "active" : ""}
-              >
-                <span>Content Management</span>
-                <i className={`bi bi-chevron-down toggle-dropdown ${openDropdowns["main"] ? "active" : ""}`}></i>
-              </a>
-
-              <ul className={openDropdowns["main"] ? "dropdown-active" : ""}>
-                <li className={`dropdown ${openDropdowns["deep"] ? "active" : ""}`}>
-                  <a
-                    href="#!"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      toggleDropdown("deep");
-                    }}
-                    className={openDropdowns["deep"] ? "active" : ""}
-                  >
-                    <span>Master Data</span>
-                    <i className={`bi bi-chevron-down toggle-dropdown ${openDropdowns["deep"] ? "active" : ""}`}></i>
-                  </a>
-
-                  <ul className={openDropdowns["deep"] ? "dropdown-active" : ""}>
-                    <li>
-                      <NavLink
-                        to="/servicelist"
-                        onClick={handleLinkClick}
-                        className={({ isActive }) => (isActive ? "active" : "")}
-                      >
-                        Services
-                      </NavLink>
-                    </li>
-                    <li>
-                      <NavLink
-                        to="/categorylist"
-                        onClick={handleLinkClick}
-                        className={({ isActive }) => (isActive ? "active" : "")}
-                      >
-                        Category
-                      </NavLink>
-                    </li>
-                    <li>
-                      <NavLink
-                        to="/locationlist"
-                        onClick={handleLinkClick}
-                        className={({ isActive }) => (isActive ? "active" : "")}
-                      >
-                        Location
-                      </NavLink>
-                    </li>
-                    <li>
-                      <NavLink
-                        to="/userlist"
-                        onClick={handleLinkClick}
-                        className={({ isActive }) => (isActive ? "active" : "")}
-                      >
-                        User
-                      </NavLink>
-                    </li>
-                    <li>
-                      <NavLink
-                        to="/Registrationlist"
-                        onClick={handleLinkClick}
-                        className={({ isActive }) => (isActive ? "active" : "")}
-                      >
-                        Registration
-                      </NavLink>
-                    </li>
-                    
-                      <li>
-                      <NavLink
-                        to="/attachmentlist"
-                        onClick={handleLinkClick}
-                        className={({ isActive }) => (isActive ? "active" : "")}
-                      >
-                        Attachments
-                      </NavLink>
-                    </li>
-                    
-                  </ul>
-                </li>
-
-                
-                <li>
-                  <NavLink
-                    to="/searchvendors"
-                    onClick={handleLinkClick}
-                    className={({ isActive }) => (isActive ? "active" : "")}
-                  >
-                    Search
-                  </NavLink>
-                </li>
-                <li>
-                  <NavLink
-                    to="/example4"
-                    onClick={handleLinkClick}
-                    className={({ isActive }) => (isActive ? "active" : "")}
-                  >
-                    Dropdown 4
-                  </NavLink>
-                </li>
-              </ul>
+           
+            {/* Serch */}
+            <li>
+              <NavLink to="/searchvendors" onClick={handleLinkClick}>
+                Search
+              </NavLink>
             </li>
+            {/* CONTENT MANAGEMENT – ONLY AFTER LOGIN */}
+            {auth && (
+              <li className={`dropdown ${openDropdowns.main ? "active" : ""}`}>
+                <a
+                  href="#!"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    toggleDropdown("main");
+                  }}
+                >
+                  <span>Content Management</span>
+                  <i className="bi bi-chevron-down toggle-dropdown"></i>
+                </a>
 
+                <ul className={openDropdowns.main ? "dropdown-active" : ""}>
+                  {/* MASTER DATA */}
+                  {(isAdmin || isManager) && (
+                    <li
+                      className={`dropdown ${
+                        openDropdowns.master ? "active" : ""
+                      }`}
+                    >
+                      <a
+                        href="#!"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          toggleDropdown("master");
+                        }}
+                      >
+                        <span>Master Data</span>
+                        <i className="bi bi-chevron-down toggle-dropdown"></i>
+                      </a>
+
+                      <ul
+                        className={
+                          openDropdowns.master ? "dropdown-active" : ""
+                        }
+                      >
+                        {/* ADMIN ONLY */}
+                        {isAdmin && (
+                          <>
+                            <li>
+                              <NavLink
+                                to="/management/services"
+                                onClick={handleLinkClick}
+                              >
+                                Services
+                              </NavLink>
+                            </li>
+                            <li>
+                              <NavLink
+                                to="/management/categories"
+                                onClick={handleLinkClick}
+                              >
+                                Categories
+                              </NavLink>
+                            </li>
+                            <li>
+                              <NavLink
+                                to="/management/locations"
+                                onClick={handleLinkClick}
+                              >
+                                Locations
+                              </NavLink>
+                            </li>
+                            <li>
+                              <NavLink
+                                to="/management/attachments"
+                                onClick={handleLinkClick}
+                              >
+                                Attachments
+                              </NavLink>
+                            </li>
+                          </>
+                        )}
+
+                        {/* ADMIN + MANAGER */}
+                        {(isAdmin || isManager) && (
+                          <>
+                            <li>
+                              <NavLink
+                                to="/management/users"
+                                onClick={handleLinkClick}
+                              >
+                                Users
+                              </NavLink>
+                            </li>
+                            <li>
+                              <NavLink
+                                to="/management/registrations"
+                                onClick={handleLinkClick}
+                              >
+                                Registrations
+                              </NavLink>
+                            </li>
+                          </>
+                        )}
+                      </ul>
+                    </li>
+                  )}
+                </ul>
+              </li>
+            )}
+
+            {/* CONTACT */}
             <li>
               <a
                 href="#contact"
@@ -215,12 +219,30 @@ const Navbar = () => {
             </li>
           </ul>
 
-          <i className="mobile-nav-toggle d-xl-none bi bi-list" onClick={toggleMobileNav}></i>
+          <i
+            className="mobile-nav-toggle d-xl-none bi bi-list"
+            onClick={toggleMobileNav}
+          ></i>
         </nav>
 
-        <NavLink to="/signup" className="btn-getstarted" onClick={handleLinkClick}>
-          Sign Up
-        </NavLink>
+        {/* AUTH BUTTON */}
+        {!auth ? (
+          <NavLink
+            to="/signup"
+            className="btn-getstarted"
+            onClick={handleLinkClick}
+          >
+            Sign In
+          </NavLink>
+        ) : (
+          <button
+            className="btn-getstarted"
+            style={{ backgroundColor: "#dc3545", border: "none" }}
+            onClick={handleLogout}
+          >
+            Logout
+          </button>
+        )}
       </div>
     </header>
   );

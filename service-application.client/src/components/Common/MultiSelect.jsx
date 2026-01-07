@@ -62,7 +62,7 @@ const MultiSelect = ({
                                             removeTag(o.id);
                                         }}
                                     >
-                                        ×
+                                        
                                     </button>
                                 </span>
                             ))}
