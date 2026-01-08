@@ -8,289 +8,254 @@ import { getAllLocations } from "../../../api/locationList";
 import CurrentLocation from "../../Location/CurrentLocation";
 import LoadingPage from "../../Common/LoadingPage";
 import MultiSelect from "../../Common/MultiSelect";
+import "./SearchProperties.css";
 
 /* ---------- HELPERS ---------- */
 const slugify = (text = "") =>
-    text.toLowerCase().replace(/\s+/g, "-");
+  text.toLowerCase().replace(/\s+/g, "-");
+
+const ALL_OPTION = { id: "__ALL__", label: "All" };
 
 const SearchProperties = ({ onSearch, onValidationError }) => {
-    const [searchParams] = useSearchParams();
+  const [searchParams] = useSearchParams();
 
-    /* ---------- URL PARAMS ---------- */
-    const categoryParam = searchParams.get("category"); // mechanic,plumber
-    const serviceParam = searchParams.get("service");   // two-wheeler-service
-    const initialLocation = searchParams.get("location") || "";
+  const categorySlugs = searchParams.get("category")?.split(",") || [];
+  const serviceSlugs = searchParams.get("service")?.split(",") || [];
 
-    const categorySlugs = categoryParam
-        ? categoryParam.split(",").map(s => s.toLowerCase())
-        : [];
+  /* ---------------- DATA ---------------- */
+  const [categories, setCategories] = useState([]);
+  const [services, setServices] = useState([]);
+  const [locations, setLocations] = useState([]);
 
-    const serviceSlugs = serviceParam
-        ? serviceParam.split(",").map(s => s.toLowerCase())
-        : [];
+  /* ---------------- SELECTIONS ---------------- */
+  const [selectedCategoryIds, setSelectedCategoryIds] = useState([]);
+  const [selectedServiceIds, setSelectedServiceIds] = useState([]);
+  const [selectedLocationIds, setSelectedLocationIds] = useState([]);
 
-    /* ---------------- DATA ---------------- */
-    const [categories, setCategories] = useState([]);
-    const [services, setServices] = useState([]);
-    const [locations, setLocations] = useState([]);
+  const [locationMode, setLocationMode] = useState("current");
+  const [currentCoords, setCurrentCoords] = useState({ lat: null, lon: null });
 
-    /* ---------------- SELECTIONS ---------------- */
-    const [selectedCategoryIds, setSelectedCategoryIds] = useState([]);
-    const [selectedServiceIds, setSelectedServiceIds] = useState([]);
-    const [selectedLocation, setSelectedLocation] = useState(initialLocation);
+  const [filteredServices, setFilteredServices] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-    const [locationMode, setLocationMode] = useState("current");
-    const [currentCoords, setCurrentCoords] = useState({ lat: null, lon: null });
+  /* ---------------- ERRORS ---------------- */
+  const [categoryError, setCategoryError] = useState("");
+  const [serviceError, setServiceError] = useState("");
+  const [locationError, setLocationError] = useState("");
 
-    const [filteredServices, setFilteredServices] = useState([]);
-    const [loading, setLoading] = useState(true);
+  /* ---------------- FETCH DATA ---------------- */
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
 
-    /* ---------------- ERRORS ---------------- */
-    const [categoryError, setCategoryError] = useState("");
-    const [serviceError, setServiceError] = useState("");
-    const [locationError, setLocationError] = useState("");
+        const [catRes, servRes, locRes] = await Promise.all([
+          getAllCategories(),
+          getAllServices(),
+          getAllLocations(),
+        ]);
 
-    /* ---------------- FETCH DATA ---------------- */
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                setLoading(true);
-
-                const [catRes, servRes, locRes] = await Promise.all([
-                    getAllCategories(),
-                    getAllServices(),
-                    getAllLocations(),
-                ]);
-
-                const catData = catRes?.data || [];
-                const servData = servRes?.data || [];
-
-                setCategories(catData);
-                setServices(servData);
-                setLocations(locRes?.data || []);
-
-                /* ✅ DEFAULT CATEGORY FROM URL */
-                const defaultCategoryIds = catData
-                    .filter(c => categorySlugs.includes(c.link?.toLowerCase()))
-                    .map(c => Number(c.id));
-
-                setSelectedCategoryIds(defaultCategoryIds);
-
-                /* ✅ DEFAULT SERVICE FROM URL */
-                const defaultServiceIds = servData
-                    .filter(s => serviceSlugs.includes(slugify(s.name)))
-                    .map(s => Number(s.id));
-
-                setSelectedServiceIds(defaultServiceIds);
-
-            } catch (err) {
-                console.error("Failed to load search filters", err);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchData();
-    }, []);
-
-    /* -------- FILTER SERVICES BASED ON CATEGORY -------- */
-    useEffect(() => {
-        if (selectedCategoryIds.length === 0) {
-            setFilteredServices([]);
-            setSelectedServiceIds([]);
-            return;
-        }
-
-        const selectedCategoryNames = categories
-            .filter(c => selectedCategoryIds.includes(Number(c.id)))
-            .map(c => (c.title || c.name)?.toLowerCase());
-
-        const filtered = services.filter(s =>
-            selectedCategoryNames.includes(s.categoryName?.toLowerCase())
-        );
-
-        setFilteredServices(filtered);
-
-        /* remove invalid services */
-        setSelectedServiceIds(prev =>
-            prev.filter(id => filtered.some(s => Number(s.id) === id))
-        );
-    }, [selectedCategoryIds, categories, services]);
-
-    /* ---------------- VALIDATION ---------------- */
-    const isSearchDisabled =
-        loading ||
-        selectedCategoryIds.length === 0 ||
-        selectedServiceIds.length === 0 ||
-        (locationMode === "choose" && !selectedLocation) ||
-        (locationMode === "current" &&
-            (currentCoords.lat === null || currentCoords.lon === null));
-
-    /* ---------------- SEARCH ---------------- */
-    const handleSearch = () => {
-        setCategoryError("");
-        setServiceError("");
-        setLocationError("");
-
-        let hasError = false;
-
-        if (selectedCategoryIds.length === 0) {
-            setCategoryError("Select at least one category");
-            hasError = true;
-        }
-
-        if (selectedServiceIds.length === 0) {
-            setServiceError("Select at least one service");
-            hasError = true;
-        }
-
-        if (locationMode === "choose" && !selectedLocation) {
-            setLocationError("Location is required");
-            hasError = true;
-        }
-
-        if (
-            locationMode === "current" &&
-            (currentCoords.lat === null || currentCoords.lon === null)
-        ) {
-            setLocationError("Current location not available");
-            hasError = true;
-        }
-
-        if (hasError) {
-            onValidationError?.("Please fix the errors above");
-            return;
-        }
-
-        const selectedLoc = locations.find(l => l.name === selectedLocation);
-
-        const latitude =
-            locationMode === "current"
-                ? Number(currentCoords.lat)
-                : Number(selectedLoc?.latitude ?? 0);
-
-        const longitude =
-            locationMode === "current"
-                ? Number(currentCoords.lon)
-                : Number(selectedLoc?.longitude ?? 0);
-
-        onSearch?.({
-            CategoryIds: selectedCategoryIds.map(Number),
-            ServiceIds: selectedServiceIds.map(Number),
-            Latitude: latitude,
-            Longitude: longitude,
-        });
+        setCategories(catRes?.data || []);
+        setServices(servRes?.data || []);
+        setLocations(locRes?.data || []);
+      } catch (err) {
+        console.error("Failed to load search filters", err);
+      } finally {
+        setLoading(false);
+      }
     };
 
-    /* ---------------- UI ---------------- */
-    return (
-        <section className="sp-search-wrapper" style={{ position: "relative" }}>
-            {loading && <LoadingPage />}
+    fetchData();
+  }, []);
 
-            <div className="sp-search-title">
-                <h2>Search Vendors</h2>
-                <span className="sp-search-dot"></span>
-            </div>
+  /* -------- FILTER SERVICES BY CATEGORY -------- */
+  useEffect(() => {
+    if (!selectedCategoryIds.length) {
+      setFilteredServices([]);
+      setSelectedServiceIds([]);
+      return;
+    }
 
-            <div className="sp-search-box">
-                <div className="sp-search-row">
+    const selectedCategoryNames = categories
+      .filter(c => selectedCategoryIds.includes(Number(c.id)))
+      .map(c => (c.title || c.name)?.toLowerCase());
 
-                    {/* CATEGORY */}
-                    <div>
-                        <MultiSelect
-                            label="Category"
-                            options={categories.map(c => ({
-                                id: c.id,
-                                label: c.title || c.name,
-                            }))}
-                            value={selectedCategoryIds}
-                            onChange={setSelectedCategoryIds}
-                            placeholder="Select Categories"
-                        />
-                        {categoryError && (
-                            <span className="error">{categoryError}</span>
-                        )}
-                    </div>
-
-                    {/* SERVICE */}
-                    <div>
-                        <MultiSelect
-                            label="Service"
-                            options={filteredServices.map(s => ({
-                                id: s.id,
-                                label: s.name,
-                            }))}
-                            value={selectedServiceIds}
-                            onChange={setSelectedServiceIds}
-                            placeholder="Select Services"
-                            disabled={filteredServices.length === 0}
-                        />
-                        {serviceError && (
-                            <span className="error">{serviceError}</span>
-                        )}
-                    </div>
-
-                    {/* LOCATION */}
-                    <div className="sp-location-box">
-                        <label>
-                            <input
-                                type="radio"
-                                checked={locationMode === "current"}
-                                onChange={() => {
-                                    setLocationMode("current");
-                                    setSelectedLocation("");
-                                }}
-                            />
-                            Current Location
-                        </label>
-
-                        <label>
-                            <input
-                                type="radio"
-                                checked={locationMode === "choose"}
-                                onChange={() => setLocationMode("choose")}
-                            />
-                            Choose Location
-                        </label>
-
-                        {locationMode === "current" && (
-                            <CurrentLocation onLocationSelect={setCurrentCoords} />
-                        )}
-
-                        {locationMode === "choose" && (
-                            <select
-                                className="sp-select"
-                                value={selectedLocation}
-                                onChange={(e) =>
-                                    setSelectedLocation(e.target.value)
-                                }
-                            >
-                                <option value="">Select Location</option>
-                                {locations.map(l => (
-                                    <option key={l.id} value={l.name}>
-                                        {l.name}
-                                    </option>
-                                ))}
-                            </select>
-                        )}
-
-                        {locationError && (
-                            <span className="error">{locationError}</span>
-                        )}
-                    </div>
-
-                    <button
-                        className="sp-search-btn"
-                        disabled={isSearchDisabled}
-                        onClick={handleSearch}
-                    >
-                        🔍 SEARCH
-                    </button>
-
-                </div>
-            </div>
-        </section>
+    const filtered = services.filter(s =>
+      selectedCategoryNames.includes(s.categoryName?.toLowerCase())
     );
+
+    setFilteredServices(filtered);
+
+    setSelectedServiceIds(prev =>
+      prev.filter(id => filtered.some(s => Number(s.id) === id))
+    );
+  }, [selectedCategoryIds, categories, services]);
+
+  /* ---------------- VALIDATION ---------------- */
+  const isSearchDisabled =
+    loading ||
+    !selectedCategoryIds.length ||
+    !selectedServiceIds.length ||
+    (locationMode === "choose" && !selectedLocationIds.length) ||
+    (locationMode === "current" &&
+      (currentCoords.lat === null || currentCoords.lon === null));
+
+  /* ---------------- SEARCH ---------------- */
+  const handleSearch = () => {
+    setCategoryError("");
+    setServiceError("");
+    setLocationError("");
+
+    let hasError = false;
+
+    if (!selectedCategoryIds.length) {
+      setCategoryError("Select at least one category");
+      hasError = true;
+    }
+    if (!selectedServiceIds.length) {
+      setServiceError("Select at least one service");
+      hasError = true;
+    }
+    if (locationMode === "choose" && !selectedLocationIds.length) {
+      setLocationError("Select at least one location");
+      hasError = true;
+    }
+    if (
+      locationMode === "current" &&
+      (currentCoords.lat === null || currentCoords.lon === null)
+    ) {
+      setLocationError("Current location not available");
+      hasError = true;
+    }
+
+    if (hasError) {
+      onValidationError?.("Please fix the errors above");
+      return;
+    }
+
+    onSearch?.({
+      CategoryIds: selectedCategoryIds.map(Number),
+      ServiceIds: selectedServiceIds.map(Number),
+      LocationIds:
+        locationMode === "choose"
+          ? selectedLocationIds.map(Number)
+          : [],
+      Latitude:
+        locationMode === "current" ? Number(currentCoords.lat) : 0,
+      Longitude:
+        locationMode === "current" ? Number(currentCoords.lon) : 0,
+    });
+  };
+
+  if (loading) return <LoadingPage />;
+
+  /* ---------------- UI ---------------- */
+  return (
+    <section className="sp-search-wrapper">
+      <div className="sp-search-title">
+        <h2>Search Vendors</h2>
+        <span className="sp-search-dot" />
+      </div>
+
+      <div className="sp-search-box">
+        <div className="sp-search-row">
+
+          {/* CATEGORY */}
+          <MultiSelect
+            label="Category"
+            options={[
+              ALL_OPTION,
+              ...categories.map(c => ({
+                id: c.id,
+                label: c.title || c.name,
+              })),
+            ]}
+            value={selectedCategoryIds}
+            onChange={(ids) =>
+              ids.includes("__ALL__")
+                ? setSelectedCategoryIds(categories.map(c => Number(c.id)))
+                : setSelectedCategoryIds(ids)
+            }
+            placeholder="Select Categories"
+          />
+          {categoryError && <span className="error">{categoryError}</span>}
+
+          {/* SERVICE */}
+          <MultiSelect
+            label="Service"
+            options={[
+              ALL_OPTION,
+              ...filteredServices.map(s => ({
+                id: s.id,
+                label: s.name,
+              })),
+            ]}
+            value={selectedServiceIds}
+            onChange={(ids) =>
+              ids.includes("__ALL__")
+                ? setSelectedServiceIds(filteredServices.map(s => Number(s.id)))
+                : setSelectedServiceIds(ids)
+            }
+            placeholder="Select Services"
+          />
+          {serviceError && <span className="error">{serviceError}</span>}
+
+          {/* LOCATION MODE */}
+          <div className="sp-location-box">
+            <label>
+              <input
+                type="radio"
+                checked={locationMode === "current"}
+                onChange={() => setLocationMode("current")}
+              />
+              Current Location
+            </label>
+
+            <label>
+              <input
+                type="radio"
+                checked={locationMode === "choose"}
+                onChange={() => setLocationMode("choose")}
+              />
+              Choose Location
+            </label>
+
+            {locationMode === "choose" && (
+              <MultiSelect
+                label="Location"
+                options={[
+                  ALL_OPTION,
+                  ...locations.map(l => ({
+                    id: l.id,
+                    label: l.name,
+                  })),
+                ]}
+                value={selectedLocationIds}
+                onChange={(ids) =>
+                  ids.includes("__ALL__")
+                    ? setSelectedLocationIds(locations.map(l => Number(l.id)))
+                    : setSelectedLocationIds(ids)
+                }
+                placeholder="Select Locations"
+              />
+            )}
+
+            {locationError && <span className="error">{locationError}</span>}
+          </div>
+
+          {/* SEARCH */}
+          <button
+            className="sp-search-btn"
+            disabled={isSearchDisabled}
+            onClick={handleSearch}
+          >
+            🔍 SEARCH
+          </button>
+
+        </div>
+      </div>
+    </section>
+  );
 };
 
 export default SearchProperties;

@@ -3,7 +3,6 @@
 import Navbar from "./components/MainLayout/Navbar/Navbar";
 import Footer from "./components/MainLayout/Footer/Footer";
 import MainLayout from "./components/MainLayout/MainLayout";
-import SignUp from "./components/Signup/SignUp";
 import CategoriesPage from "./components/Pages/Category";
 import Service from "./components/Pages/Service";
 import SearchVendors from "./components/Pages/SearchVendorsPage";
@@ -17,6 +16,7 @@ import AuthSlider from "./components/Signup/AuthSlider";
 import ScrollToHash from "./components/Common/ScrollToHash";
 import ScrollToTop from "./components/Common/ScrollToTop";
 import ScrollToTopButton from "./components/Common/ScrollToTopButton";
+import Dashboard from "./components/Common/Dashboard";
 
 function App() {
   return (
@@ -37,6 +37,10 @@ function App() {
         <Route path="/forgot-password" element={<ForgotPasswordModal />} />
         <Route path="/verify-otp" element={<VerifyOtpModal />} />
         <Route path="/unauthorized" element={<Unauthorized />} />
+        <Route element={<RequireAuth />}>
+  <Route path="/dashboard" element={<Dashboard />} />
+</Route>
+
 
         {/* PROTECTED MANAGEMENT ROUTES */}
         <Route element={<RequireAuth allowedRoles={["Admin", "Manager"]} />}>

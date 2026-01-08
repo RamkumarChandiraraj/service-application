@@ -195,6 +195,14 @@ const Navbar = () => {
                                 Registrations
                               </NavLink>
                             </li>
+                            <li>
+                              <NavLink
+                                to="/dashboard"
+                                onClick={handleLinkClick}
+                              >
+                                Dashboard
+                              </NavLink>
+                            </li>
                           </>
                         )}
                       </ul>
@@ -203,6 +211,8 @@ const Navbar = () => {
                 </ul>
               </li>
             )}
+
+            
 
             {/* CONTACT */}
             <li>

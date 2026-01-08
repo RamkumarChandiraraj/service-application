@@ -23,7 +23,7 @@ const SignIn = () => {
       setAuth(decodedUser);
 
       setLoginSuccess("Login successful! Redirecting...");
-      setTimeout(() => navigate("/management/locations"), 800);
+      setTimeout(() => navigate("/dashboard"), 800);
     } catch {
       setLoginError("Invalid username or password");
     } finally {
@@ -37,7 +37,7 @@ const SignIn = () => {
 
       <input
         type="text"
-        placeholder="User Name"
+        placeholder="User Name or Email"
         value={userName}
         onChange={(e) => setUserName(e.target.value)}
         autoComplete="username"
