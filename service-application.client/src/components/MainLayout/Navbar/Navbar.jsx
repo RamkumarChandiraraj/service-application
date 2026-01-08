@@ -91,6 +91,9 @@ const Navbar = () => {
                 About
               </a>
             </li>
+                      
+
+            
 
             <li className={`dropdown ${openDropdowns["main"] ? "active" : ""}`}>
               <a
@@ -190,14 +193,15 @@ const Navbar = () => {
                   </NavLink>
                 </li>
                 <li>
-                  <NavLink
-                    to="/example4"
-                    onClick={handleLinkClick}
-                    className={({ isActive }) => (isActive ? "active" : "")}
-                  >
-                    Dropdown 4
-                  </NavLink>
+                    <NavLink
+                        to="/vendor-chat"
+                        onClick={handleLinkClick}
+                        className={({ isActive }) => (isActive ? "active" : "")}
+                    >
+                        Vendor Chat
+                    </NavLink>
                 </li>
+
               </ul>
             </li>
 

@@ -55,7 +55,8 @@ namespace Services.Impl
                     LocationId = x.Registration.LocationId,
                     LocationName = x.Registration.Location.Name,
                     ServiceName = x.Registration.Service.Name,
-                    ServiceId = x.Registration.ServiceId
+                    ServiceId = x.Registration.ServiceId,
+                    PhoneNumber=x.Registration.PhoneNumber
                 })
                 .ToList();
 

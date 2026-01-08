@@ -1,8 +1,11 @@
-import React, { useEffect, useState } from "react";
-import { userSearch } from "../../../api/UsersearchApi"; // POST API
+﻿import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom"; // ✅ FIX: add this
+import { userSearch } from "../../../api/UsersearchApi";
 import LoadingPage from "../../Common/LoadingPage";
 
 const Vendors = ({ searchPayload }) => {
+    const navigate = useNavigate(); // ✅ FIX: add this
+
     const [vendors, setVendors] = useState([]);
     const [searchTerm, setSearchTerm] = useState("");
     const [loading, setLoading] = useState(true);
@@ -65,6 +68,16 @@ const Vendors = ({ searchPayload }) => {
                             <p className="vendor-description">
                                 {vendor.description}
                             </p>
+
+                            <button
+                                className="chat-btn"
+                                onClick={() => {
+                                    console.log("FULL VENDOR OBJECT:", vendor);
+                                    navigate(`/chat/${vendor.phoneNumber}`)
+                                }}
+                            >
+                                💬 Chat Now
+                            </button>
                         </div>
                     ))
                 ) : (

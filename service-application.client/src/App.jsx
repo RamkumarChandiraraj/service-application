@@ -43,6 +43,11 @@ import SearchVendors from "./components/Pages/SearchVendorsPage";
 import ForgotPasswordModal from "./components/ForgotPasswordManagement/ForgotPasswordModal";
 import VerifyOtpModal from "./components/ForgotPasswordManagement/VerifyOtpModal";
 
+//SignalR Chat
+import Chat from "./components/ChatMessage/Chat";
+import ChatPage from "./components/ChatMessage/ChatPage"
+import VendorPage from "./components/VendorChat/VendorPage"
+
 function App() {
   return (
     <>
@@ -117,6 +122,10 @@ function App() {
               {/*forgotpassword*/}
               <Route path="/forgot-password" element={<ForgotPasswordModal />} />
               <Route path="/verify-otp" element={<VerifyOtpModal />} />
+
+              <Route path="/chat/:receiverId" element={<ChatPage />} />
+
+              <Route path="/vendor-chat" element={<VendorPage />} />
 
           </Routes>
       <Footer />
