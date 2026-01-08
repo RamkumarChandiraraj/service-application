@@ -1,6 +1,7 @@
-import { useState, useEffect } from "react";
+﻿import { useState, useEffect } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { createUser, updateUser, getUserById } from "../../api/UserApi";
+import { uploadAttachment, updateAttachment } from "../../api/attachmentApi";
 
 const validateEmail = (email) =>
     /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -22,9 +23,12 @@ function CreateUserManagement() {
         password: "",
         email: "",
         mobilenumber: "",
-        role: ""
+        role: "",
+        profileId: ""
     });
 
+    const [file, setFile] = useState(null);
+    const [uploading, setUploading] = useState(false);
     const [errors, setErrors] = useState({});
     const [loading, setLoading] = useState(false);
     const [pageLoading, setPageLoading] = useState(false);
@@ -37,6 +41,7 @@ function CreateUserManagement() {
             setPageLoading(true);
             try {
                 const res = await getUserById(id);
+                
                 const user = res.data?.data || res.data;
 
                 setFormData({
@@ -45,7 +50,8 @@ function CreateUserManagement() {
                     email: user.email || "",
                     password: "",
                     mobilenumber: user.mobileNumber || "",
-                    role: user.role || ""
+                    role: user.role || "",
+                    profileId: user.profileId ? String(user.profileId) : ""
                 });
             } catch {
                 setError("Failed to load user");
@@ -59,8 +65,12 @@ function CreateUserManagement() {
 
     const handleChange = (e) => {
         const { name, value } = e.target;
-        setFormData({ ...formData, [name]: name === "role" ? Number(value) : value });
-        setErrors({ ...errors, [name]: "" });
+        setFormData(prev => ({ ...prev, [name]: value }));
+        setErrors(prev => ({ ...prev, [name]: "" }));
+    };
+
+    const handleFileChange = (e) => {
+        setFile(e.target.files[0]);
     };
 
     const validate = () => {
@@ -93,22 +103,52 @@ function CreateUserManagement() {
         return Object.keys(temp).length === 0;
     };
 
+    const uploadProfile = async () => {
+        if (!file) return formData.profileId || null;
+
+        const fd = new FormData();
+        fd.append("file", file);
+
+        setUploading(true);
+        try {
+            let res;
+            if (isEditMode && formData.profileId) {
+                res = await updateAttachment(formData.profileId, fd);
+            } else {
+                res = await uploadAttachment(fd);
+            }
+
+            const uploaded = res.data?.data || res.data;
+            return uploaded.id;
+        } finally {
+            setUploading(false);
+        }
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (!validate()) return;
 
         setLoading(true);
         try {
-            const payload = { ...formData };
+            const profileId = await uploadProfile();
+
+            const payload = {
+                ...formData,
+                role: Number(formData.role),
+                profileId: profileId ? Number(profileId) : null
+            };
+
             if (isEditMode) delete payload.password;
 
-            isEditMode ? await updateUser(formData.id, payload) : await createUser(payload);
+            isEditMode
+                ? await updateUser(formData.id, payload)
+                : await createUser(payload);
 
             alert(isEditMode ? "User updated successfully!" : "User created successfully!");
             navigate("/management/users");
         } catch (err) {
-            const msg = err.response?.data?.message || "Save failed";
-            setError(msg);
+            setError(err.response?.data?.message || "Save failed");
         } finally {
             setLoading(false);
         }
@@ -123,6 +163,7 @@ function CreateUserManagement() {
             {error && <div className="alert alert-danger">{error}</div>}
 
             <form onSubmit={handleSubmit} className="w-50">
+
                 <div className="mb-3">
                     <label>User Name</label>
                     <input name="username" value={formData.username} onChange={handleChange} className="form-control" readOnly={isEditMode} />
@@ -140,13 +181,11 @@ function CreateUserManagement() {
                 <div className="mb-3">
                     <label>Email</label>
                     <input name="email" value={formData.email} onChange={handleChange} className="form-control" />
-                    {errors.email && <small className="text-danger">{errors.email}</small>}
                 </div>
 
                 <div className="mb-3">
-                    <label>Mobile Number</label>
+                    <label>Mobile</label>
                     <input name="mobilenumber" value={formData.mobilenumber} onChange={handleChange} className="form-control" />
-                    {errors.mobilenumber && <small className="text-danger">{errors.mobilenumber}</small>}
                 </div>
 
                 <div className="mb-3">
@@ -160,7 +199,11 @@ function CreateUserManagement() {
                         <option value={5}>Cooking</option>
                         <option value={6}>Plumbing</option>
                     </select>
-                    {errors.role && <small className="text-danger">{errors.role}</small>}
+                </div>
+
+                <div className="mb-3">
+                    <label>Profile Image</label>
+                    <input type="file" className="form-control" onChange={handleFileChange} />
                 </div>
 
                 <div>
@@ -169,6 +212,7 @@ function CreateUserManagement() {
                         {loading ? "Saving..." : "Save"}
                     </button>
                 </div>
+
             </form>
         </div>
     );

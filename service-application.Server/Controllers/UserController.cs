@@ -52,9 +52,12 @@ namespace service_application.Server.Controllers
         [HttpGet("{id}")]
         public async ValueTask<IActionResult> GetUserById(long id)
         {
+            
             try
-            {
-                var entity = await _User.GetUserById(id);
+            { 
+                
+                var entity = await _User
+                    .GetUserById(id);
                 var dto = entity.ToMap<User, UserResponseDto>();
                 return _apiResponse.Ok(dto);
             }

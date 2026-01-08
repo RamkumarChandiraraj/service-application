@@ -40,7 +40,8 @@ function UserList() {
       { header: "Username", field: "userName" },
       { header: "Email", field: "email" },
       { header: "Mobile", field: "mobileNumber" },
-      { header: "Role", field: "role" },
+     
+
       {
         header: "Actions",
         field: "actions",
