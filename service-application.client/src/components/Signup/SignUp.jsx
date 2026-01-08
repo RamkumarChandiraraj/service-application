@@ -2,7 +2,6 @@
 import { createUser } from "../../api/UserApi";
 import "./SignUp.css";
 
-/* ================= VALIDATION HELPERS ================= */
 
 const validateEmail = (email) =>
   /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);

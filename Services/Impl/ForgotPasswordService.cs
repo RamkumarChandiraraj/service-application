@@ -97,22 +97,26 @@ namespace Services.Impl
         {
             try
             {
-                var otpEntry = _otpRepo.FindByCondition(o =>
-                    o.Email == request.Email &&
-                    o.OtpValue == request.Otp &&
-                    !o.IsUsed
+                // 1️⃣ Find user using username OR email
+                var user = _userRepo.FindByCondition(u =>
+                    u.Email == request.UserNameOrEmail ||
+                    u.UserName == request.UserNameOrEmail
                 ).FirstOrDefault();
 
-                if (otpEntry == null)
+
+                if (user == null)
                     return new ApiResponse
                     {
                         Success = false,
                         Message = "Invalid or expired OTP"
                     };
 
-                var user = _userRepo
-                    .FindByCondition(u => u.ID == otpEntry.UserId)
-                    .FirstOrDefault();
+                var otpEntry = _otpRepo.FindByCondition(o =>
+                          o.UserId == user.ID &&
+                          o.OtpValue == request.Otp &&
+                          !o.IsUsed &&
+                          o.ExpiryTime > DateTime.UtcNow
+                      ).FirstOrDefault();
 
                 if (user == null)
                     return new ApiResponse
