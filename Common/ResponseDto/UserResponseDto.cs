@@ -16,5 +16,7 @@ namespace Common.ResponseDto
         public string Email { get; set; }
         public long MobileNumber { get; set; }
         public UserRole Role { get; set; }
+        public long? ProfileId { get; set; }
+        public AttachmentResponseDto Profile { get; set; } 
     }
 }

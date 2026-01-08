@@ -3,6 +3,7 @@ using System;
 using Data.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Data.Migrations
 {
     [DbContext(typeof(ServiceApplicationDbContext))]
-    partial class ServiceApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260106072343_AddProfileIdToUser")]
+    partial class AddProfileIdToUser
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -379,8 +382,6 @@ namespace Data.Migrations
 
                     b.HasKey("ID");
 
-                    b.HasIndex("ProfileId");
-
                     b.ToTable("User");
                 });
 
@@ -412,15 +413,6 @@ namespace Data.Migrations
                         .IsRequired();
 
                     b.Navigation("Category");
-                });
-
-            modelBuilder.Entity("Data.Entities.User", b =>
-                {
-                    b.HasOne("Data.Entities.Attachment", "Profile")
-                        .WithMany()
-                        .HasForeignKey("ProfileId");
-
-                    b.Navigation("Profile");
                 });
 
             modelBuilder.Entity("Data.Entities.Category", b =>
