@@ -1,6 +1,7 @@
 ﻿import { useState, useEffect } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { createUser, updateUser, getUserById } from "../../api/UserApi";
+import { uploadAttachment, updateAttachment } from "../../api/attachmentApi";
 
 const validateEmail = (email) =>
     /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -26,6 +27,8 @@ function CreateUserManagement() {
         profileId: ""
     });
 
+    const [file, setFile] = useState(null);
+    const [uploading, setUploading] = useState(false);
     const [errors, setErrors] = useState({});
     const [loading, setLoading] = useState(false);
     const [pageLoading, setPageLoading] = useState(false);
@@ -38,6 +41,7 @@ function CreateUserManagement() {
             setPageLoading(true);
             try {
                 const res = await getUserById(id);
+                
                 const user = res.data?.data || res.data;
 
                 setFormData({
@@ -63,6 +67,10 @@ function CreateUserManagement() {
         const { name, value } = e.target;
         setFormData(prev => ({ ...prev, [name]: value }));
         setErrors(prev => ({ ...prev, [name]: "" }));
+    };
+
+    const handleFileChange = (e) => {
+        setFile(e.target.files[0]);
     };
 
     const validate = () => {
@@ -95,21 +103,43 @@ function CreateUserManagement() {
         return Object.keys(temp).length === 0;
     };
 
+    const uploadProfile = async () => {
+        if (!file) return formData.profileId || null;
+
+        const fd = new FormData();
+        fd.append("file", file);
+
+        setUploading(true);
+        try {
+            let res;
+            if (isEditMode && formData.profileId) {
+                res = await updateAttachment(formData.profileId, fd);
+            } else {
+                res = await uploadAttachment(fd);
+            }
+
+            const uploaded = res.data?.data || res.data;
+            return uploaded.id;
+        } finally {
+            setUploading(false);
+        }
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (!validate()) return;
 
         setLoading(true);
         try {
+            const profileId = await uploadProfile();
+
             const payload = {
                 ...formData,
                 role: Number(formData.role),
-                profileId: formData.profileId ? Number(formData.profileId) : null
+                profileId: profileId ? Number(profileId) : null
             };
 
             if (isEditMode) delete payload.password;
-
-            console.log("Payload:", payload);
 
             isEditMode
                 ? await updateUser(formData.id, payload)
@@ -172,20 +202,14 @@ function CreateUserManagement() {
                 </div>
 
                 <div className="mb-3">
-                    <label> Profile ID</label>
-                    <input
-                        name="profileId"
-                        value={formData.profileId}
-                        onChange={handleChange}
-                        className="form-control"
-                        
-                    />
+                    <label>Profile Image</label>
+                    <input type="file" className="form-control" onChange={handleFileChange} />
                 </div>
 
                 <div>
                     <Link to="/userlist" className="btn btn-secondary me-2">Cancel</Link>
-                    <button type="submit" className="btn btn-success" disabled={loading}>
-                        {loading ? "Saving..." : "Save"}
+                    <button type="submit" className="btn btn-success" disabled={loading || uploading}>
+                        {uploading ? "Uploading..." : loading ? "Saving..." : "Save"}
                     </button>
                 </div>
 
