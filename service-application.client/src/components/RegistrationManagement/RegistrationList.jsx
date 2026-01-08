@@ -47,10 +47,10 @@ function RegistrationList() {
         sortable: false,
         body: (row) => (
           <div className="d-flex gap-2 flex-wrap">
-            <Link to={`/readregistration/${row.id}`} className="btn btn-info btn-sm">
+            <Link to={`/management/registrations/read/${row.id}`} className="btn btn-info btn-sm">
               View
             </Link>
-            <Link to={`/createregistration/${row.id}`} className="btn btn-primary btn-sm">
+            <Link to={`/management/registrations/edit/${row.id}`} className="btn btn-primary btn-sm">
               Edit
             </Link>
             <button className="btn btn-danger btn-sm" onClick={() => handleDelete(row.id)}>
@@ -73,7 +73,7 @@ function RegistrationList() {
         data={data}
         columns={columns}
         searchFields={["companyName", "email", "phoneNumber"]}
-        onAdd={() => navigate("/createregistration")}
+        onAdd={() => navigate("/management/registrations/create")}
       />
     </div>
   );

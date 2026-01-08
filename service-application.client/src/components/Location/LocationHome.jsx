@@ -45,13 +45,24 @@ function LocationHome() {
         sortable: false,
         body: (row) => (
           <div className="d-flex gap-2 flex-wrap">
-            <Link to={`/readlocation/${row.id}`} className="btn btn-info btn-sm">
+            <Link
+              to={`/management/locations/read/${row.id}`}
+              className="btn btn-info btn-sm"
+            >
               View
             </Link>
-            <Link to={`/createlocation/${row.id}`} className="btn btn-primary btn-sm">
+
+            <Link
+              to={`/management/locations/edit/${row.id}`}
+              className="btn btn-primary btn-sm"
+            >
               Edit
             </Link>
-            <button className="btn btn-danger btn-sm" onClick={() => handleDelete(row.id)}>
+
+            <button
+              className="btn btn-danger btn-sm"
+              onClick={() => handleDelete(row.id)}
+            >
               Delete
             </button>
           </div>
@@ -71,7 +82,7 @@ function LocationHome() {
         data={data}
         columns={columns}
         searchFields={["name", "pincode"]}
-        onAdd={() => navigate("/createlocation")}
+        onAdd={() => navigate("/management/locations/create")}
       />
     </div>
   );

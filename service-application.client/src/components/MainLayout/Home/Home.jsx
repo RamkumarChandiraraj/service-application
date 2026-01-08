@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import heroBg from "./hero-bg-abstract.jpg";
+import heroBg from "../../../assets/images/hero-bg-abstract.jpg";
 
 const HeroSection = () => {
   const navigate = useNavigate();
