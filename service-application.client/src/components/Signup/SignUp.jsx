@@ -13,10 +13,9 @@ const SignUp = () => {
     const [rightPanelActive, setRightPanelActive] = useState(false);
 
     // Login state
-    const [userName, setUserName] = useState("");
+    const [userInput, setUserInput] = useState(""); // username or email
     const [password, setPassword] = useState("");
     const [loginError, setLoginError] = useState("");
-
     // Signup state
     const [signUpForm, setSignUpForm] = useState({
         userName: "",
@@ -73,13 +72,27 @@ const SignUp = () => {
     const handleLogin = async () => {
         try {
             setLoginError("");
-            await loginApi({ userName, password });
-            navigate("/");
-        } catch {
-            setLoginError("Invalid username or password");
-        }
-    };
 
+            const data = await loginApi({
+                UserNameOrEmail: userInput, // username or email
+                Password: password,         // include password
+            });
+
+            // Optional: store JWT token in localStorage
+            localStorage.setItem("token", data.token);
+
+            // Redirect after successful login
+            navigate("/");
+
+        } catch (err) {
+            console.error(err);
+            setLoginError(
+                err.response && err.response.status === 401
+                    ? "Invalid username or password"
+                    : "Server error, try again later"
+            );
+        }
+    }
     const handleForgotPassword = () => {
         navigate("/reset-password");
     };
@@ -114,9 +127,9 @@ const SignUp = () => {
 
                     <input
                         type="text"
-                        placeholder="User Name"
-                        value={userName}
-                        onChange={(e) => setUserName(e.target.value)}
+                        placeholder="User Name or Email"
+                        value={userInput}  // <-- now using userInput state
+                        onChange={(e) => setUserInput(e.target.value)}
                     />
 
                     <input
