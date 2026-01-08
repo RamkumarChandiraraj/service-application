@@ -13,7 +13,9 @@ const AnnouncementsManagement = () => {
     const [saving, setSaving] = useState(false);
 
     const [modalOpen, setModalOpen] = useState(false);
+    const [viewModalOpen, setViewModalOpen] = useState(false);
     const [editingId, setEditingId] = useState(null);
+    const [viewData, setViewData] = useState(null);
 
     const [formData, setFormData] = useState({
         title: "",
@@ -68,12 +70,18 @@ const AnnouncementsManagement = () => {
 
     // ================= EDIT =================
     const handleEdit = (row) => {
-        setEditingId(row.id);
+        setEditingId(row.id || row._id);
         setFormData({
             title: row.title,
             description: row.description,
         });
         setModalOpen(true);
+    };
+
+    // ================= VIEW =================
+    const handleView = (row) => {
+        setViewData(row);
+        setViewModalOpen(true);
     };
 
     // ================= DELETE =================
@@ -96,6 +104,11 @@ const AnnouncementsManagement = () => {
         setFormData({ title: "", description: "" });
     };
 
+    const closeViewModal = () => {
+        setViewModalOpen(false);
+        setViewData(null);
+    };
+
     // ================= TABLE COLUMNS =================
     const columns = useMemo(
         () => [
@@ -109,6 +122,12 @@ const AnnouncementsManagement = () => {
                 body: (row) => (
                     <div className="d-flex gap-2 flex-wrap">
                         <button
+                            className="btn btn-info btn-sm"
+                            onClick={() => handleView(row)}
+                        >
+                            View
+                        </button>
+                        <button
                             className="btn btn-warning btn-sm"
                             onClick={() => handleEdit(row)}
                         >
@@ -116,7 +135,7 @@ const AnnouncementsManagement = () => {
                         </button>
                         <button
                             className="btn btn-danger btn-sm"
-                            onClick={() => handleDelete(row.id)}
+                            onClick={() => handleDelete(row.id || row._id)}
                         >
                             Delete
                         </button>
@@ -144,7 +163,7 @@ const AnnouncementsManagement = () => {
                 onAdd={() => setModalOpen(true)}
             />
 
-            {/* ================= MODAL ================= */}
+            {/* ================= ADD / EDIT MODAL ================= */}
             {modalOpen && (
                 <div className="modal show d-block" tabIndex="-1">
                     <div className="modal-dialog">
@@ -196,6 +215,36 @@ const AnnouncementsManagement = () => {
                                         : editingId
                                             ? "Update"
                                             : "Add"}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* ================= VIEW MODAL ================= */}
+            {viewModalOpen && viewData && (
+                <div className="modal show d-block" tabIndex="-1">
+                    <div className="modal-dialog">
+                        <div className="modal-content">
+                            <div className="modal-header">
+                                <h5 className="modal-title">View Announcement</h5>
+                                <button className="btn-close" onClick={closeViewModal}></button>
+                            </div>
+                            <div className="modal-body">
+                                <p>
+                                    <strong>ID:</strong> {viewData.id || viewData._id}
+                                </p>
+                                <p>
+                                    <strong>Title:</strong> {viewData.title}
+                                </p>
+                                <p>
+                                    <strong>Description:</strong> {viewData.description}
+                                </p>
+                            </div>
+                            <div className="modal-footer">
+                                <button className="btn btn-secondary" onClick={closeViewModal}>
+                                    Close
                                 </button>
                             </div>
                         </div>
