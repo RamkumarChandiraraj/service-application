@@ -92,7 +92,7 @@ function CreateServiceManagement() {
                 alert("Service created successfully");
             }
 
-            navigate("/servicelist");
+            navigate("/management/services");
         } catch (err) {
             setError(
                 err.response?.data?.message ||
@@ -198,7 +198,7 @@ function CreateServiceManagement() {
 
                     {/* Buttons */}
                     <div className="d-flex justify-content-end">
-                        <Link to="/servicelist" className="btn btn-secondary me-2">
+                        <Link to="/management/services/" className="btn btn-secondary me-2">
                             Cancel
                         </Link>
                         <button

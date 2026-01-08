@@ -103,7 +103,7 @@ function CreateLocation() {
         alert("Location created successfully");
       }
 
-      navigate("/locationlist");
+      navigate("/management/locations");
     } catch (err) {
       setError(
         err.response?.data?.message ||
@@ -250,7 +250,7 @@ function CreateLocation() {
 
             {/* BUTTONS */}
             <div className="d-flex justify-content-end gap-3 mt-5">
-              <Link to="/locationlist" className="btn btn-secondary">
+              <Link to="/management/locations" className="btn btn-secondary">
                 Cancel
               </Link>
               <button

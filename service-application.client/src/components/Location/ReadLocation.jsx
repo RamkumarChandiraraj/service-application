@@ -25,7 +25,7 @@ function ReadLocationManagement() {
                 <p><strong>Pincode:</strong> {location.pincode}</p>
 
                 <div className="text-end">
-                    <Link to="/locationlist" className="btn btn-secondary">Back</Link>
+                    <Link to="/management/locations" className="btn btn-secondary">Back</Link>
                 </div>
             </div>
         </div>

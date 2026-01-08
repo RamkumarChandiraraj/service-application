@@ -93,7 +93,7 @@ function ReadUserManagement() {
                 </tbody>
             </table>
 
-            <Link to="/userlist" className="btn btn-secondary mt-3">Back</Link>
+            <Link to="/management/users" className="btn btn-secondary">Back</Link>
         </div>
     );
 }

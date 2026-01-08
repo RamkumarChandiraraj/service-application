@@ -10,7 +10,7 @@ using Services.Interface;
 
 namespace service_application.Server.Controllers
 {
-    //[Authorize]
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class LocationController(ILocationService location, IApiMessage<IApiResponse> apiResponse) : ControllerBase

@@ -1,5 +1,4 @@
 import { useState, useMemo } from "react";
-import "./DataTable.css";
 
 const DataTable = ({
   title,

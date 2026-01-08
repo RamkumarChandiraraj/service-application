@@ -180,7 +180,7 @@ function CreateRegistration() {
                 ? await updateRegistration(id, payload)
                 : await createRegistration(payload);
 
-            navigate("/registrationlist");
+            navigate("/management/registrations");
         } catch {
             setError("Something went wrong");
         } finally {
@@ -192,7 +192,7 @@ function CreateRegistration() {
     const handleDelete = async () => {
         if (!window.confirm("Are you sure?")) return;
         await deleteRegistration(id);
-        navigate("/registrationlist");
+        navigate("/management/registrations");
     };
 
     if (pageLoading) return <p className="text-center mt-5">Loading...</p>;
@@ -304,7 +304,7 @@ function CreateRegistration() {
 
                     {/* ACTIONS */}
                     <div className="text-end">
-                        <Link to="/registrationlist" className="btn btn-secondary me-2">
+                        <Link to="/management/registrations" className="btn btn-secondary me-2">
                             Cancel
                         </Link>
                         <button className="btn btn-success" disabled={loading}>
