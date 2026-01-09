@@ -57,7 +57,7 @@ const VerifyOtpModal = () => {
 
             // ⏳ Redirect after toast
             setTimeout(() => {
-                navigate("/");
+                navigate("/auth");
             }, 3000);
 
         } catch (err) {

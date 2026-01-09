@@ -1,0 +1,131 @@
+/* ROOT */
+.sp-search-wrapper {
+  width: 100%;
+  padding: 16px;
+  background: #f9fafc;
+}
+
+/* TITLE */
+.sp-search-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.sp-search-title h2 {
+  font-size: 22px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.sp-search-dot {
+  width: 8px;
+  height: 8px;
+  background: #007bff;
+  border-radius: 50%;
+}
+
+/* BOX */
+.sp-search-box {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+  position: relative;
+}
+
+
+/* GRID */
+.sp-search-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  align-items: end;
+}
+
+.sp-search-row > * {
+  width: 100%;
+}
+
+/* LOCATION */
+.sp-location-box {
+  display: flex;
+  position:sticky;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.sp-location-box label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+}
+
+/* SELECT */
+.sp-select {
+  padding: 10px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+
+/* BUTTON */
+.sp-search-btn {
+  height: 44px;
+  border-radius: 8px;
+  background: #007bff;
+  color: #fff;
+  border: none;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.sp-search-btn:disabled {
+  background: #cfd4da;
+  cursor: not-allowed;
+}
+
+/* ERROR */
+.error {
+  color: #d93025;
+  font-size: 12px;
+}
+
+/* TABLET */
+@media (max-width: 1024px) {
+  .sp-search-row {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .sp-search-btn {
+    grid-column: span 2;
+  }
+}
+
+/* MOBILE */
+@media (max-width: 600px) {
+  .sp-search-wrapper {
+    padding: 12px;
+  }
+
+  .sp-search-row {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .sp-search-btn {
+    height: 46px;
+    font-size: 16px;
+  }
+}
+
+/* LARGE */
+@media (min-width: 1280px) {
+  .sp-search-wrapper {
+    max-width: 1200px;
+    margin: auto;
+  }
+}
