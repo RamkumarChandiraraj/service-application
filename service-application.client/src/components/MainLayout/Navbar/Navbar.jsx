@@ -44,7 +44,7 @@ const Navbar = () => {
   const isHashActive = (hash) => activeHash === hash;
 
   const isAdmin = auth?.role === "Admin";
-  const isManager = auth?.role === "Manager";
+  const isVendor = auth?.role === "Vendor";
 
   return (
     <header
@@ -116,7 +116,7 @@ const Navbar = () => {
 
                 <ul className={openDropdowns.main ? "dropdown-active" : ""}>
                   {/* MASTER DATA */}
-                  {(isAdmin || isManager) && (
+                  {(isAdmin || isVendor) && (
                     <li
                       className={`dropdown ${
                         openDropdowns.master ? "active" : ""
@@ -177,7 +177,7 @@ const Navbar = () => {
                         )}
 
                         {/* ADMIN + MANAGER */}
-                        {(isAdmin || isManager) && (
+                        {(isAdmin || isVendor) && (
                           <>
                             <li>
                               <NavLink

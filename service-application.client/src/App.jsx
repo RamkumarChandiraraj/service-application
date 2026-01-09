@@ -43,7 +43,7 @@ function App() {
 
 
         {/* PROTECTED MANAGEMENT ROUTES */}
-        <Route element={<RequireAuth allowedRoles={["Admin", "Manager"]} />}>
+        <Route element={<RequireAuth allowedRoles={["Admin", "Vendor"]} />}>
           <Route path="/management/*" element={<ManagementRoutes />} />
         </Route>
       </Routes>

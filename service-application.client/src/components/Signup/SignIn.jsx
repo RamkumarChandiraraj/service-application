@@ -28,7 +28,7 @@ const SignIn = () => {
             const response = await loginApi({
                 userNameOrEmail: userInput, // send username/email
                 password: password,
-            });S
+            });
 
             // Optionally store JWT token
             localStorage.setItem("token", response.token);

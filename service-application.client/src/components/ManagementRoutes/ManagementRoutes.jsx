@@ -54,7 +54,7 @@ export default function ManagementRoutes() {
       </Route>
 
       {/* ========== ADMIN + MANAGER ========== */}
-      <Route element={<RequireAuth allowedRoles={["Admin", "Manager"]} />}>
+      <Route element={<RequireAuth allowedRoles={["Admin", "Vendor"]} />}>
         <Route path="registrations" element={<RegistrationList />} />
         <Route path="registrations/create" element={<CreateRegistration />} />
         <Route path="registrations/edit/:id" element={<CreateRegistration />} />

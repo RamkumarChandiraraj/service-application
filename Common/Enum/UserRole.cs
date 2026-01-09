@@ -9,7 +9,7 @@ namespace Common.Enum
     public enum UserRole
     {
         Admin = 1,
-        Vendors = 2,
+        Vendor = 2,
         Customer = 3,
         Employee = 4,
     }
