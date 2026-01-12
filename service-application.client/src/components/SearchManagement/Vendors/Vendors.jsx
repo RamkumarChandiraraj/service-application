@@ -1,77 +1,91 @@
-import React, { useEffect, useState } from "react";
-import { userSearch } from "../../../api/UsersearchApi"; // POST API
+﻿import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom"; // ✅ FIX: add this
+import { userSearch } from "../../../api/UsersearchApi";
 import LoadingPage from "../../Common/LoadingPage";
 
 const Vendors = ({ searchPayload }) => {
-  const [vendors, setVendors] = useState([]);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [loading, setLoading] = useState(true);
+    const navigate = useNavigate(); // ✅ FIX: add this
 
-  useEffect(() => {
-    const fetchVendors = async () => {
-      if (!searchPayload) return;
+    const [vendors, setVendors] = useState([]);
+    const [searchTerm, setSearchTerm] = useState("");
+    const [loading, setLoading] = useState(true);
 
-      setLoading(true);
-      try {
-        const vendorResponse = await userSearch(searchPayload);
-        setVendors(vendorResponse?.data || []);
-      } catch (err) {
-        console.error("Failed to fetch vendors", err);
-      } finally {
-        setLoading(false);
-      }
-    };
+    useEffect(() => {
+        const fetchVendors = async () => {
+            if (!searchPayload) return;
 
-    fetchVendors();
-  }, [searchPayload]);
+            setLoading(true);
+            try {
+                const vendorResponse = await userSearch(searchPayload);
+                setVendors(vendorResponse?.data || []);
+            } catch (err) {
+                console.error("Failed to fetch vendors", err);
+            } finally {
+                setLoading(false);
+            }
+        };
 
-  const filteredVendors = Array.isArray(vendors)
-    ? vendors.filter((vendor) =>
-        vendor.companyName?.toLowerCase().includes(searchTerm.toLowerCase())
-      )
-    : [];
+        fetchVendors();
+    }, [searchPayload]);
 
-  if (loading) return <LoadingPage />;
+    const filteredVendors = Array.isArray(vendors)
+        ? vendors.filter(vendor =>
+            vendor.companyName
+                ?.toLowerCase()
+                .includes(searchTerm.toLowerCase())
+        )
+        : [];
 
-  return (
-    <div className="vendor-wrapper">
-      <div className="search-bar-container">
-        <input
-          type="text"
-          placeholder="Search by company name..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="search-bar"
-        />
-      </div>
+    if (loading) return <LoadingPage />;
 
-      <div className="vendor-container">
-        {filteredVendors.length > 0 ? (
-          filteredVendors.map((vendor) => (
-            <div className="vendor-card" key={vendor.id}>
-              <h2 className="vendor-name">{vendor.companyName}</h2>
-
-              <p className="vendor-location">
-                <i className="bi bi-geo-alt location-icon"></i>
-                {vendor.locationName || "Unknown"}
-              </p>
-
-              <p className="vendor-services">
-                {vendor.serviceName || "Unknown Service"}
-              </p>
-
-              <p className="vendor-description">{vendor.description}</p>
-
-              <p className="vendor-description"> Call Now{vendor.mobile}</p>
-              
+    return (
+        <div className="vendor-wrapper">
+            <div className="search-bar-container">
+                <input
+                    type="text"
+                    placeholder="Search by company name..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="search-bar"
+                />
             </div>
-          ))
-        ) : (
-          <p className="no-results">No vendors found.</p>
-        )}
-      </div>
-    </div>
-  );
+
+            <div className="vendor-container">
+                {filteredVendors.length > 0 ? (
+                    filteredVendors.map(vendor => (
+                        <div className="vendor-card" key={vendor.id}>
+                            <h2 className="vendor-name">{vendor.companyName}</h2>
+
+                            <p className="vendor-location">
+                                <i className="bi bi-geo-alt location-icon"></i>
+                                {vendor.locationName || "Unknown"}
+                            </p>
+
+                            <p className="vendor-services">
+                                {vendor.serviceName || "Unknown Service"}
+                            </p>
+
+                            <p className="vendor-description">
+                                {vendor.description}
+                            </p>
+
+                            <button
+                                className="chat-btn"
+                                onClick={() => {
+                                    console.log("FULL VENDOR OBJECT:", vendor);
+                                    navigate(`/chat/${vendor.phoneNumber}`)
+                                }}
+                            >
+                                💬 Chat Now
+                            </button>
+                        </div>
+                    ))
+                ) : (
+                    <p className="no-results">No vendors found.</p>
+                )}
+            </div>
+        </div>
+    );
 };
 
 export default Vendors;
