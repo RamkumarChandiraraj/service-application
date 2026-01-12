@@ -34,15 +34,14 @@ const SignIn = () => {
             localStorage.setItem("token", response.token);
             setAuth(response);
 
-            setLoginSuccess("Login successful! Redirecting...");
-            setTimeout(() => navigate("/management/locations"), 800);
-        } catch (err) {
-            console.error(err);
-            setLoginError("Invalid username or password");
-        } finally {
-            setLoading(false);
-        }
-    };
+      setLoginSuccess("Login successful! Redirecting...");
+      setTimeout(() => navigate("/dashboard"), 800);
+    } catch {
+      setLoginError("Invalid username or password");
+    } finally {
+      setLoading(false);
+    }
+  };
 
     return (
         <form onSubmit={(e) => e.preventDefault()}>

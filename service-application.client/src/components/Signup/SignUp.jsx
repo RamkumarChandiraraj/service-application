@@ -2,7 +2,6 @@
 import { createUser } from "../../api/UserApi";
 import "./SignUp.css";
 
-
 const validateEmail = (email) =>
   /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
@@ -17,6 +16,7 @@ const SignUp = ({ onSuccess }) => {
     mobileNumber: "",
     email: "",
     password: "",
+    role: "", // ✅ added
   });
 
   const [errors, setErrors] = useState({});
@@ -55,19 +55,22 @@ const SignUp = ({ onSuccess }) => {
     else if (signUpForm.password.length < 6)
       newErrors.password = "Password must be at least 6 characters";
 
+    // ✅ role validation
+    if (!signUpForm.role)
+      newErrors.role = "Please select a role";
+
     setErrors(newErrors);
     if (Object.keys(newErrors).length > 0) return;
 
     setIsSubmitting(true);
 
     try {
-      // ✅ Payload EXACTLY matching your API
       await createUser({
         userName: signUpForm.userName,
         password: signUpForm.password,
         email: signUpForm.email,
-        mobileNumber: Number(signUpForm.mobileNumber), // IMPORTANT
-        role: 1,
+        mobileNumber: Number(signUpForm.mobileNumber),
+        role: Number(signUpForm.role), // ✅ Owner / Customer only
       });
 
       alert("User created successfully");
@@ -77,20 +80,18 @@ const SignUp = ({ onSuccess }) => {
         mobileNumber: "",
         email: "",
         password: "",
+        role: "",
       });
 
       setErrors({});
       onSuccess(); // switch to Sign In panel
     } catch (error) {
-      /* ================= BACKEND VALIDATION HANDLING ================= */
-
       const apiErrors = error.response?.data?.errors;
 
       if (apiErrors) {
         const formattedErrors = {};
 
         Object.keys(apiErrors).forEach((key) => {
-          // Backend: UserName → Frontend: userName
           const field =
             key.charAt(0).toLowerCase() + key.slice(1);
           formattedErrors[field] = apiErrors[key][0];
@@ -152,6 +153,23 @@ const SignUp = ({ onSuccess }) => {
       {errors.password && (
         <small className="text-danger">{errors.password}</small>
       )}
+
+      {/* ✅ ROLE DROPDOWN */}
+      <div className="mb-3">
+        <select
+          name="role"
+          value={signUpForm.role}
+          onChange={handleSignUpChange}
+          className="form-control"
+        >
+          <option value="">-- Select Role --</option>
+          <option value="2">Vendor</option>
+          <option value="3">Customer</option>
+        </select>
+        {errors.role && (
+          <small className="text-danger">{errors.role}</small>
+        )}
+      </div>
 
       <button type="submit" disabled={isSubmitting}>
         {isSubmitting ? "Creating..." : "Sign Up"}

@@ -193,11 +193,9 @@ function CreateUserManagement() {
                     <select name="role" value={formData.role} onChange={handleChange} className="form-control">
                         <option value="">--Select Role--</option>
                         <option value={1}>Admin</option>
-                        <option value={2}>Manager</option>
-                        <option value={3}>User</option>
-                        <option value={4}>Painting</option>
-                        <option value={5}>Cooking</option>
-                        <option value={6}>Plumbing</option>
+                        <option value={2}>Vendor</option>
+                        <option value={3}>Customer</option>
+                        <option value={4}>Employee</option>
                     </select>
                 </div>
 

@@ -6,6 +6,9 @@ import {
   getLocationById,
 } from "../../api/locationList";
 
+import AlertToast from "../Common/AlertToast";
+import LoadingPage from "../Common/LoadingPage";
+
 function CreateLocation() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -23,9 +26,14 @@ function CreateLocation() {
   });
 
   const [errors, setErrors] = useState({});
-  const [loading, setLoading] = useState(false);
-  const [pageLoading, setPageLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);      // submit loader
+  const [pageLoading, setPageLoading] = useState(false); // page loader
+
+  const [toast, setToast] = useState({
+    show: false,
+    message: "",
+    type: "success",
+  });
 
   // ================= LOAD DATA (EDIT MODE) =================
   useEffect(() => {
@@ -46,7 +54,11 @@ function CreateLocation() {
           ReferenceId: res.data.referenceId ?? "",
         });
       } catch {
-        setError("Failed to load location details");
+        setToast({
+          show: true,
+          message: "Failed to load location details",
+          type: "error",
+        });
       } finally {
         setPageLoading(false);
       }
@@ -81,7 +93,6 @@ function CreateLocation() {
     if (!validate()) return;
 
     setLoading(true);
-    setError(null);
 
     try {
       const payload = {
@@ -96,181 +107,204 @@ function CreateLocation() {
 
       if (isEditMode) {
         await updateLocation(payload);
-        alert("Location updated successfully");
+        setToast({
+          show: true,
+          message: "Location updated successfully",
+          type: "success",
+        });
       } else {
         const { ID, ...createPayload } = payload;
         await createLocation(createPayload);
-        alert("Location created successfully");
+        setToast({
+          show: true,
+          message: "Location created successfully",
+          type: "success",
+        });
       }
 
-      navigate("/management/locations");
+      setTimeout(() => {
+        navigate("/management/locations");
+      }, 1500);
     } catch (err) {
-      setError(
-        err.response?.data?.message ||
-          "Something went wrong. Please try again."
-      );
+      setToast({
+        show: true,
+        message:
+          err.response?.data?.message ||
+          "Something went wrong. Please try again.",
+        type: "error",
+      });
     } finally {
       setLoading(false);
     }
   };
 
-  if (pageLoading)
-    return <p className="text-center mt-5">Loading location details...</p>;
+  // ================= PAGE LOADER =================
+  if (pageLoading) return <LoadingPage />;
 
   return (
-    <div className="bg-light min-vh-100 d-flex justify-content-center py-5">
-      <div className="container px-3">
-        {/* MAIN CARD */}
-        <div
-          className="card shadow-sm mx-auto p-4 p-md-5"
-          style={{ maxWidth: "900px" }}
-        >
-          <h3 className="text-center mb-4">
-            {isEditMode ? "Update Location" : "Create Location"}
-          </h3>
+    <>
+      {/* 🔔 TOAST */}
+      <AlertToast
+        show={toast.show}
+        message={toast.message}
+        type={toast.type}
+        onClose={() => setToast({ ...toast, show: false })}
+      />
 
-          {error && <div className="alert alert-danger">{error}</div>}
+      <div className="bg-light min-vh-100 d-flex justify-content-center py-5">
+        <div className="container px-3">
+          <div
+            className="card shadow-sm mx-auto p-4 p-md-5"
+            style={{ maxWidth: "900px" }}
+          >
+            <h3 className="text-center mb-4">
+              {isEditMode ? "Update Location" : "Create Location"}
+            </h3>
 
-          <form onSubmit={handleSubmit}>
-            <div className="row g-4">
-              {/* Location Name */}
-              <div className="col-12">
-                <label className="form-label">
-                  Location Name <span className="text-danger">*</span>
-                </label>
-                <input
-                  type="text"
-                  name="Name"
-                  value={formData.Name}
-                  onChange={handleChange}
-                  className={`form-control ${
-                    errors.Name ? "is-invalid" : ""
-                  }`}
-                />
-                {errors.Name && (
-                  <div className="invalid-feedback">{errors.Name}</div>
-                )}
+            <form onSubmit={handleSubmit}>
+              <div className="row g-4">
+                {/* Location Name */}
+                <div className="col-12">
+                  <label className="form-label">
+                    Location Name <span className="text-danger">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    name="Name"
+                    value={formData.Name}
+                    onChange={handleChange}
+                    className={`form-control ${
+                      errors.Name ? "is-invalid" : ""
+                    }`}
+                  />
+                  {errors.Name && (
+                    <div className="invalid-feedback">{errors.Name}</div>
+                  )}
+                </div>
+
+                {/* Description */}
+                <div className="col-12">
+                  <label className="form-label">Description</label>
+                  <textarea
+                    name="Description"
+                    value={formData.Description}
+                    onChange={handleChange}
+                    className="form-control"
+                    rows="3"
+                  />
+                </div>
+
+                {/* Location Code */}
+                <div className="col-12 col-md-6">
+                  <label className="form-label">Location Code</label>
+                  <input
+                    type="text"
+                    name="LocationCode"
+                    value={formData.LocationCode}
+                    onChange={handleChange}
+                    className="form-control"
+                  />
+                </div>
+
+                {/* Pincode */}
+                <div className="col-12 col-md-6">
+                  <label className="form-label">
+                    Pincode <span className="text-danger">*</span>
+                  </label>
+                  <input
+                    type="number"
+                    name="Pincode"
+                    value={formData.Pincode}
+                    onChange={handleChange}
+                    className={`form-control ${
+                      errors.Pincode ? "is-invalid" : ""
+                    }`}
+                  />
+                  {errors.Pincode && (
+                    <div className="invalid-feedback">{errors.Pincode}</div>
+                  )}
+                </div>
+
+                {/* Latitude */}
+                <div className="col-12 col-md-6">
+                  <label className="form-label">
+                    Latitude <span className="text-danger">*</span>
+                  </label>
+                  <input
+                    type="number"
+                    step="0.000001"
+                    name="Latitude"
+                    value={formData.Latitude}
+                    onChange={handleChange}
+                    className={`form-control ${
+                      errors.Latitude ? "is-invalid" : ""
+                    }`}
+                  />
+                  {errors.Latitude && (
+                    <div className="invalid-feedback">{errors.Latitude}</div>
+                  )}
+                </div>
+
+                {/* Longitude */}
+                <div className="col-12 col-md-6">
+                  <label className="form-label">
+                    Longitude <span className="text-danger">*</span>
+                  </label>
+                  <input
+                    type="number"
+                    step="0.000001"
+                    name="Longitude"
+                    value={formData.Longitude}
+                    onChange={handleChange}
+                    className={`form-control ${
+                      errors.Longitude ? "is-invalid" : ""
+                    }`}
+                  />
+                  {errors.Longitude && (
+                    <div className="invalid-feedback">{errors.Longitude}</div>
+                  )}
+                </div>
+
+                {/* Reference ID */}
+                <div className="col-12 col-md-4">
+                  <label className="form-label">Reference ID</label>
+                  <input
+                    type="number"
+                    name="ReferenceId"
+                    value={formData.ReferenceId}
+                    onChange={handleChange}
+                    className="form-control"
+                  />
+                </div>
               </div>
 
-              {/* Description */}
-              <div className="col-12">
-                <label className="form-label">Description</label>
-                <textarea
-                  name="Description"
-                  value={formData.Description}
-                  onChange={handleChange}
-                  className="form-control"
-                  rows="3"
-                />
+              {/* BUTTONS */}
+              <div className="d-flex justify-content-end gap-3 mt-5">
+                <Link
+                  to="/management/locations"
+                  className="btn btn-secondary"
+                >
+                  Cancel
+                </Link>
+                <button
+                  type="submit"
+                  className="btn btn-success"
+                  disabled={loading}
+                >
+                  {loading
+                    ? isEditMode
+                      ? "Updating..."
+                      : "Saving..."
+                    : isEditMode
+                    ? "Update"
+                    : "Save"}
+                </button>
               </div>
-
-              {/* Location Code */}
-              <div className="col-12 col-md-6">
-                <label className="form-label">Location Code</label>
-                <input
-                  type="text"
-                  name="LocationCode"
-                  value={formData.LocationCode}
-                  onChange={handleChange}
-                  className="form-control"
-                />
-              </div>
-
-              {/* Pincode */}
-              <div className="col-12 col-md-6">
-                <label className="form-label">
-                  Pincode <span className="text-danger">*</span>
-                </label>
-                <input
-                  type="number"
-                  name="Pincode"
-                  value={formData.Pincode}
-                  onChange={handleChange}
-                  className={`form-control ${
-                    errors.Pincode ? "is-invalid" : ""
-                  }`}
-                />
-                {errors.Pincode && (
-                  <div className="invalid-feedback">{errors.Pincode}</div>
-                )}
-              </div>
-
-              {/* Latitude */}
-              <div className="col-12 col-md-6">
-                <label className="form-label">
-                  Latitude <span className="text-danger">*</span>
-                </label>
-                <input
-                  type="number"
-                  step="0.000001"
-                  name="Latitude"
-                  value={formData.Latitude}
-                  onChange={handleChange}
-                  className={`form-control ${
-                    errors.Latitude ? "is-invalid" : ""
-                  }`}
-                />
-                {errors.Latitude && (
-                  <div className="invalid-feedback">{errors.Latitude}</div>
-                )}
-              </div>
-
-              {/* Longitude */}
-              <div className="col-12 col-md-6">
-                <label className="form-label">
-                  Longitude <span className="text-danger">*</span>
-                </label>
-                <input
-                  type="number"
-                  step="0.000001"
-                  name="Longitude"
-                  value={formData.Longitude}
-                  onChange={handleChange}
-                  className={`form-control ${
-                    errors.Longitude ? "is-invalid" : ""
-                  }`}
-                />
-                {errors.Longitude && (
-                  <div className="invalid-feedback">{errors.Longitude}</div>
-                )}
-              </div>
-
-              {/* Reference ID */}
-              <div className="col-12 col-md-4">
-                <label className="form-label">Reference ID</label>
-                <input
-                  type="number"
-                  name="ReferenceId"
-                  value={formData.ReferenceId}
-                  onChange={handleChange}
-                  className="form-control"
-                />
-              </div>
-            </div>
-
-            {/* BUTTONS */}
-            <div className="d-flex justify-content-end gap-3 mt-5">
-              <Link to="/management/locations" className="btn btn-secondary">
-                Cancel
-              </Link>
-              <button
-                type="submit"
-                className="btn btn-success"
-                disabled={loading}
-              >
-                {loading
-                  ? isEditMode
-                    ? "Updating..."
-                    : "Saving..."
-                  : isEditMode
-                  ? "Update"
-                  : "Save"}
-              </button>
-            </div>
-          </form>
+            </form>
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }
 

@@ -10,14 +10,15 @@ using Services.Interface;
 
 namespace service_application.Server.Controllers
 {
-    [Authorize]
+    
     [Route("api/[controller]")]
     [ApiController]
     public class LocationController(ILocationService location, IApiMessage<IApiResponse> apiResponse) : ControllerBase
     {
         private readonly ILocationService _location = location;
         private readonly IApiMessage<IApiResponse> _apiResponse = apiResponse;
-
+        
+        [Authorize]
         [HttpPost]
         public async ValueTask<IActionResult> CreateLocation([FromBody] LocationRequestDto dto)
         {
@@ -40,6 +41,7 @@ namespace service_application.Server.Controllers
             }
         }
 
+
         [HttpGet("{id}")]
         public async ValueTask<IActionResult> GetLocationById(long id)
         {
@@ -60,7 +62,7 @@ namespace service_application.Server.Controllers
                 return _apiResponse.InternalServerError(ex.Message);
             }
         }
-
+        [Authorize]
         [HttpPut]
         public async ValueTask<IActionResult> UpdateLocation([FromBody] LocationRequestDto dto)
         {
@@ -80,7 +82,7 @@ namespace service_application.Server.Controllers
                 return _apiResponse.InternalServerError(ex.Message);
             }
         }
-
+        [Authorize]
         [HttpDelete("{id}")]
         public async ValueTask<IActionResult> DeleteLocation(long id)
         {
