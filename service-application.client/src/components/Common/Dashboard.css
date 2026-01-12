@@ -1,0 +1,132 @@
+.dashboard-layout {
+  display: flex;
+  min-height: 100vh;
+  background: #f3f4f6;
+}
+
+/* ===== SIDEBAR ===== */
+.dashboard-sidebar {
+  width: 260px;
+  background: linear-gradient(180deg, #4fd1c5, #38b2ac);
+  color: white;
+  padding: 2rem 1.5rem;
+  text-align: center;
+}
+
+.sidebar-avatar {
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  border: 3px solid white;
+  margin-bottom: 1rem;
+}
+
+.dashboard-sidebar h3 {
+  margin: 0.5rem 0;
+}
+
+.sidebar-menu {
+  list-style: none;
+  margin-top: 2rem;
+  padding: 0;
+}
+
+.sidebar-menu li {
+  padding: 0.7rem;
+  cursor: pointer;
+  border-radius: 8px;
+}
+
+.sidebar-menu li:hover {
+  background: rgba(255,255,255,0.2);
+}
+
+/* ===== MAIN ===== */
+.dashboard-main {
+  flex: 1;
+  padding: 2rem;
+}
+
+/* ===== STATS ===== */
+.stats-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.stat-card {
+  border-radius: 16px;
+  padding: 1.5rem;
+  color: white;
+}
+
+.stat-card h1 {
+  font-size: 2.2rem;
+  margin-top: 0.5rem;
+}
+
+.green { background: linear-gradient(135deg, #48bb78, #38a169); }
+.blue { background: linear-gradient(135deg, #4299e1, #3182ce); }
+.purple { background: linear-gradient(135deg, #9f7aea, #805ad5); }
+
+/* ===== DETAILS ===== */
+.details-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.5rem;
+}
+
+.info-card {
+  background: white;
+  border-radius: 16px;
+  padding: 1.5rem;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+}
+
+.info-card h4 {
+  color: #6b7280;
+}
+
+.info-card p {
+  font-weight: 600;
+}
+
+/* Fake chart */
+.chart-placeholder .fake-chart {
+  height: 120px;
+  background: linear-gradient(135deg, #90cdf4, #63b3ed);
+  border-radius: 10px;
+  margin-top: 1rem;
+}
+
+/* Percentage */
+.percent-card h1 {
+  font-size: 3rem;
+  color: #38b2ac;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 1024px) {
+  .stats-row {
+    grid-template-columns: 1fr;
+  }
+
+  .details-row {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .dashboard-layout {
+    flex-direction: column;
+  }
+
+  .dashboard-sidebar {
+    width: 100%;
+  }
+
+  .details-row {
+    grid-template-columns: 1fr;
+  }
+}

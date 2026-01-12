@@ -8,6 +8,6 @@ namespace Common.RequestDto
 {
     public class ForgotPasswordRequestDto
     {
-        public string UserNameOrEmail { get; set; }
+         public required string UserNameOrEmail { get; set; }
     }
 }

@@ -27,12 +27,15 @@ namespace Services.Impl
         {
             try
             {
-                // 1️⃣ Validate user from DB
-                var user = _context.Set<User>()
-                    .FirstOrDefault(x =>
-                        x.UserName == request.UserName &&
-                        x.Password == request.Password); // hash in real projects
+                var input = request.UserNameOrEmail.Trim();
 
+                var user = await _context.Set<User>()
+                    .FirstOrDefaultAsync(x =>
+                    (x.UserName == request.UserNameOrEmail || x.Email == request.UserNameOrEmail) &&
+                    x.Password == request.Password
+                    );
+
+                // hash compare in real apps
                 if (user == null)
                     return null;
 
@@ -42,9 +45,6 @@ namespace Services.Impl
                 return new LoginResponseDto
                 {
                     Token = token,
-                    UserId = user.ID,
-                    UserName = user.UserName,
-                    Role = user.Role.ToString()
                 };
             }
             catch

@@ -10,7 +10,7 @@ using Services.Interface;
 
 namespace service_application.Server.Controllers
 {
-    
+    //[Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class CategoryController : ControllerBase
@@ -25,7 +25,7 @@ namespace service_application.Server.Controllers
             _categoryService = categoryService;
             _apiResponse = apiResponse;
         }
-
+        [Authorize]
         // ✅ CREATE
         [HttpPost]
         public async ValueTask<IActionResult> CreateCategory([FromBody] CategoryRequestDto dto)
@@ -77,7 +77,7 @@ namespace service_application.Server.Controllers
                 return _apiResponse.InternalServerError(ex.Message);
             }
         }
-
+        [Authorize]
         // ✅ UPDATE (FIXED)
         [HttpPut("{id:long}")]
         public async ValueTask<IActionResult> Update(long id, [FromBody] CategoryRequestDto dto)
@@ -116,7 +116,7 @@ namespace service_application.Server.Controllers
                 return _apiResponse.InternalServerError(ex.Message);
             }
         }
-
+        [Authorize]
         // ✅ DELETE
         [HttpDelete("{id:long}")]
         public async ValueTask<IActionResult> Delete(long id)

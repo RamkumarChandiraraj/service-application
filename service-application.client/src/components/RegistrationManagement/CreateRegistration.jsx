@@ -174,7 +174,7 @@ function CreateRegistration() {
                 ? await updateRegistration(id, payload)
                 : await createRegistration(payload);
 
-            navigate("/registrationlist");
+            navigate("/management/registrations");
         } catch (err) {
             console.error(err);
             setError("Something went wrong");
@@ -187,7 +187,7 @@ function CreateRegistration() {
     const handleDelete = async () => {
         if (!window.confirm("Are you sure?")) return;
         await deleteRegistration(id);
-        navigate("/registrationlist");
+        navigate("/management/registrations");
     };
 
     if (pageLoading) return <p className="text-center mt-5">Loading...</p>;
@@ -264,7 +264,7 @@ function CreateRegistration() {
                     <input type="file" accept="image/*" className="form-control mb-3" onChange={handleFileChange} />
 
                     <div className="text-end">
-                        <Link to="/registrationlist" className="btn btn-secondary me-2">Cancel</Link>
+                        <Link to="/management/registrations" className="btn btn-secondary me-2">Cancel</Link>
                         <button className="btn btn-success" disabled={loading}>{isEditMode ? "Update" : "Save"}</button>
                         {isEditMode && <button type="button" className="btn btn-danger ms-2" onClick={handleDelete}>Delete</button>}
                     </div>

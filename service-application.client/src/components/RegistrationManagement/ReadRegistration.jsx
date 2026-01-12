@@ -68,7 +68,7 @@ function ReadRegistration() {
                     </div>
                 </div>
                 <div className="text-center mt-4">
-                    <Link to="/registrationlist" className="btn btn-secondary">Back</Link>
+                    <Link to="/management/registrations" className="btn btn-secondary">Back</Link>
                 </div>
             </div>
         </div>

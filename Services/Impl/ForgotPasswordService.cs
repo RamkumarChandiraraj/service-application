@@ -3,6 +3,7 @@ using Common.ResponseDto;
 using Data.Base;
 using Data.Entities;
 using Services.Interface;
+using Services.Impl; // 👈 Required for EmailTemplateReader
 using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -61,11 +62,19 @@ namespace Services.Impl
                     CreatedDate = DateTime.UtcNow
                 });
 
+                // ================= SEND OTP EMAIL =================
+                var html = EmailTemplateReader.ReadTemplate("ForgotPasswordOtp.html");
+
+                html = html
+                    .Replace("{{UserName}}", user.UserName)
+                    .Replace("{{OTP}}", otp);
+
                 await _emailService.SendEmailAsync(
                     user.Email,
                     "Password Reset OTP",
-                    $"Your OTP is {otp}. It is valid for 5 minutes."
+                    html
                 );
+                // =================================================
 
                 return new ApiResponse
                 {
@@ -73,9 +82,8 @@ namespace Services.Impl
                     Message = "OTP sent successfully"
                 };
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                // TODO: log exception (Serilog / NLog / ILogger)
                 return new ApiResponse
                 {
                     Success = false,
@@ -89,23 +97,26 @@ namespace Services.Impl
         {
             try
             {
-                var otpEntry = _otpRepo.FindByCondition(o =>
-                    o.Email == request.Email &&
-                    o.OtpValue == request.Otp &&
-                    !o.IsUsed &&
-                    o.ExpiryTime > DateTime.UtcNow
+                // 1️⃣ Find user using username OR email
+                var user = _userRepo.FindByCondition(u =>
+                    u.Email == request.UserNameOrEmail ||
+                    u.UserName == request.UserNameOrEmail
                 ).FirstOrDefault();
 
-                if (otpEntry == null)
+
+                if (user == null)
                     return new ApiResponse
                     {
                         Success = false,
                         Message = "Invalid or expired OTP"
                     };
 
-                var user = _userRepo
-                    .FindByCondition(u => u.ID == otpEntry.UserId)
-                    .FirstOrDefault();
+                var otpEntry = _otpRepo.FindByCondition(o =>
+                          o.UserId == user.ID &&
+                          o.OtpValue == request.Otp &&
+                          !o.IsUsed &&
+                          o.ExpiryTime > DateTime.UtcNow
+                      ).FirstOrDefault();
 
                 if (user == null)
                     return new ApiResponse
@@ -114,12 +125,26 @@ namespace Services.Impl
                         Message = "User not found"
                     };
 
-                // 🔐 IMPORTANT: Hash password here (do NOT store plain text)
+                // 🔐 Update password (logic unchanged)
                 user.Password = request.NewPassword;
                 await _userRepo.UpdateAsync(user);
 
                 otpEntry.IsUsed = true;
                 await _otpRepo.UpdateAsync(otpEntry);
+
+                // ================= SEND PASSWORD RESET SUCCESS EMAIL =================
+                var successHtml = EmailTemplateReader.ReadTemplate("PasswordResetSuccess.html");
+
+                successHtml = successHtml
+                    .Replace("{{UserName}}", user.UserName)
+                    .Replace("{{Year}}", DateTime.UtcNow.Year.ToString());
+
+                await _emailService.SendEmailAsync(
+                    user.Email,
+                    "Your Password Has Been Reset",
+                    successHtml
+                );
+                // =====================================================================
 
                 return new ApiResponse
                 {
@@ -127,9 +152,8 @@ namespace Services.Impl
                     Message = "Password updated successfully"
                 };
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                // TODO: log exception
                 return new ApiResponse
                 {
                     Success = false,

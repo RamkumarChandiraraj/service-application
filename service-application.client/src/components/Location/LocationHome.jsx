@@ -3,37 +3,64 @@ import { Link, useNavigate } from "react-router-dom";
 import DataTable from "../../components/Common/DataTable";
 import { getAllLocations, deleteLocation } from "../../api/locationList";
 
+import AlertToast from "../../components/Common/AlertToast";
+import LoadingPage from "../../components/Common/LoadingPage";
+
 function LocationHome() {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const navigate = useNavigate();
+
+  const [toast, setToast] = useState({
+    show: false,
+    message: "",
+    type: "success",
+  });
 
   useEffect(() => {
     fetchLocations();
   }, []);
 
+  // ================= FETCH =================
   const fetchLocations = async () => {
+    setLoading(true);
     try {
       const res = await getAllLocations();
       setData(res.data || []);
     } catch (err) {
-      setError(err.message || "Failed to load locations");
+      setToast({
+        show: true,
+        message: "Failed to load locations",
+        type: "error",
+      });
     } finally {
       setLoading(false);
     }
   };
 
+  // ================= DELETE =================
   const handleDelete = async (id) => {
     if (!window.confirm("Delete this location?")) return;
+
     try {
       await deleteLocation(id);
       setData((prev) => prev.filter((x) => x.id !== id));
+
+      setToast({
+        show: true,
+        message: "Location deleted successfully",
+        type: "success",
+      });
     } catch {
-      alert("Failed to delete location");
+      setToast({
+        show: true,
+        message: "Failed to delete location",
+        type: "error",
+      });
     }
   };
 
+  // ================= TABLE COLUMNS =================
   const columns = useMemo(
     () => [
       { header: "ID", field: "id" },
@@ -45,13 +72,24 @@ function LocationHome() {
         sortable: false,
         body: (row) => (
           <div className="d-flex gap-2 flex-wrap">
-            <Link to={`/readlocation/${row.id}`} className="btn btn-info btn-sm">
+            <Link
+              to={`/management/locations/read/${row.id}`}
+              className="btn btn-info btn-sm"
+            >
               View
             </Link>
-            <Link to={`/createlocation/${row.id}`} className="btn btn-primary btn-sm">
+
+            <Link
+              to={`/management/locations/edit/${row.id}`}
+              className="btn btn-primary btn-sm"
+            >
               Edit
             </Link>
-            <button className="btn btn-danger btn-sm" onClick={() => handleDelete(row.id)}>
+
+            <button
+              className="btn btn-danger btn-sm"
+              onClick={() => handleDelete(row.id)}
+            >
               Delete
             </button>
           </div>
@@ -61,19 +99,29 @@ function LocationHome() {
     []
   );
 
-  if (loading) return <p className="text-center mt-5">Loading locations...</p>;
-  if (error) return <p className="text-center mt-5 text-danger">{error}</p>;
+  // ================= LOADER =================
+  if (loading) return <LoadingPage />;
 
   return (
-    <div className="container py-4">
-      <DataTable
-        title="Locations"
-        data={data}
-        columns={columns}
-        searchFields={["name", "pincode"]}
-        onAdd={() => navigate("/createlocation")}
+    <>
+      {/* 🔔 TOAST */}
+      <AlertToast
+        show={toast.show}
+        message={toast.message}
+        type={toast.type}
+        onClose={() => setToast({ ...toast, show: false })}
       />
-    </div>
+
+      <div className="container py-4">
+        <DataTable
+          title="Locations"
+          data={data}
+          columns={columns}
+          searchFields={["name", "pincode"]}
+          onAdd={() => navigate("/management/locations/create")}
+        />
+      </div>
+    </>
   );
 }
 
