@@ -1,5 +1,5 @@
 ﻿import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate , Link} from "react-router-dom";
 import { loginApi } from "../../api/authApi";
 import { createUser } from "../../api/UserApi";
 import "./SignUp.css";
@@ -12,12 +12,12 @@ const SignUp = () => {
     const navigate = useNavigate();
     const [rightPanelActive, setRightPanelActive] = useState(false);
 
-    // 🔑 Login state
+    // Login state
     const [userName, setUserName] = useState("");
     const [password, setPassword] = useState("");
     const [loginError, setLoginError] = useState("");
 
-    // 🔑 Signup state
+    // Signup state
     const [signUpForm, setSignUpForm] = useState({
         userName: "",
         mobileNumber: "",
@@ -36,6 +36,7 @@ const SignUp = () => {
         const newErrors = {};
 
         if (!signUpForm.userName.trim()) newErrors.userName = "Name is required";
+
         if (!signUpForm.email.trim()) newErrors.email = "Email is required";
         else if (!validateEmail(signUpForm.email))
             newErrors.email = "Invalid email format";
@@ -54,11 +55,7 @@ const SignUp = () => {
         if (Object.keys(newErrors).length > 0) return;
 
         try {
-            await createUser({
-                ...signUpForm,
-                role: 1,
-            });
-
+            await createUser({ ...signUpForm, role: 1 });
             alert("User created successfully");
             setRightPanelActive(false);
             setSignUpForm({
@@ -68,7 +65,7 @@ const SignUp = () => {
                 password: "",
             });
             setErrors({});
-        } catch (err) {
+        } catch {
             alert("Signup failed");
         }
     };
@@ -83,8 +80,32 @@ const SignUp = () => {
         }
     };
 
+    const handleForgotPassword = () => {
+        navigate("/reset-password");
+    };
+
     return (
-        <div className={`signup-slider-container ${rightPanelActive ? "right-panel-active" : ""}`}>
+        <div
+            className={`signup-slider-container ${rightPanelActive ? "right-panel-active" : ""
+                }`}
+        >
+            {/* MOBILE TOGGLE */}
+            <div className="mobile-toggle">
+                <button
+                    className={!rightPanelActive ? "active" : ""}
+                    onClick={() => setRightPanelActive(false)}
+                    type="button"
+                >
+                    Sign In
+                </button>
+                <button
+                    className={rightPanelActive ? "active" : ""}
+                    onClick={() => setRightPanelActive(true)}
+                    type="button"
+                >
+                    Sign Up
+                </button>
+            </div>
 
             {/* SIGN IN */}
             <div className="signup-slider-form-container signup-slider-sign-in-container">
@@ -110,6 +131,8 @@ const SignUp = () => {
                     <button type="button" onClick={handleLogin}>
                         Sign In
                     </button>
+
+                    <Link to="/forgot-password">Forgot Password?</Link>
                 </form>
             </div>
 
@@ -124,7 +147,9 @@ const SignUp = () => {
                         value={signUpForm.userName}
                         onChange={handleSignUpChange}
                     />
-                    {errors.userName && <small className="text-danger">{errors.userName}</small>}
+                    {errors.userName && (
+                        <small className="text-danger">{errors.userName}</small>
+                    )}
 
                     <input
                         name="mobileNumber"
@@ -132,7 +157,9 @@ const SignUp = () => {
                         value={signUpForm.mobileNumber}
                         onChange={handleSignUpChange}
                     />
-                    {errors.mobileNumber && <small className="text-danger">{errors.mobileNumber}</small>}
+                    {errors.mobileNumber && (
+                        <small className="text-danger">{errors.mobileNumber}</small>
+                    )}
 
                     <input
                         name="email"
@@ -140,7 +167,9 @@ const SignUp = () => {
                         value={signUpForm.email}
                         onChange={handleSignUpChange}
                     />
-                    {errors.email && <small className="text-danger">{errors.email}</small>}
+                    {errors.email && (
+                        <small className="text-danger">{errors.email}</small>
+                    )}
 
                     <input
                         type="password"
@@ -149,23 +178,29 @@ const SignUp = () => {
                         value={signUpForm.password}
                         onChange={handleSignUpChange}
                     />
-                    {errors.password && <small className="text-danger">{errors.password}</small>}
+                    {errors.password && (
+                        <small className="text-danger">{errors.password}</small>
+                    )}
 
                     <button type="submit">Sign Up</button>
                 </form>
             </div>
 
-            {/* OVERLAY */}
+            {/* OVERLAY (DESKTOP ONLY) */}
             <div className="signup-slider-overlay-container">
                 <div className="signup-slider-overlay">
                     <div className="signup-slider-overlay-panel signup-slider-overlay-left">
                         <h1>Welcome Back!</h1>
-                        <button onClick={() => setRightPanelActive(false)}>Sign In</button>
+                        <button onClick={() => setRightPanelActive(false)}>
+                            Sign In
+                        </button>
                     </div>
 
                     <div className="signup-slider-overlay-panel signup-slider-overlay-right">
                         <h1>Hello, Friend!</h1>
-                        <button onClick={() => setRightPanelActive(true)}>Sign Up</button>
+                        <button onClick={() => setRightPanelActive(true)}>
+                            Sign Up
+                        </button>
                     </div>
                 </div>
             </div>
