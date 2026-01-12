@@ -8,17 +8,15 @@ import {
     deleteRegistration,
     getAllRegistrations
 } from "../../api/registrationApi";
-
+import { uploadAttachment } from "../../api/attachmentApi";
 import { getAllLocations } from "../../api/locationList";
 import { getAllServices } from "../../api/serviceList";
-import api from "../../api/baseapiinstance"; // your axios instance
 
 function CreateRegistration() {
     const { id } = useParams();
     const navigate = useNavigate();
     const isEditMode = Boolean(id);
 
-    /* ================= STATE ================= */
     const [formData, setFormData] = useState({
         id: 0,
         companyName: "",
@@ -29,7 +27,7 @@ function CreateRegistration() {
         description: "",
         latitude: "",
         longitude: "",
-        profileImageId: null // <--- store attachment ID
+        profileImageId: 0
     });
 
     const [locations, setLocations] = useState([]);
@@ -38,51 +36,49 @@ function CreateRegistration() {
     const [loading, setLoading] = useState(false);
     const [pageLoading, setPageLoading] = useState(false);
     const [error, setError] = useState(null);
+    const [selectedFile, setSelectedFile] = useState(null);
 
-    const [selectedFile, setSelectedFile] = useState(null); // file state
-    const [previewUrl, setPreviewUrl] = useState(null);      // preview
-
-    /* ================= LOAD LOCATIONS ================= */
+    // Load locations
     useEffect(() => {
         getAllLocations()
             .then(res => setLocations(res.data || []))
             .catch(() => setLocations([]));
     }, []);
 
-    /* ================= LOAD SERVICES ================= */
+    // Load services
     useEffect(() => {
         getAllServices()
             .then(res => setServicesList(res.data || []))
             .catch(() => setServicesList([]));
     }, []);
 
-    /* ================= EDIT MODE ================= */
+    // Edit mode
     useEffect(() => {
         if (!isEditMode) return;
-
         setPageLoading(true);
         getRegistrationById(id)
             .then(res => {
+                const r = res?.data || res;
                 setFormData({
-                    id: res.id,
-                    companyName: res.companyName || "",
-                    email: res.email || "",
-                    locationId: res.locationId || "",
-                    serviceId: res.serviceId || "",
-                    phoneNumber: res.phoneNumber || "",
-                    description: res.description || "",
-                    latitude: res.latitude ?? "",
-                    longitude: res.longitude ?? "",
-                    profileImageId: res.profileImageId || null
+                    id: r.id,
+                    companyName: r.companyName || "",
+                    email: r.email || "",
+                    locationId: r.locationId || "",
+                    serviceId: r.serviceId || "",
+                    phoneNumber: r.phoneNumber || "",
+                    description: r.description || "",
+                    latitude: r.latitude ?? "",
+                    longitude: r.longitude ?? "",
+                    profileImageId: r.profileImageId || 0
                 });
-
-                if (res.profileImage?.fileUrl) setPreviewUrl(res.profileImage.fileUrl);
             })
             .catch(() => setError("Failed to load registration"))
             .finally(() => setPageLoading(false));
     }, [id, isEditMode]);
 
-    /* ================= GEO LOCATION ================= */
+
+
+    // Geo location
     useEffect(() => {
         if (!isEditMode && navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(pos => {
@@ -95,48 +91,22 @@ function CreateRegistration() {
         }
     }, [isEditMode]);
 
-    /* ================= HANDLE CHANGE ================= */
+    // Handle input change
     const handleChange = (e) => {
         const { name, value } = e.target;
-
         setFormData(prev => ({
             ...prev,
-            [name]: name === "locationId" || name === "serviceId"
-                ? Number(value)
-                : value
+            [name]: ["locationId", "serviceId"].includes(name) ? Number(value) : value
         }));
-
         setErrors(prev => ({ ...prev, [name]: "" }));
     };
 
-    /* ================= HANDLE FILE SELECTION ================= */
+    // Handle file selection
     const handleFileChange = (e) => {
-        const file = e.target.files[0];
-        if (file) {
-            setSelectedFile(file);
-            setPreviewUrl(URL.createObjectURL(file)); // show preview
-        }
+        setSelectedFile(e.target.files[0]);
     };
 
-    /* ================= UPLOAD FILE API ================= */
-    const uploadProfileImage = async () => {
-        if (!selectedFile) return null;
-
-        const formDataFile = new FormData();
-        formDataFile.append("file", selectedFile);
-
-        try {
-            const res = await api.post("/api/Registration/upload", formDataFile, {
-                headers: { "Content-Type": "multipart/form-data" },
-            });
-            return res.data.ID; // attachment ID
-        } catch (err) {
-            console.error("Error uploading file:", err);
-            return null;
-        }
-    };
-
-    /* ================= VALIDATION ================= */
+    // Validation
     const validate = async () => {
         let temp = {};
 
@@ -144,51 +114,65 @@ function CreateRegistration() {
         if (!formData.email) temp.email = "Email is required";
         if (!formData.locationId) temp.locationId = "Location is required";
         if (!formData.serviceId) temp.serviceId = "Service is required";
-        if (!formData.phoneNumber) temp.phoneNumber = "Phone number is required";
-        else if (formData.phoneNumber.length !== 10) temp.phoneNumber = "Phone number must be 10 digits";
+
+        // Normalize phone number
+        const phone = formData.phoneNumber?.toString().trim() || "";
+        if (!phone) temp.phoneNumber = "Phone number is required";
+        else if (phone.length !== 10) temp.phoneNumber = "Phone number must be 10 digits";
+
         if (!formData.description) temp.description = "Description is required";
 
+        // Duplicate checks
         try {
             const registrations = await getAllRegistrations();
-            const phoneExists = registrations.find(
-                r => r.phoneNumber === formData.phoneNumber && r.id !== formData.id
+            const currentId = isEditMode ? Number(id) : 0;
+
+            // MOBILE DUPLICATE CHECK
+            const phoneExists = registrations.some(
+                r => r.phoneNumber?.toString().trim() === phone && r.id !== currentId
             );
             if (phoneExists) temp.phoneNumber = "Mobile number already exists";
 
-            const emailExists = registrations.find(
-                r => r.email?.toLowerCase() === formData.email.toLowerCase() && r.id !== formData.id
+            // EMAIL DUPLICATE CHECK
+            const emailExists = registrations.some(
+                r => r.email?.toLowerCase() === formData.email.toLowerCase() && r.id !== currentId
             );
             if (emailExists) temp.email = "Email already exists";
-
         } catch (err) {
-            console.error(err);
+            console.error("Duplicate check error:", err);
         }
 
         setErrors(temp);
         return Object.keys(temp).length === 0;
     };
 
-    /* ================= SUBMIT ================= */
+    //submit
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError(null);
-
         if (!(await validate())) return;
 
         setLoading(true);
         try {
-            // Upload image first
-            const attachmentId = await uploadProfileImage();
+            let profileId = formData.profileImageId || 0;
+            if (selectedFile) {
+                const fileData = new FormData();
+                fileData.append("file", selectedFile);
+                const uploadRes = await uploadAttachment(fileData);
+                profileId = Number(uploadRes.data.data.id);
+            }
+
             const payload = {
                 ...formData,
                 email: formData.email.toLowerCase(),
                 latitude: Number(formData.latitude),
                 longitude: Number(formData.longitude),
-                profileImageId: attachmentId || formData.profileImageId
+                profileImageId: Number(profileId)
             };
 
-            if (isEditMode) await updateRegistration(id, payload);
-            else await createRegistration(payload);
+            isEditMode
+                ? await updateRegistration(id, payload)
+                : await createRegistration(payload);
 
             navigate("/registrationlist");
         } catch (err) {
@@ -199,7 +183,7 @@ function CreateRegistration() {
         }
     };
 
-    /* ================= DELETE ================= */
+    // Delete
     const handleDelete = async () => {
         if (!window.confirm("Are you sure?")) return;
         await deleteRegistration(id);
@@ -212,99 +196,60 @@ function CreateRegistration() {
         <div className="d-flex justify-content-center align-items-center bg-light vh-100">
             <div className="w-50 bg-white border rounded shadow p-4">
                 <h3 className="text-center mb-4">{isEditMode ? "Update Registration" : "Create Registration"}</h3>
-
                 {error && <div className="alert alert-danger">{error}</div>}
 
                 <form onSubmit={handleSubmit}>
-
-                    {/* COMPANY */}
                     <label>Company Name *</label>
-                    <input
-                        className={`form-control mb-1 ${errors.companyName ? "is-invalid" : ""}`}
-                        name="companyName"
-                        value={formData.companyName}
-                        onChange={handleChange}
-                    />
+                    <input className={`form-control mb-1 ${errors.companyName ? "is-invalid" : ""}`}
+                        name="companyName" value={formData.companyName} onChange={handleChange} />
                     <div className="invalid-feedback">{errors.companyName}</div>
 
-                    {/* EMAIL */}
+                    {/* Email */}
                     <label>Email *</label>
-                    <input
-                        type="email"
-                        name="email"
-                        className={`form-control mb-1 ${errors.email ? "is-invalid" : ""}`}
-                        value={formData.email}
-                        onChange={(e) => {
-                            const lowerEmail = e.target.value.toLowerCase();
-                            setFormData({ ...formData, email: lowerEmail });
-                            setErrors({ ...errors, email: "" });
-                        }}
-                    />
+                    <input type="email" name="email" className={`form-control mb-1 ${errors.email ? "is-invalid" : ""}`}
+                        value={formData.email} onChange={handleChange} />
                     <div className="invalid-feedback">{errors.email}</div>
 
-                    {/* LOCATION */}
+                    {/* Location */}
                     <label>Location *</label>
-                    <select
-                        className={`form-control mb-1 ${errors.locationId ? "is-invalid" : ""}`}
-                        name="locationId"
-                        value={formData.locationId}
-                        onChange={handleChange}
-                    >
+                    <select className={`form-control mb-1 ${errors.locationId ? "is-invalid" : ""}`}
+                        name="locationId" value={formData.locationId} onChange={handleChange}>
                         <option value="">-- Select Location --</option>
-                        {locations.map(loc => (
-                            <option key={loc.id} value={loc.id}>{loc.name}</option>
-                        ))}
+                        {locations.map(loc => <option key={loc.id} value={loc.id}>{loc.name}</option>)}
                     </select>
                     <div className="invalid-feedback">{errors.locationId}</div>
 
-                    {/* SERVICE */}
+
+                    {/* Service */}
                     <label>Service *</label>
-                    <select
-                        className={`form-control mb-1 ${errors.serviceId ? "is-invalid" : ""}`}
-                        name="serviceId"
-                        value={formData.serviceId}
-                        onChange={handleChange}
-                    >
+                    <select className={`form-control mb-1 ${errors.serviceId ? "is-invalid" : ""}`}
+                        name="serviceId" value={formData.serviceId} onChange={handleChange}>
                         <option value="">-- Select Service --</option>
-                        {servicesList.map(srv => (
-                            <option key={srv.id} value={srv.id}>{srv.name}</option>
-                        ))}
+                        {servicesList.map(srv => <option key={srv.id} value={srv.id}>{srv.name}</option>)}
                     </select>
                     <div className="invalid-feedback">{errors.serviceId}</div>
 
-                    {/* PHONE */}
+
+                    {/* Phone Number */}
                     <label>Phone Number *</label>
-                    <input
-                        className={`form-control mb-1 ${errors.phoneNumber ? "is-invalid" : ""}`}
+                    <input className={`form-control mb-1 ${errors.phoneNumber ? "is-invalid" : ""}`}
+                        name="phoneNumber"
                         value={formData.phoneNumber}
                         onChange={(e) => {
                             const val = e.target.value.replace(/\D/g, "");
-                            if (val.length <= 10) setFormData({ ...formData, phoneNumber: val });
+                            setFormData({ ...formData, phoneNumber: val });
                             setErrors({ ...errors, phoneNumber: "" });
                         }}
                     />
                     <div className="invalid-feedback">{errors.phoneNumber}</div>
 
-                    {/* DESCRIPTION */}
+                    {/* Description */}
                     <label>Description *</label>
-                    <textarea
-                        className={`form-control mb-3 ${errors.description ? "is-invalid" : ""}`}
-                        name="description"
-                        value={formData.description}
-                        onChange={handleChange}
-                    />
+                    <textarea className={`form-control mb-3 ${errors.description ? "is-invalid" : ""}`}
+                        name="description" value={formData.description} onChange={handleChange} />
                     <div className="invalid-feedback">{errors.description}</div>
 
-                    {/* PROFILE IMAGE */}
-                    <label>Profile Image</label>
-                    <input type="file" onChange={handleFileChange} />
-                    {previewUrl && <div className="mb-3">
-                        <p>Preview:</p>
-                        <img src={previewUrl} alt="Profile Preview" width={150} />
-                    </div>}
-
-                    {/* LAT / LNG */}
-                    <label>Company Current Location</label>
+                    {/* Latitude / Longitude */}
                     <div className="row mb-3">
                         <div className="col">
                             <input className="form-control" value={formData.latitude} readOnly />
@@ -314,18 +259,14 @@ function CreateRegistration() {
                         </div>
                     </div>
 
-                    {/* ACTIONS */}
+                    {/* Profile Upload */}
+                    <label>Profile Image</label>
+                    <input type="file" accept="image/*" className="form-control mb-3" onChange={handleFileChange} />
+
                     <div className="text-end">
                         <Link to="/registrationlist" className="btn btn-secondary me-2">Cancel</Link>
-                        <button className="btn btn-success" disabled={loading}>
-                            {isEditMode ? "Update" : "Save"}
-                        </button>
-
-                        {isEditMode && (
-                            <button type="button" className="btn btn-danger ms-2" onClick={handleDelete}>
-                                Delete
-                            </button>
-                        )}
+                        <button className="btn btn-success" disabled={loading}>{isEditMode ? "Update" : "Save"}</button>
+                        {isEditMode && <button type="button" className="btn btn-danger ms-2" onClick={handleDelete}>Delete</button>}
                     </div>
                 </form>
             </div>

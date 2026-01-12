@@ -40,6 +40,7 @@ function RegistrationList() {
       { header: "Company Name", field: "companyName" },
       { header: "Email", field: "email" },
       { header: "PhoneNumber", field: "phoneNumber" },
+     
          
       {
         header: "Actions",

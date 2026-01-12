@@ -1,12 +1,17 @@
-﻿using Common.Extension;
+﻿
+
+using Common.Extension;
 using Common.RequestDto;
-using Common.ResponseDto;
 using Data.Base;
 using Data.Entities;
-using Mapster;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Services.Interface;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace Services.Impl
 {
@@ -14,12 +19,12 @@ namespace Services.Impl
     {
         private readonly IRepositary<Registration> _registrationRepository;
 
+        public object Attachments => throw new NotImplementedException();
+
         public RegistrationService(IRepositary<Registration> registrationRepository)
         {
             _registrationRepository = registrationRepository;
         }
-
-        /* ================= DUPLICATE CHECKS ================= */
 
         public async Task<bool> EmailExists(string email)
         {
@@ -35,80 +40,34 @@ namespace Services.Impl
                 .AnyAsync();
         }
 
-        /* ================= CREATE ================= */
-
         public async ValueTask<IActionResult> Create(RegistrationRequestDto dto)
         {
-            // 🔒 Duplicate Email
-            if (await EmailExists(dto.Email))
-                return new BadRequestObjectResult("Email already exists");
-
-            // 🔒 Duplicate Phone
-            if (await PhoneNumberExists(dto.PhoneNumber))
-                return new BadRequestObjectResult("Phone number already exists");
-
             var entity = dto.ToMap<RegistrationRequestDto, Registration>();
-
-            entity.Email = dto.Email.ToLower(); // ✅ lowercase
-            entity.ProfileImageId = dto.ProfileImageId; // ✅ attachment
+           
+            entity.Email = dto.Email.ToLower(); // ensure lowercase
             entity.GenerateCreateHistory(1);
 
             await _registrationRepository.CreateAsync(entity);
-
             return new OkObjectResult(entity);
         }
-
-        /* ================= GET BY ID ================= */
 
         public async ValueTask<IActionResult> Get(long id)
         {
             var entity = await _registrationRepository
-                .FindByCondition(r => r.ID == id)
-                .Include(r => r.ProfileImage) // include profile image
+                .FindByCondition(r => r.ID == id).Include(r =>r.ProfileImage)
                 .FirstOrDefaultAsync();
 
             if (entity == null)
-                return new NotFoundObjectResult($"Registration with ID {id} not found");
+                return new NotFoundObjectResult($"Registration with ID {id} not found.");
 
-            // Map to Response DTO
-            var response = entity.Adapt<RegistrationResponseDto>();
-
-            if (entity.ProfileImage != null)
-            {
-                response.ProfileImageId = entity.ProfileImage.ID;
-                response.ProfileImageUrl = "/Uploads/" + entity.ProfileImage.FileName;
-            }
-
-            return new OkObjectResult(response);
+            return new OkObjectResult(entity);
         }
-
-
-        /* ================= GET ALL ================= */
 
         public async ValueTask<IActionResult> GetAll()
         {
-            var list = await _registrationRepository
-                .FindAll()
-                .Include(r => r.ProfileImage)
-                .ToListAsync();
-
-            // Map each entity to Response DTO with image URL
-            var responseList = list.Select(entity =>
-            {
-                var dto = entity.Adapt<RegistrationResponseDto>();
-                if (entity.ProfileImage != null)
-                {
-                    dto.ProfileImageId = entity.ProfileImage.ID;
-                    dto.ProfileImageUrl = "/Uploads/" + entity.ProfileImage.FileName;
-                }
-                return dto;
-            }).ToList();
-
-            return new OkObjectResult(responseList);
+            var list = await _registrationRepository.FindAll().Include(r => r.ProfileImage).ToListAsync();
+            return new OkObjectResult(list);
         }
-
-
-        /* ================= UPDATE ================= */
 
         public async ValueTask<IActionResult> Update(long id, RegistrationRequestDto dto)
         {
@@ -117,31 +76,11 @@ namespace Services.Impl
                 .FirstOrDefaultAsync();
 
             if (entity == null)
-                return new NotFoundObjectResult($"Registration with ID {id} not found");
+                return new NotFoundObjectResult($"Registration with ID {id} not found.");
 
-            // 🔒 Duplicate Email (ignore current record)
-            var emailExists = await _registrationRepository
-                .FindByCondition(r =>
-                    r.Email.ToLower() == dto.Email.ToLower() &&
-                    r.ID != id)
-                .AnyAsync();
-
-            if (emailExists)
-                return new BadRequestObjectResult("Email already exists");
-
-            // 🔒 Duplicate Phone
-            var phoneExists = await _registrationRepository
-                .FindByCondition(r =>
-                    r.PhoneNumber == dto.PhoneNumber &&
-                    r.ID != id)
-                .AnyAsync();
-
-            if (phoneExists)
-                return new BadRequestObjectResult("Phone number already exists");
-
-            // ✅ Update fields
+            // Update fields
             entity.CompanyName = dto.CompanyName;
-            entity.Email = dto.Email.ToLower();
+            entity.Email = dto.Email;
             entity.PhoneNumber = dto.PhoneNumber;
             entity.LocationId = dto.LocationId;
             entity.ServiceId = dto.ServiceId;
@@ -155,8 +94,6 @@ namespace Services.Impl
             return new OkObjectResult("Registration updated successfully");
         }
 
-        /* ================= DELETE ================= */
-
         public async ValueTask<IActionResult> Delete(long id)
         {
             var entity = await _registrationRepository
@@ -164,12 +101,15 @@ namespace Services.Impl
                 .FirstOrDefaultAsync();
 
             if (entity == null)
-                return new NotFoundObjectResult($"Registration with ID {id} not found");
+                return new NotFoundObjectResult($"Registration with ID {id} not found.");
 
             entity.GenerateDeleteHistory(1);
             await _registrationRepository.DeleteAsync(entity);
 
             return new OkObjectResult(true);
         }
+
+
+
     }
 }
