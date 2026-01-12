@@ -54,9 +54,11 @@ namespace Services.Impl
                     Description = x.Registration.Description,
                     LocationId = x.Registration.LocationId,
                     LocationName = x.Registration.Location.Name,
-                    ServiceName = x.Registration.Service.Name,
+                    ServiceName = x.Registration.Service.Name,      
                     ServiceId = x.Registration.ServiceId,
-                    PhoneNumber=x.Registration.PhoneNumber
+                    Latitude=x.Registration.Latitude,
+                    Longitude=x.Registration.Longitude,
+                    PhoneNumber = x.Registration.PhoneNumber
                 })
                 .ToList();
 

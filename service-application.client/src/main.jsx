@@ -21,6 +21,9 @@ import "aos/dist/aos.css";
 import "swiper/css";
 import "swiper/css/bundle";
 
+//OSM
+import "leaflet/dist/leaflet.css";
+
 // Glightbox
 import "glightbox/dist/css/glightbox.min.css";
 
