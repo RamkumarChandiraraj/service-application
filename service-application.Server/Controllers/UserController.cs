@@ -12,7 +12,7 @@ using Services.Interface;
 
 namespace service_application.Server.Controllers
 {
-    
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class UserController(IUserService user, IApiMessage<IApiResponse> apiResponse) : ControllerBase
