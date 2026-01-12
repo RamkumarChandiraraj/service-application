@@ -98,6 +98,7 @@ const ChatPage = () => {
                     receiverId={Number(receiverId)}
                 />
             )}
+            {/*<Chat senderId={Number(customerMobile)} />*/}
         </div>
     );
 };

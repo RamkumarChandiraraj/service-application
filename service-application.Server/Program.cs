@@ -47,7 +47,6 @@ builder.Services.AddScoped<IUserSearchService, UserSearchService>();
 builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
 builder.Services.AddScoped<IForgotPasswordService, ForgotPasswordService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
-builder.Services.AddScoped<IChatService, ChatService>();
 
 // 🔑 REGISTER CustomUserIdProvider
 builder.Services.AddSingleton<IUserIdProvider, CustomUserIdProvider>();

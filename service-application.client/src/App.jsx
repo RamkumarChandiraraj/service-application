@@ -46,7 +46,7 @@ import VerifyOtpModal from "./components/ForgotPasswordManagement/VerifyOtpModal
 //SignalR Chat
 import Chat from "./components/ChatMessage/Chat";
 import ChatPage from "./components/ChatMessage/ChatPage"
-import VendorPage from "./components/VendorChat/VendorPage"
+/*import VendorPage from "./components/VendorChat/VendorPage"*/
 
 function App() {
   return (
@@ -125,7 +125,7 @@ function App() {
 
               <Route path="/chat/:receiverId" element={<ChatPage />} />
 
-              <Route path="/vendor-chat" element={<VendorPage />} />
+              {/*<Route path="/vendor-chat" element={<VendorPage />} />*/}
 
           </Routes>
       <Footer />

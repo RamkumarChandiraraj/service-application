@@ -1,57 +1,51 @@
 ﻿using Microsoft.AspNetCore.SignalR;
-using System;
-using System.Threading.Tasks;
+using System.Collections.Concurrent;
 
 namespace service_application.Server.Hubs
 {
     public class ChatHub : Hub
     {
-        // 🔗 When client connects
+        // 🔑 Store active users (UserId -> ConnectionId)
+        private static ConcurrentDictionary<string, string> ActiveUsers
+            = new ConcurrentDictionary<string, string>();
+
+        // 🔗 When user connects
         public override async Task OnConnectedAsync()
         {
-            var userId = Context.GetHttpContext()?.Request.Query["userId"];
+            var userId = Context.UserIdentifier;
 
             if (!string.IsNullOrEmpty(userId))
             {
-                Context.Items["UserId"] = userId.ToString();
+                ActiveUsers[userId] = Context.ConnectionId;
                 Console.WriteLine($"User connected: {userId}");
             }
 
-            await Clients.All
-                .SendAsync("ReceiveUsers", Context.Items);
+            // Send active users list to all clients
+            await Clients.All.SendAsync("ReceiveUsers", ActiveUsers.Keys);
 
             await base.OnConnectedAsync();
         }
 
-        // 🔌 When client disconnects (STOP PROCESS)
+        // 🔌 When user disconnects
         public override async Task OnDisconnectedAsync(Exception? exception)
         {
-            var userId = Context.Items["UserId"]?.ToString();
+            var userId = Context.UserIdentifier;
 
-            Console.WriteLine($"User disconnected: {userId}");
+            if (!string.IsNullOrEmpty(userId))
+            {
+                ActiveUsers.TryRemove(userId, out _);
+                Console.WriteLine($"User disconnected: {userId}");
+            }
+
+            // Notify all clients
+            await Clients.All.SendAsync("ReceiveUsers", ActiveUsers.Keys);
 
             await base.OnDisconnectedAsync(exception);
         }
 
-
-
-        public IDictionary<object,object> ReceiveUsers()
-        {
-            var users = Context.Items;
-
-            return users;
-        }
-
-
-        // 💬 Send message to a specific user
+        // 💬 Send private message
         public async Task SendMessage(long senderId, long receiverId, string message)
         {
-
-            var users = Context.Items;
-
-            await Clients.All
-                .SendAsync("ReceiveUsers", Context.Items);
-
             await Clients.User(receiverId.ToString())
                 .SendAsync("ReceiveMessage", new
                 {
@@ -60,11 +54,6 @@ namespace service_application.Server.Hubs
                     Message = message,
                     SentAt = DateTime.UtcNow
                 });
-
-            //await Clients.
-
-            //await Clients.User(receiverId.ToString())
-            //   .SendAsync("ReceiveMessage", message);
         }
     }
 }
