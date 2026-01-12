@@ -1,4 +1,5 @@
 ﻿
+
 using Common.Extension;
 using Common.RequestDto;
 using Data.Base;
@@ -18,15 +19,34 @@ namespace Services.Impl
     {
         private readonly IRepositary<Registration> _registrationRepository;
 
+        public object Attachments => throw new NotImplementedException();
+
         public RegistrationService(IRepositary<Registration> registrationRepository)
         {
             _registrationRepository = registrationRepository;
         }
 
+        public async Task<bool> EmailExists(string email)
+        {
+            return await _registrationRepository
+                .FindByCondition(r => r.Email.ToLower() == email.ToLower())
+                .AnyAsync();
+        }
+
+        public async Task<bool> PhoneNumberExists(long phoneNumber)
+        {
+            return await _registrationRepository
+                .FindByCondition(r => r.PhoneNumber == phoneNumber)
+                .AnyAsync();
+        }
+
         public async ValueTask<IActionResult> Create(RegistrationRequestDto dto)
         {
             var entity = dto.ToMap<RegistrationRequestDto, Registration>();
-            entity.GenerateCreateHistory(1); // Assuming 1 is the current user ID
+           
+            entity.Email = dto.Email.ToLower(); // ensure lowercase
+            entity.GenerateCreateHistory(1);
+
             await _registrationRepository.CreateAsync(entity);
             return new OkObjectResult(entity);
         }
@@ -34,7 +54,7 @@ namespace Services.Impl
         public async ValueTask<IActionResult> Get(long id)
         {
             var entity = await _registrationRepository
-                .FindByCondition(r => r.ID == id)
+                .FindByCondition(r => r.ID == id).Include(r =>r.ProfileImage)
                 .FirstOrDefaultAsync();
 
             if (entity == null)
@@ -45,11 +65,11 @@ namespace Services.Impl
 
         public async ValueTask<IActionResult> GetAll()
         {
-            var list = await _registrationRepository.FindAll().ToListAsync();
+            var list = await _registrationRepository.FindAll().Include(r => r.ProfileImage).ToListAsync();
             return new OkObjectResult(list);
         }
 
-        public async ValueTask<IActionResult> Update(int id, RegistrationRequestDto dto)
+        public async ValueTask<IActionResult> Update(long id, RegistrationRequestDto dto)
         {
             var entity = await _registrationRepository
                 .FindByCondition(r => r.ID == id)
@@ -67,6 +87,7 @@ namespace Services.Impl
             entity.Description = dto.Description;
             entity.Latitude = dto.Latitude;
             entity.Longitude = dto.Longitude;
+            entity.ProfileImageId = dto.ProfileImageId;
 
             await _registrationRepository.UpdateAsync(entity);
 
@@ -89,6 +110,6 @@ namespace Services.Impl
         }
 
 
-        
+
     }
 }

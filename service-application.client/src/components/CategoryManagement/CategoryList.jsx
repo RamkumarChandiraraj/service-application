@@ -69,14 +69,14 @@ function CategoryList() {
                 body: (row) => (
                     <div className="d-flex gap-2 flex-wrap">
                         <Link
-                            to={`/readcategory/${row.id}`}
+                            to={`/management/categories/read/${row.id}`}
                             className="btn btn-info btn-sm"
                         >
                             View
                         </Link>
 
                         <Link
-                            to={`/createcategorymanagement/${row.id}`}
+                            to={`/management/categories/edit/${row.id}`}
                             className="btn btn-primary btn-sm"
                         >
                             Edit
@@ -107,7 +107,7 @@ function CategoryList() {
                     data={data}
                     columns={columns}
                     searchFields={["name", "description"]}
-                    onAdd={() => navigate("/createcategorymanagement")}
+                    onAdd={() => navigate("/management/categories/create")}
                 />
             </div>
 

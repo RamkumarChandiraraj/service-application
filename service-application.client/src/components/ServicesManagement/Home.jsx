@@ -56,14 +56,14 @@ function Home() {
         body: (row) => (
           <div className="d-flex gap-2 flex-wrap">
             <Link
-              to={`/readservice/${row.id}`}
+              to={`/management/services/read/${row.id}`}
               className="btn btn-info btn-sm"
             >
               Read
             </Link>
 
             <Link
-              to={`/createservicemanagement/${row.id}`}
+              to={`/management/services/edit/${row.id}`}
               className="btn btn-primary btn-sm"
             >
               Edit
@@ -95,7 +95,7 @@ function Home() {
         data={data}
         columns={columns}
         searchFields={["name", "description"]}
-        onAdd={() => navigate("/createservicemanagement")}
+        onAdd={() => navigate("/management/services/create")}
       />
     </div>
   );

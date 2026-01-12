@@ -264,6 +264,9 @@ namespace Data.Migrations
                     b.Property<long>("PhoneNumber")
                         .HasColumnType("bigint");
 
+                    b.Property<long?>("ProfileImageId")
+                        .HasColumnType("bigint");
+
                     b.Property<long>("ServiceId")
                         .HasColumnType("bigint");
 
@@ -276,6 +279,8 @@ namespace Data.Migrations
                     b.HasKey("ID");
 
                     b.HasIndex("LocationId");
+
+                    b.HasIndex("ProfileImageId");
 
                     b.HasIndex("ServiceId");
 
@@ -361,6 +366,9 @@ namespace Data.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
+                    b.Property<long?>("ProfileId")
+                        .HasColumnType("bigint");
+
                     b.Property<int>("Role")
                         .HasColumnType("int");
 
@@ -376,6 +384,8 @@ namespace Data.Migrations
 
                     b.HasKey("ID");
 
+                    b.HasIndex("ProfileId");
+
                     b.ToTable("User");
                 });
 
@@ -387,6 +397,11 @@ namespace Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("Data.Entities.Attachment", "ProfileImage")
+                        .WithMany()
+                        .HasForeignKey("ProfileImageId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
                     b.HasOne("Data.Entities.Service", "Service")
                         .WithMany()
                         .HasForeignKey("ServiceId")
@@ -394,6 +409,8 @@ namespace Data.Migrations
                         .IsRequired();
 
                     b.Navigation("Location");
+
+                    b.Navigation("ProfileImage");
 
                     b.Navigation("Service");
                 });
@@ -407,6 +424,15 @@ namespace Data.Migrations
                         .IsRequired();
 
                     b.Navigation("Category");
+                });
+
+            modelBuilder.Entity("Data.Entities.User", b =>
+                {
+                    b.HasOne("Data.Entities.Attachment", "Profile")
+                        .WithMany()
+                        .HasForeignKey("ProfileId");
+
+                    b.Navigation("Profile");
                 });
 
             modelBuilder.Entity("Data.Entities.Category", b =>

@@ -16,6 +16,6 @@ namespace Services.Interface
         ValueTask DeleteUserById(long id);
         ValueTask<List<User>> GetAllUser();
         Task<bool> IsDuplicateAsync(string email,string username, long mobileNumber, int? currentUserId = null);
-
+       
     }
 }

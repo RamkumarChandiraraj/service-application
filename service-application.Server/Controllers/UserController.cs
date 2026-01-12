@@ -12,7 +12,7 @@ using Services.Interface;
 
 namespace service_application.Server.Controllers
 {
-    //[Authorize]
+    
     [Route("api/[controller]")]
     [ApiController]
     public class UserController(IUserService user, IApiMessage<IApiResponse> apiResponse) : ControllerBase
@@ -52,9 +52,12 @@ namespace service_application.Server.Controllers
         [HttpGet("{id}")]
         public async ValueTask<IActionResult> GetUserById(long id)
         {
+            
             try
-            {
-                var entity = await _User.GetUserById(id);
+            { 
+                
+                var entity = await _User
+                    .GetUserById(id);
                 var dto = entity.ToMap<User, UserResponseDto>();
                 return _apiResponse.Ok(dto);
             }
@@ -63,7 +66,7 @@ namespace service_application.Server.Controllers
                 return _apiResponse.InternalServerError(ex.Message);
             }
         }
-
+        [Authorize]
         [HttpPut("{id}")]
 
         public async ValueTask<IActionResult> UpdateUser(int id, [FromBody] UserRequestDto dto)
@@ -94,7 +97,7 @@ namespace service_application.Server.Controllers
             }
             }
 
-
+        [Authorize]
         [HttpDelete("{id}")]
         public async ValueTask<IActionResult> DeleteUser(long id)
         {
@@ -113,7 +116,7 @@ namespace service_application.Server.Controllers
                 return _apiResponse.InternalServerError(ex.Message);
             }
         }
-      
+        [Authorize]
         [HttpGet("list")]
         public async ValueTask<IActionResult> GetAllUser(string? searchkeyword)
         {

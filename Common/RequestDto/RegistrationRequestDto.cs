@@ -30,5 +30,7 @@ namespace Common.RequestDto
 
         public double Latitude { get; set; }
         public double Longitude { get; set; }
+        public long? ProfileImageId { get; set; }
+
     }
 }

@@ -10,7 +10,7 @@ using Services.Interface;
 
 namespace service_application.Server.Controllers
 {
-   // [Authorize]
+   [Authorize]
     [ApiController]
     [Route("api/attachments")]
     public class AttachmentController : ControllerBase

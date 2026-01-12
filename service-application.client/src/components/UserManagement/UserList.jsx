@@ -40,17 +40,18 @@ function UserList() {
       { header: "Username", field: "userName" },
       { header: "Email", field: "email" },
       { header: "Mobile", field: "mobileNumber" },
-      { header: "Role", field: "role" },
+     
+
       {
         header: "Actions",
         field: "actions",
         sortable: false,
         body: (row) => (
           <div className="d-flex gap-2 flex-wrap">
-            <Link to={`/user/read/${row.id}`} className="btn btn-info btn-sm">
+            <Link to={`/management/users/read/${row.id}`} className="btn btn-info btn-sm">
               Read
             </Link>
-            <Link to={`/user/edit/${row.id}`} className="btn btn-primary btn-sm">
+            <Link to={`/management/users/edit/${row.id}`} className="btn btn-primary btn-sm">
               Edit
             </Link>
             <button className="btn btn-danger btn-sm" onClick={() => handleDelete(row.id)}>
@@ -73,7 +74,7 @@ function UserList() {
         data={data}
         columns={columns}
         searchFields={["userName", "email"]}
-        onAdd={() => navigate("/user/create")}
+        onAdd={() => navigate("/management/users/create")}
       />
     </div>
   );

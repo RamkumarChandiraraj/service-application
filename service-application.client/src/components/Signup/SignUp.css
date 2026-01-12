@@ -342,3 +342,51 @@ form a {
         width: 100%;
         background: #2ecc71;
     }
+/* ================= DROPDOWN (ROLE SELECT) ================= */
+
+form select {
+    width: 100%;
+    padding: 12px;
+    margin: 6px 0;
+    border-radius: 5px;
+    border: none;
+    background: #eee;
+    font-family: "Montserrat", sans-serif;
+    font-size: 14px;
+    color: #333;
+    appearance: none;              /* remove default arrow */
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    cursor: pointer;
+}
+
+/* Custom dropdown arrow */
+form select {
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg width='12' height='8' viewBox='0 0 12 8' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23666' stroke-width='2' fill='none'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 12px;
+}
+
+/* Placeholder style */
+form select option[value=""] {
+    color: #999;
+}
+
+/* Focus state */
+form select:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(36, 135, 206, 0.3);
+}
+
+/* Error state (optional, matches inputs) */
+form select.error {
+    box-shadow: 0 0 0 2px rgba(231, 76, 60, 0.4);
+}
+
+/* Mobile consistency */
+@media (max-width: 900px) {
+    form select {
+        font-size: 15px;
+    }
+}

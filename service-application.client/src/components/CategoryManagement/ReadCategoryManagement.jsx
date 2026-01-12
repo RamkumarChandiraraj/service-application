@@ -27,8 +27,7 @@ function ReadCategoryManagement() {
                 { name: "icon", label: "Icon" },
                 { name: "link", label: "Link" }
             ]}
-            editPath={`/createcategorymanagement/${category.id}`}
-            backPath="/categorylist"
+            backPath="/management/categories"
         />
     );
 }

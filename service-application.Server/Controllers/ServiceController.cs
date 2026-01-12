@@ -21,7 +21,7 @@ namespace service_application.Server.Controllers
     {
         private readonly IServiceService _service = service;
         private readonly IApiMessage<IApiResponse> _apiResponse = apiResponse;
-
+        [Authorize]
         [HttpPost]
         public async ValueTask<IActionResult> CreateService([FromBody] ServiceRequestDto dto)
         {
@@ -71,7 +71,7 @@ namespace service_application.Server.Controllers
                 return _apiResponse.InternalServerError(ex.Message);
             }
         }
-
+        [Authorize]
         [HttpPut()]
         public async ValueTask<IActionResult> UpdateService([FromBody] ServiceRequestDto dto)
         {
@@ -90,7 +90,7 @@ namespace service_application.Server.Controllers
                 return _apiResponse.InternalServerError(ex.Message);
             }
         }
-
+        [Authorize]
         [HttpDelete("{id}")]
         public async ValueTask<IActionResult> DeleteService(long id)
         {

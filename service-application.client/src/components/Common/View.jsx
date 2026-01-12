@@ -1,8 +1,7 @@
 /* eslint-disable react-hooks/set-state-in-effect */
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import AlertToast from "./AlertToast";
-import "./Add.css";
+import AlertToast from "../Common/AlertToast";
 
 function View({ title, data, fields, editPath, backPath }) {
     const [toast, setToast] = useState({ show: false, message: "", type: "success" });

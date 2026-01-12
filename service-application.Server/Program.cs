@@ -60,46 +60,46 @@ builder.Services.AddScoped(typeof(IRepositary<>), typeof(Repository<>));
 // 🔐 JWT Authentication (FIXED)
 // =======================
 
-builder.Services.AddAuthentication();
-//builder.Services.AddAuthentication(options =>
-//{
-//    // 🔑 REQUIRED FOR IIS + SWAGGER
-//    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-//    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-//})
-//.AddJwtBearer(options =>
-//{
-//    options.RequireHttpsMetadata = false;
-//    options.SaveToken = true;
+//builder.Services.AddAuthentication();
+builder.Services.AddAuthentication(options =>
+{
+    // 🔑 REQUIRED FOR IIS + SWAGGER
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(options =>
+{
+    options.RequireHttpsMetadata = false;
+    options.SaveToken = true;
 
-//    options.TokenValidationParameters = new TokenValidationParameters
-//    {
-//        ValidateIssuerSigningKey = true,
-//        IssuerSigningKey = new SymmetricSecurityKey(
-//            Encoding.UTF8.GetBytes(builder.Configuration["JWT:SecretKey"])
-//        ),
-//        ValidateIssuer = true,
-//        ValidIssuer = builder.Configuration["JWT:Issuer"],
-//        ValidateAudience = true,
-//        ValidAudience = builder.Configuration["JWT:Audience"],
-//        ValidateLifetime = true,
-//        ClockSkew = TimeSpan.Zero
-//    };
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuerSigningKey = true,
+        IssuerSigningKey = new SymmetricSecurityKey(
+            Encoding.UTF8.GetBytes(builder.Configuration["JWT:SecretKey"])
+        ),
+        ValidateIssuer = true,
+        ValidIssuer = builder.Configuration["JWT:Issuer"],
+        ValidateAudience = true,
+        ValidAudience = builder.Configuration["JWT:Audience"],
+        ValidateLifetime = true,
+        ClockSkew = TimeSpan.Zero
+    };
 
-//    // 🔥 IMPORTANT: Fix Swagger/IIS Authorization header issue
-//    options.Events = new JwtBearerEvents
-//    {
-//        OnMessageReceived = context =>
-//        {
-//            var authHeader = context.Request.Headers["Authorization"].FirstOrDefault();
-//            if (!string.IsNullOrEmpty(authHeader) && authHeader.StartsWith("Bearer "))
-//            {
-//                context.Token = authHeader.Substring("Bearer ".Length).Trim();
-//            }
-//            return Task.CompletedTask;
-//        }
-//    };
-//});
+    // 🔥 IMPORTANT: Fix Swagger/IIS Authorization header issue
+    options.Events = new JwtBearerEvents
+    {
+        OnMessageReceived = context =>
+        {
+            var authHeader = context.Request.Headers["Authorization"].FirstOrDefault();
+            if (!string.IsNullOrEmpty(authHeader) && authHeader.StartsWith("Bearer "))
+            {
+                context.Token = authHeader.Substring("Bearer ".Length).Trim();
+            }
+            return Task.CompletedTask;
+        }
+    };
+});
 
 // =======================
 // 🔒 GLOBAL AUTHORIZATION
@@ -120,30 +120,30 @@ builder.Services.AddSwaggerGen(c =>
         Version = "v1"
     });
 
-    //c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
-    //{
-    //    Name = "Authorization",
-    //    Type = SecuritySchemeType.ApiKey,
-    //    Scheme = "Bearer",
-    //    BearerFormat = "JWT",
-    //    In = ParameterLocation.Header,
-    //    Description = "Enter: Bearer {JWT token}"
-    //});
+    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Name = "Authorization",
+        Type = SecuritySchemeType.ApiKey,
+        Scheme = "Bearer",
+        BearerFormat = "JWT",
+        In = ParameterLocation.Header,
+        Description = "Enter: Bearer {JWT token}"
+    });
 
-    //c.AddSecurityRequirement(new OpenApiSecurityRequirement
-    //{
-    //    {
-    //        new OpenApiSecurityScheme
-    //        {
-    //            Reference = new OpenApiReference
-    //            {
-    //                Type = ReferenceType.SecurityScheme,
-    //                Id = "Bearer"
-    //            }
-    //        },
-    //        Array.Empty<string>()
-    //    }
-    //});
+    c.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            Array.Empty<string>()
+        }
+    });
 });
 
 builder.Services.AddControllers();
