@@ -1,9 +1,12 @@
-// src/components/SearchManagement/Vendors/Vendors.jsx
+﻿// src/components/SearchManagement/Vendors/Vendors.jsx
 import React, { useEffect, useState } from "react";
-import { userSearch } from "./vendor"; // Mock API
+import { useNavigate } from "react-router-dom"; // ✅ FIX: add this
+import { userSearch } from "../../../api/UsersearchApi";
 import LoadingPage from "../../Common/LoadingPage";
 
 const Vendors = ({ searchPayload }) => {
+    const navigate = useNavigate(); // ✅ FIX: add this
+
     const [vendors, setVendors] = useState([]);
     const [searchTerm, setSearchTerm] = useState("");
     const [loading, setLoading] = useState(true);
@@ -28,7 +31,7 @@ const Vendors = ({ searchPayload }) => {
     }, [searchPayload]);
 
     const filteredVendors = Array.isArray(vendors)
-        ? vendors.filter((vendor) =>
+        ? vendors.filter(vendor =>
             vendor.companyName
                 ?.toLowerCase()
                 .includes(searchTerm.toLowerCase())
@@ -75,7 +78,7 @@ const Vendors = ({ searchPayload }) => {
 
             <div className="vendor-container">
                 {filteredVendors.length > 0 ? (
-                    filteredVendors.map((vendor) => (
+                    filteredVendors.map(vendor => (
                         <div className="vendor-card" key={vendor.id}>
                             <h2 className="vendor-name">{vendor.companyName}</h2>
 
@@ -88,12 +91,19 @@ const Vendors = ({ searchPayload }) => {
                                 {vendor.serviceName || "Unknown Service"}
                             </p>
 
-                            <p className="vendor-description">{vendor.description}</p>
-
                             <p className="vendor-description">
-                                Chat :{" "}
-                                <a href={`tel:${vendor.mobile}`}>{vendor.mobile}</a>
+                                {vendor.description}
                             </p>
+
+                            <button
+                                className="chat-btn"
+                                onClick={() => {
+                                    console.log("FULL VENDOR OBJECT:", vendor);
+                                    navigate(`/chat/${vendor.phoneNumber}`)
+                                }}
+                            >
+                                💬 Chat Now
+                            </button>
 
                             <p className="vendor-description">
                                 Directions:{" "}

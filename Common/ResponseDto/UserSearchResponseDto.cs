@@ -11,6 +11,7 @@ namespace Common.ResponseDto
         public string LocationName { get; set; }
         public long ServiceId { get; set; }
         public string ServiceName { get; set; }
+        public long PhoneNumber { get; set; }
         public double Latitude { get; set; }
         public double Longitude { get; set; }
     }

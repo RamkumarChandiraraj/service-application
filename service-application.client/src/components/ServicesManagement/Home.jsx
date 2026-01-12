@@ -10,7 +10,8 @@ function Home() {
   const [error, setError] = useState(null);
   const navigate = useNavigate();
 
-  useEffect(() => {
+    useEffect(() => {
+        console.log("ChatPage - Vendor Mobile :");
     fetchServices();
   }, []);
 
