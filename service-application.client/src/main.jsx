@@ -21,6 +21,9 @@ import "aos/dist/aos.css";
 import "swiper/css";
 import "swiper/css/bundle";
 
+//OSM
+import "leaflet/dist/leaflet.css";
+
 // Glightbox
 import "glightbox/dist/css/glightbox.min.css";
 
@@ -28,11 +31,11 @@ import "glightbox/dist/css/glightbox.min.css";
 AOS.init({ duration: 800, easing: "ease-in-out", once: true });
 
 createRoot(document.getElementById("root")).render(
-  <StrictMode>
+  //<StrictMode>
     <BrowserRouter>
       <AuthProvider>
         <App />
       </AuthProvider>
     </BrowserRouter>
-  </StrictMode>
+  //</StrictMode>
 );

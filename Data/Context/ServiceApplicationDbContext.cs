@@ -19,5 +19,17 @@ namespace Data.Context
         public DbSet<Otp> Otp { get; set; } = null!;
 
 
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<Registration>()
+                .HasOne(r => r.ProfileImage)
+                .WithMany()
+                .HasForeignKey(r => r.ProfileImageId)
+                .OnDelete(DeleteBehavior.SetNull);
+
+            base.OnModelCreating(modelBuilder);
+        }
+
+
     }
 }

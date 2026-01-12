@@ -18,6 +18,11 @@ import ScrollToTop from "./components/Common/ScrollToTop";
 import ScrollToTopButton from "./components/Common/ScrollToTopButton";
 import Dashboard from "./components/Dashboard/Dashboard";
 
+//SignalR Chat
+import Chat from "./components/ChatMessage/Chat";
+import ChatPage from "./components/ChatMessage/ChatPage"
+/*import VendorPage from "./components/VendorChat/VendorPage"*/
+
 function App() {
   return (
     <>
@@ -37,16 +42,12 @@ function App() {
         <Route path="/forgot-password" element={<ForgotPasswordModal />} />
         <Route path="/verify-otp" element={<VerifyOtpModal />} />
         <Route path="/unauthorized" element={<Unauthorized />} />
+        <Route path="/chat/:receiverId" element={<ChatPage />} />
         <Route element={<RequireAuth />}>
           <Route path="/dashboard" element={<Dashboard />} />
         </Route>
 
-        {/* PROTECTED MANAGEMENT ROUTES */}
-        <Route element={<RequireAuth allowedRoles={["Admin", "Vendor"]} />}>
-          <Route path="/management/*" element={<ManagementRoutes />} />
-        </Route>
-      </Routes>
-
+          </Routes>
       <Footer />
 
       {/* FLOATING SCROLL BUTTON */}
