@@ -1,78 +1,82 @@
 ﻿import React, { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, useLocation, Link } from "react-router-dom";
 import { loginApi } from "../../api/authApi";
 import { useAuth } from "../../Auth/AuthProvider";
+import { getDecodedUser } from "../../utils/jwtUtils";
 import "./SignUp.css";
 
 const SignIn = () => {
-    const navigate = useNavigate();
-    const { setAuth } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { setAuth } = useAuth();
 
-    const [userInput, setUserInput] = useState(""); // username or email
-    const [password, setPassword] = useState("");
-    const [loginError, setLoginError] = useState("");
-    const [loginSuccess, setLoginSuccess] = useState("");
-    const [loading, setLoading] = useState(false);
+  const from = location.state?.from?.pathname || "/dashboard";
 
-    const handleLogin = async () => {
-        if (!userInput || !password) {
-            setLoginError("Please enter username/email and password");
-            return;
-        }
+  const [userInput, setUserInput] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
-        try {
-            setLoginError("");
-            setLoginSuccess("");
-            setLoading(true);
+  const handleLogin = async () => {
+    if (!userInput || !password) {
+      setError("Username/Email and password are required");
+      return;
+    }
 
-            const response = await loginApi({
-                userNameOrEmail: userInput, // send username/email
-                password: password,
-            });
+    try {
+      setLoading(true);
+      setError("");
 
-            // Optionally store JWT token
-            localStorage.setItem("token", response.token);
-            setAuth(response);
+      const response = await loginApi({
+        userNameOrEmail: userInput,
+        password,
+      });
 
-      setLoginSuccess("Login successful! Redirecting...");
-      setTimeout(() => navigate("/dashboard"), 800);
+      // ✅ Store JWT
+      localStorage.setItem("token", response.token);
+
+      // ✅ Decode & store in AuthContext
+      const decodedUser = getDecodedUser();
+      setAuth(decodedUser);
+
+      // ✅ Redirect back to protected page
+      navigate(from, { replace: true });
     } catch {
-      setLoginError("Invalid username or password");
+      setError("Invalid username or password");
     } finally {
       setLoading(false);
     }
   };
 
-    return (
-        <form onSubmit={(e) => e.preventDefault()}>
-            <h1>Sign In</h1>
+  return (
+    <form onSubmit={(e) => e.preventDefault()}>
+      <h1>Sign In</h1>
 
-            <input
-                type="text"
-                placeholder="User Name or Email"
-                value={userInput} // ✅ fixed
-                onChange={(e) => setUserInput(e.target.value)} // ✅ fixed
-                autoComplete="username"
-            />
+      <input
+        type="text"
+        placeholder="Username or Email"
+        value={userInput}
+        onChange={(e) => setUserInput(e.target.value)}
+        autoComplete="username"
+      />
 
-            <input
-                type="password"
-                placeholder="Password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                autoComplete="current-password"
-            />
+      <input
+        type="password"
+        placeholder="Password"
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+        autoComplete="current-password"
+      />
 
-            {loginError && <p style={{ color: "red" }}>{loginError}</p>}
-            {loginSuccess && <p style={{ color: "green" }}>{loginSuccess}</p>}
+      {error && <p className="error-text">{error}</p>}
 
-            <button type="button" disabled={loading} onClick={handleLogin}>
-                {loading ? "Signing in..." : "Sign In"}
-            </button>
+      <button type="button" disabled={loading} onClick={handleLogin}>
+        {loading ? "Signing in..." : "Sign In"}
+      </button>
 
-            <Link to="/forgot-password">Forgot Password?</Link>
-        </form>
-    );
+      <Link to="/forgot-password">Forgot Password?</Link>
+    </form>
+  );
 };
 
 export default SignIn;

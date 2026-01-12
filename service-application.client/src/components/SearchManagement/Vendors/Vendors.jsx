@@ -62,7 +62,7 @@ const Vendors = ({ searchPayload }) => {
 
               <p className="vendor-description">{vendor.description}</p>
 
-              <p className="vendor-description"> Call Now{vendor.mobile}</p>
+              <p className="vendor-description"> Chat{vendor.mobile}</p>
               
             </div>
           ))
