@@ -15,16 +15,25 @@ namespace service_application.Server.Controllers
     [Authorize]
     [Route("api/[controller]")]
     [ApiController]
-    public class UserController(IUserService user, IApiMessage<IApiResponse> apiResponse) : ControllerBase
+    public class UserController(IUserService user, IApiMessage<IApiResponse> apiResponse,ILogger<UserController> logger) : ControllerBase
     {
+      
         private readonly IUserService _User = user;
         private readonly IApiMessage<IApiResponse> _apiResponse = apiResponse;
+        private readonly ILogger<UserController> _logger = logger;
+        //public UserController(ILogger<UserController> logger)
+        //{
+        //    _Logger = logger;
+        //}
 
         [HttpPost]
         public async ValueTask<IActionResult> CreateUser(UserRequestDto dto)
         {
             try
             {
+                _logger.LogDebug("");
+
+
                 if (string.IsNullOrEmpty(dto.UserName))
                     return _apiResponse.BadRequest("Name is required");
 
@@ -44,8 +53,11 @@ namespace service_application.Server.Controllers
             }
             catch (Exception ex)
             {
-                return _apiResponse.InternalServerError(ex.Message);
+               
+              _logger.LogError(ex.Message);
+               return _apiResponse.InternalServerError(ex.Message);
             }
+
         }
 
 
@@ -120,19 +132,28 @@ namespace service_application.Server.Controllers
         [HttpGet("list")]
         public async ValueTask<IActionResult> GetAllUser(string? searchkeyword)
         {
-            var results = await _User.GetAllUser();
-
-            if (!string.IsNullOrEmpty(searchkeyword))
+            try
             {
-                searchkeyword = searchkeyword.ToLower();
-                results = results.Where(x => x.UserName.ToLower().Contains(searchkeyword) ||
-                x.Email.ToLower().Contains(searchkeyword) || x.MobileNumber.ToString().Contains(searchkeyword)
-                ).ToList();
+                
+                var results = await _User.GetAllUser();
+
+                if (!string.IsNullOrEmpty(searchkeyword))
+                {
+                    searchkeyword = searchkeyword.ToLower();
+                    results = results.Where(x => x.UserName.ToLower().Contains(searchkeyword) ||
+                    x.Email.ToLower().Contains(searchkeyword) || x.MobileNumber.ToString().Contains(searchkeyword)
+                    ).ToList();
+                }
+
+                var dtos = results.ToMap<List<User>, List<UserResponseDto>>();
+
+                return _apiResponse.Ok(dtos);
             }
-
-            var dtos = results.ToMap<List<User>, List<UserResponseDto>>();
-
-            return _apiResponse.Ok(dtos);
+            catch (Exception ex)
+            {
+                 _logger.LogError(ex.Message);
+                return _apiResponse.Ok();
+            }
         }
 
     }

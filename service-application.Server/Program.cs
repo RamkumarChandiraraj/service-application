@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using Serilog;
 using service_application.Server.Hubs;
 using service_application.Server.Providers;
 using Services.Impl;
@@ -17,6 +18,11 @@ using System.Text;
 
 var corsPolicyName = "AllowAll";
 var builder = WebApplication.CreateBuilder(args);
+
+//Serilog configuration
+
+builder.Host.UseSerilog((context, configuration) =>
+    configuration.ReadFrom.Configuration(context.Configuration));
 
 // =======================
 // Database (MySQL)
@@ -172,6 +178,8 @@ builder.Services.AddCors(options =>
 // =======================
 var app = builder.Build();
 
+app.UseSerilogRequestLogging();
+
 app.UseDefaultFiles();
 app.UseStaticFiles();
 
@@ -189,5 +197,13 @@ app.UseAuthorization();    // SECOND
 app.MapControllers();
 app.MapFallbackToFile("/index.html");
 app.MapHub<ChatHub>("/chatHub");
+
+if (app.Environment.IsDevelopment())
+{
+    app.UseSpa(spa =>
+    {
+        spa.UseProxyToSpaDevelopmentServer("http://localhost:5173");
+    });
+}
 
 app.Run();
