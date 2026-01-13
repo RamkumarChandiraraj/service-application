@@ -4,7 +4,8 @@ import { useSearchParams } from "react-router-dom";
 import { getAllCategories } from "../../../api/categoryApi";
 import { getAllServices } from "../../../api/serviceList";
 import { getAllLocations } from "../../../api/locationList";
-import "./SearchProperties.css"
+
+import "./SearchProperties.css";
 import LoadingPage from "../../Common/LoadingPage";
 import MultiSelect from "../../Common/MultiSelect";
 
@@ -65,18 +66,18 @@ const SearchProperties = ({ onSearch, onValidationError }) => {
         setLocations(locData);
 
         /* DEFAULT CATEGORY FROM URL */
-        const defaultCategoryIds = catData
-          .filter(c => categorySlugs.includes(c.link?.toLowerCase()))
-          .map(c => Number(c.id));
-
-        setSelectedCategoryIds(defaultCategoryIds);
+        setSelectedCategoryIds(
+          catData
+            .filter(c => categorySlugs.includes(c.link?.toLowerCase()))
+            .map(c => Number(c.id))
+        );
 
         /* DEFAULT SERVICE FROM URL */
-        const defaultServiceIds = servData
-          .filter(s => serviceSlugs.includes(slugify(s.name)))
-          .map(s => Number(s.id));
-
-        setSelectedServiceIds(defaultServiceIds);
+        setSelectedServiceIds(
+          servData
+            .filter(s => serviceSlugs.includes(slugify(s.name)))
+            .map(s => Number(s.id))
+        );
 
         /* DEFAULT LOCATION FROM URL */
         if (locationSlugs.length) {
@@ -87,7 +88,6 @@ const SearchProperties = ({ onSearch, onValidationError }) => {
               .map(l => Number(l.id))
           );
         }
-
       } catch (err) {
         console.error("Failed to load search filters", err);
       } finally {
@@ -97,6 +97,24 @@ const SearchProperties = ({ onSearch, onValidationError }) => {
 
     fetchData();
   }, []);
+
+  /* ---------- CURRENT LOCATION ---------- */
+  useEffect(() => {
+    if (locationMode !== "current") return;
+
+    navigator.geolocation?.getCurrentPosition(
+      (pos) => {
+        setCurrentCoords({
+          lat: pos.coords.latitude,
+          lon: pos.coords.longitude,
+        });
+      },
+      () => {
+        setLocationError("Unable to fetch current location");
+      },
+      { enableHighAccuracy: true }
+    );
+  }, [locationMode]);
 
   /* ---------- FILTER SERVICES ---------- */
   useEffect(() => {
@@ -167,7 +185,6 @@ const SearchProperties = ({ onSearch, onValidationError }) => {
   return (
     <section className="sp-page">
       <div className="sp-container">
-
         <div className="sp-header-center">
           <h2>Search Vendors</h2>
           <div className="sp-divider"><span /></div>
@@ -187,7 +204,6 @@ const SearchProperties = ({ onSearch, onValidationError }) => {
               onChange={setSelectedCategoryIds}
               placeholder="Select categories"
             />
-            {categoryError && <span className="error">{categoryError}</span>}
           </div>
 
           {/* SERVICE */}
@@ -203,16 +219,16 @@ const SearchProperties = ({ onSearch, onValidationError }) => {
               placeholder="Select services"
               disabled={!filteredServices.length}
             />
-            {serviceError && <span className="error">{serviceError}</span>}
           </div>
 
-          {/* LOCATION (ICON + MULTISELECT UI) */}
+          {/* LOCATION */}
           <div className="sp-col">
             <label>Location</label>
 
             <div className="sp-location-inline">
               <button
-                className={locationMode === "current" ? "active" : ""}
+                title="Use current location"
+                className={`sp-loc-btn ${locationMode === "current" ? "active" : ""}`}
                 onClick={() => {
                   setLocationMode("current");
                   setSelectedLocationIds([]);
@@ -222,15 +238,16 @@ const SearchProperties = ({ onSearch, onValidationError }) => {
               </button>
 
               <button
-                className={locationMode === "choose" ? "active" : ""}
+                title="Choose location"
+                className={`sp-loc-btn ${locationMode === "choose" ? "active" : ""}`}
                 onClick={() => setLocationMode("choose")}
               >
-                <i className="bi bi-map-fill" />
+                <i className="bi bi-list-check" />
               </button>
 
               {locationMode === "choose" && (
                 <MultiSelect
-                  options={[ALL_OPTION, ...locations.map(l => ({
+                  options={[ ...locations.map(l => ({
                     id: l.id,
                     label: l.name,
                   }))]}
@@ -240,8 +257,6 @@ const SearchProperties = ({ onSearch, onValidationError }) => {
                 />
               )}
             </div>
-
-            {locationError && <span className="error">{locationError}</span>}
           </div>
 
           {/* SEARCH */}
@@ -251,7 +266,7 @@ const SearchProperties = ({ onSearch, onValidationError }) => {
               disabled={isSearchDisabled}
               onClick={handleSearch}
             >
-              🔍 Search
+              <i className="bi bi-search" /> Search
             </button>
           </div>
 
