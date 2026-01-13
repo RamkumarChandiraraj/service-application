@@ -4,9 +4,12 @@ using Data.Context;
 using Data.Entities;
 using Mapster;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using service_application.Server.Hubs;
+using service_application.Server.Providers;
 using Services.Impl;
 using Services.Interface;
 using Services.Mappings;
@@ -44,6 +47,9 @@ builder.Services.AddScoped<IUserSearchService, UserSearchService>();
 builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
 builder.Services.AddScoped<IForgotPasswordService, ForgotPasswordService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
+
+// 🔑 REGISTER CustomUserIdProvider
+builder.Services.AddSingleton<IUserIdProvider, CustomUserIdProvider>();
 
 // =======================
 // Repository
@@ -143,6 +149,9 @@ builder.Services.AddSwaggerGen(c =>
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 
+//SignalR for live chat
+builder.Services.AddSignalR();
+
 // =======================
 // CORS
 // =======================
@@ -150,9 +159,11 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy(corsPolicyName, policy =>
     {
-        policy.AllowAnyOrigin()
+        policy
               .AllowAnyHeader()
-              .AllowAnyMethod();
+              .AllowAnyMethod()
+              .SetIsOriginAllowed(org=> true)
+              .AllowCredentials();
     });
 });
 
@@ -177,5 +188,6 @@ app.UseAuthorization();    // SECOND
 
 app.MapControllers();
 app.MapFallbackToFile("/index.html");
+app.MapHub<ChatHub>("/chatHub");
 
 app.Run();

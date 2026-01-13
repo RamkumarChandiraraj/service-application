@@ -1,13 +1,16 @@
-import { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
+
+import OpenStreetMapPicker from "../OpenStreetMap/OpenStreetMapPicker";
+import CurrentLocation from "../Location/CurrentLocation";
+import AlertToast from "../Common/AlertToast";
+import LoadingPage from "../Common/LoadingPage";
+
 import {
   createLocation,
   updateLocation,
   getLocationById,
 } from "../../api/locationList";
-
-import AlertToast from "../Common/AlertToast";
-import LoadingPage from "../Common/LoadingPage";
 
 function CreateLocation() {
   const { id } = useParams();
@@ -26,8 +29,8 @@ function CreateLocation() {
   });
 
   const [errors, setErrors] = useState({});
-  const [loading, setLoading] = useState(false);      // submit loader
-  const [pageLoading, setPageLoading] = useState(false); // page loader
+  const [loading, setLoading] = useState(false);
+  const [pageLoading, setPageLoading] = useState(false);
 
   const [toast, setToast] = useState({
     show: false,
@@ -35,7 +38,7 @@ function CreateLocation() {
     type: "success",
   });
 
-  // ================= LOAD DATA (EDIT MODE) =================
+  // ================= LOAD DATA IF EDIT MODE =================
   useEffect(() => {
     if (!isEditMode) return;
 
@@ -100,9 +103,7 @@ function CreateLocation() {
         Latitude: Number(formData.Latitude),
         Longitude: Number(formData.Longitude),
         Pincode: Number(formData.Pincode),
-        ReferenceId: formData.ReferenceId
-          ? Number(formData.ReferenceId)
-          : null,
+        ReferenceId: formData.ReferenceId ? Number(formData.ReferenceId) : null,
       };
 
       if (isEditMode) {
@@ -122,15 +123,11 @@ function CreateLocation() {
         });
       }
 
-      setTimeout(() => {
-        navigate("/management/locations");
-      }, 1500);
+      setTimeout(() => navigate("/management/locations"), 1500);
     } catch (err) {
       setToast({
         show: true,
-        message:
-          err.response?.data?.message ||
-          "Something went wrong. Please try again.",
+        message: err.response?.data?.message || "Something went wrong.",
         type: "error",
       });
     } finally {
@@ -138,12 +135,11 @@ function CreateLocation() {
     }
   };
 
-  // ================= PAGE LOADER =================
   if (pageLoading) return <LoadingPage />;
 
   return (
     <>
-      {/* 🔔 TOAST */}
+      {/* TOAST */}
       <AlertToast
         show={toast.show}
         message={toast.message}
@@ -151,35 +147,37 @@ function CreateLocation() {
         onClose={() => setToast({ ...toast, show: false })}
       />
 
+      {/* AUTO CURRENT LOCATION */}
+      <CurrentLocation
+        onLocationSelect={({ lat, lon }) =>
+          setFormData((prev) => ({
+            ...prev,
+            Latitude: lat.toFixed(6),
+            Longitude: lon.toFixed(6),
+          }))
+        }
+      />
+
       <div className="bg-light min-vh-100 d-flex justify-content-center py-5">
         <div className="container px-3">
-          <div
-            className="card shadow-sm mx-auto p-4 p-md-5"
-            style={{ maxWidth: "900px" }}
-          >
+          <div className="card shadow-sm mx-auto p-4 p-md-5" style={{ maxWidth: "900px" }}>
             <h3 className="text-center mb-4">
               {isEditMode ? "Update Location" : "Create Location"}
             </h3>
 
             <form onSubmit={handleSubmit}>
               <div className="row g-4">
-                {/* Location Name */}
+                {/* Name */}
                 <div className="col-12">
-                  <label className="form-label">
-                    Location Name <span className="text-danger">*</span>
-                  </label>
+                  <label className="form-label">Location Name <span className="text-danger">*</span></label>
                   <input
                     type="text"
                     name="Name"
                     value={formData.Name}
                     onChange={handleChange}
-                    className={`form-control ${
-                      errors.Name ? "is-invalid" : ""
-                    }`}
+                    className={`form-control ${errors.Name ? "is-invalid" : ""}`}
                   />
-                  {errors.Name && (
-                    <div className="invalid-feedback">{errors.Name}</div>
-                  )}
+                  {errors.Name && <div className="invalid-feedback">{errors.Name}</div>}
                 </div>
 
                 {/* Description */}
@@ -208,96 +206,38 @@ function CreateLocation() {
 
                 {/* Pincode */}
                 <div className="col-12 col-md-6">
-                  <label className="form-label">
-                    Pincode <span className="text-danger">*</span>
-                  </label>
+                  <label className="form-label">Pincode <span className="text-danger">*</span></label>
                   <input
                     type="number"
                     name="Pincode"
                     value={formData.Pincode}
                     onChange={handleChange}
-                    className={`form-control ${
-                      errors.Pincode ? "is-invalid" : ""
-                    }`}
+                    className={`form-control ${errors.Pincode ? "is-invalid" : ""}`}
                   />
-                  {errors.Pincode && (
-                    <div className="invalid-feedback">{errors.Pincode}</div>
-                  )}
+                  {errors.Pincode && <div className="invalid-feedback">{errors.Pincode}</div>}
                 </div>
 
-                {/* Latitude */}
-                <div className="col-12 col-md-6">
-                  <label className="form-label">
-                    Latitude <span className="text-danger">*</span>
-                  </label>
-                  <input
-                    type="number"
-                    step="0.000001"
-                    name="Latitude"
-                    value={formData.Latitude}
-                    onChange={handleChange}
-                    className={`form-control ${
-                      errors.Latitude ? "is-invalid" : ""
-                    }`}
-                  />
-                  {errors.Latitude && (
-                    <div className="invalid-feedback">{errors.Latitude}</div>
-                  )}
-                </div>
-
-                {/* Longitude */}
-                <div className="col-12 col-md-6">
-                  <label className="form-label">
-                    Longitude <span className="text-danger">*</span>
-                  </label>
-                  <input
-                    type="number"
-                    step="0.000001"
-                    name="Longitude"
-                    value={formData.Longitude}
-                    onChange={handleChange}
-                    className={`form-control ${
-                      errors.Longitude ? "is-invalid" : ""
-                    }`}
-                  />
-                  {errors.Longitude && (
-                    <div className="invalid-feedback">{errors.Longitude}</div>
-                  )}
-                </div>
-
-                {/* Reference ID */}
-                <div className="col-12 col-md-4">
-                  <label className="form-label">Reference ID</label>
-                  <input
-                    type="number"
-                    name="ReferenceId"
-                    value={formData.ReferenceId}
-                    onChange={handleChange}
-                    className="form-control"
+                {/* Latitude & Longitude */}
+                <div className="col-12 mt-4">
+                  <label className="form-label fw-bold">Select Location on Map</label>
+                  <OpenStreetMapPicker
+                    latitude={formData.Latitude}
+                    longitude={formData.Longitude}
+                    onSelect={({ lat, lon }) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        Latitude: lat.toFixed(6),
+                        Longitude: lon.toFixed(6),
+                      }))
+                    }
                   />
                 </div>
               </div>
 
-              {/* BUTTONS */}
               <div className="d-flex justify-content-end gap-3 mt-5">
-                <Link
-                  to="/management/locations"
-                  className="btn btn-secondary"
-                >
-                  Cancel
-                </Link>
-                <button
-                  type="submit"
-                  className="btn btn-success"
-                  disabled={loading}
-                >
-                  {loading
-                    ? isEditMode
-                      ? "Updating..."
-                      : "Saving..."
-                    : isEditMode
-                    ? "Update"
-                    : "Save"}
+                <Link to="/management/locations" className="btn btn-secondary">Cancel</Link>
+                <button type="submit" className="btn btn-success" disabled={loading}>
+                  {loading ? (isEditMode ? "Updating..." : "Saving...") : (isEditMode ? "Update" : "Save")}
                 </button>
               </div>
             </form>

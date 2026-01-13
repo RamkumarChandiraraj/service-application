@@ -1,12 +1,17 @@
+﻿// src/components/SearchManagement/Vendors/Vendors.jsx
 import React, { useEffect, useState } from "react";
-import { userSearch } from "../../../api/UsersearchApi"; // POST API
+import { useNavigate } from "react-router-dom"; // ✅ FIX: add this
+import { userSearch } from "../../../api/UsersearchApi";
 import LoadingPage from "../../Common/LoadingPage";
 
 const Vendors = ({ searchPayload }) => {
+  const navigate = useNavigate(); // ✅ FIX: add this
+
   const [vendors, setVendors] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(true);
 
+  // Fetch vendors when searchPayload changes
   useEffect(() => {
     const fetchVendors = async () => {
       if (!searchPayload) return;
@@ -30,6 +35,30 @@ const Vendors = ({ searchPayload }) => {
         vendor.companyName?.toLowerCase().includes(searchTerm.toLowerCase())
       )
     : [];
+
+  // Open OpenStreetMap directions in a new tab
+  const handleDirections = (vendor) => {
+    if (!vendor.latitude || !vendor.longitude) {
+      alert("Vendor location not available.");
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const startLat = position.coords.latitude;
+        const startLon = position.coords.longitude;
+        const destLat = vendor.latitude;
+        const destLon = vendor.longitude;
+
+        const osmUrl = `https://www.openstreetmap.org/directions?engine=osrm_car&route=${startLat},${startLon};${destLat},${destLon}`;
+        window.open(osmUrl, "_blank");
+      },
+      () => {
+        const osmUrl = `https://www.openstreetmap.org/?mlat=${vendor.latitude}&mlon=${vendor.longitude}#map=18/${vendor.latitude}/${vendor.longitude}`;
+        window.open(osmUrl, "_blank");
+      }
+    );
+  };
 
   if (loading) return <LoadingPage />;
 
@@ -62,8 +91,25 @@ const Vendors = ({ searchPayload }) => {
 
               <p className="vendor-description">{vendor.description}</p>
 
-              <p className="vendor-description"> Call Now{vendor.mobile}</p>
-              
+              <p className="vendor-description">
+                <button
+                  className="btn btn-sm btn-primary"
+                  onClick={() => {
+                    console.log("FULL VENDOR OBJECT:", vendor);
+                    navigate(`/chat/${vendor.phoneNumber}`);
+                  }}
+                >
+                  💬 Chat Now
+                </button>
+              </p>
+              <p className="vendor-description">
+                <button
+                  className="btn btn-sm btn-primary"
+                  onClick={() => handleDirections(vendor)}
+                >
+                  Get Directions
+                </button>
+              </p>
             </div>
           ))
         ) : (
