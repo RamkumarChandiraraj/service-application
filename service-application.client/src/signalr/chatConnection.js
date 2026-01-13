@@ -1,12 +1,22 @@
-import * as signalR from "@microsoft/signalr";
+﻿import * as signalR from "@microsoft/signalr";
 
 /**
  * CREATE CHAT CONNECTION
  */
 export const createChatConnection = async (userId) => {
     try {
+
+        ///* Base URL configuration */
+        const BASE_URL =
+            import.meta.env.VITE_API_CHAT_BASE_URL ||
+            `${window.location.origin}`;
+
+        alert(BASE_URL);
+
         const connection = new signalR.HubConnectionBuilder()
-            .withUrl(`https://localhost:44351/chatHub?userId=${userId}`)
+            .withUrl(`${BASE_URL}/chatHub?userId=${userId}`, {
+                withCredentials: false   // 🔑 IMPORTANT
+            })
             .withAutomaticReconnect()
             .build();
 

@@ -159,11 +159,11 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy(corsPolicyName, policy =>
     {
-        policy
+        policy.AllowAnyOrigin()
               .AllowAnyHeader()
               .AllowAnyMethod()
-              .SetIsOriginAllowed(org=> true)
-              .AllowCredentials();
+              .SetIsOriginAllowed(origin => true)// Allows any origin
+              ;
     });
 });
 
