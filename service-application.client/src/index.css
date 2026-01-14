@@ -1654,3 +1654,62 @@ tbody tr:nth-child(even) {
   }
 }
 /* End Data Table ****************** */
+
+
+/* Firebase */
+
+/* ===============================
+   FIREBASE NOTIFICATION TOAST
+================================ */
+
+.fcm-toast {
+  position: fixed;
+  top: 90px;
+  right: 24px;
+  width: 340px;
+  background: linear-gradient(135deg, #0d6efd, #6610f2);
+  color: #fff;
+  border-radius: 14px;
+  padding: 16px 18px;
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.25);
+  z-index: 99999;
+  animation: slideIn 0.5s ease;
+}
+
+.fcm-toast-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.fcm-toast-title {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.fcm-toast-close {
+  background: transparent;
+  border: none;
+  font-size: 22px;
+  color: #fff;
+  cursor: pointer;
+}
+
+.fcm-toast-body {
+  margin-top: 10px;
+  font-size: 14px;
+  line-height: 1.5;
+  opacity: 0.95;
+}
+
+/* Animation */
+@keyframes slideIn {
+  from {
+    transform: translateX(120%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
