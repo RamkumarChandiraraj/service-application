@@ -1,7 +1,6 @@
 ﻿using Common.Base;
 using Data.Base;
 using Data.Context;
-using Data.Entities;
 using Mapster;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.SignalR;
@@ -14,6 +13,9 @@ using Services.Impl;
 using Services.Interface;
 using Services.Mappings;
 using System.Text;
+using FirebaseAdmin;
+using Google.Apis.Auth.OAuth2;
+
 
 var corsPolicyName = "AllowAll";
 var builder = WebApplication.CreateBuilder(args);
@@ -47,9 +49,7 @@ builder.Services.AddScoped<IUserSearchService, UserSearchService>();
 builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
 builder.Services.AddScoped<IForgotPasswordService, ForgotPasswordService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
-
-// 🔑 REGISTER CustomUserIdProvider
-builder.Services.AddSingleton<IUserIdProvider, CustomUserIdProvider>();
+builder.Services.AddScoped<INotificationService, NotificationService>();
 
 // =======================
 // Repository
@@ -57,13 +57,16 @@ builder.Services.AddSingleton<IUserIdProvider, CustomUserIdProvider>();
 builder.Services.AddScoped(typeof(IRepositary<>), typeof(Repository<>));
 
 // =======================
-// 🔐 JWT Authentication (FIXED)
+// SignalR
 // =======================
+builder.Services.AddSingleton<IUserIdProvider, CustomUserIdProvider>();
+builder.Services.AddSignalR();
 
-//builder.Services.AddAuthentication();
+// =======================
+// Authentication (JWT)
+// =======================
 builder.Services.AddAuthentication(options =>
 {
-    // 🔑 REQUIRED FOR IIS + SWAGGER
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
     options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
 })
@@ -86,7 +89,6 @@ builder.Services.AddAuthentication(options =>
         ClockSkew = TimeSpan.Zero
     };
 
-    // 🔥 IMPORTANT: Fix Swagger/IIS Authorization header issue
     options.Events = new JwtBearerEvents
     {
         OnMessageReceived = context =>
@@ -94,7 +96,7 @@ builder.Services.AddAuthentication(options =>
             var authHeader = context.Request.Headers["Authorization"].FirstOrDefault();
             if (!string.IsNullOrEmpty(authHeader) && authHeader.StartsWith("Bearer "))
             {
-                context.Token = authHeader.Substring("Bearer ".Length).Trim();
+                context.Token = authHeader["Bearer ".Length..].Trim();
             }
             return Task.CompletedTask;
         }
@@ -102,15 +104,7 @@ builder.Services.AddAuthentication(options =>
 });
 
 // =======================
-// 🔒 GLOBAL AUTHORIZATION
-// =======================
-//builder.Services.AddAuthorization(options =>
-//{
-//    options.FallbackPolicy = options.DefaultPolicy;
-//});
-
-// =======================
-// Swagger + JWT 🔒 Button
+// Swagger
 // =======================
 builder.Services.AddSwaggerGen(c =>
 {
@@ -149,9 +143,6 @@ builder.Services.AddSwaggerGen(c =>
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 
-//SignalR for live chat
-builder.Services.AddSignalR();
-
 // =======================
 // CORS
 // =======================
@@ -161,9 +152,7 @@ builder.Services.AddCors(options =>
     {
         policy.AllowAnyOrigin()
               .AllowAnyHeader()
-              .AllowAnyMethod()
-              .SetIsOriginAllowed(origin => true)// Allows any origin
-              ;
+              .AllowAnyMethod();
     });
 });
 
@@ -172,6 +161,35 @@ builder.Services.AddCors(options =>
 // =======================
 var app = builder.Build();
 
+// =======================
+// Firebase Initialization (SAFE & OPTIONAL)
+// =======================
+if (FirebaseApp.DefaultInstance == null)
+{
+    var firebasePath = Path.Combine(
+        app.Environment.ContentRootPath,
+        "firebase-adminsdk.json"
+    );
+
+    if (!File.Exists(firebasePath))
+    {
+        Console.WriteLine("❌ Firebase admin SDK file NOT found");
+        Console.WriteLine(firebasePath);
+    }
+    else
+    {
+        FirebaseApp.Create(new AppOptions
+        {
+            Credential = GoogleCredential.FromFile(firebasePath)
+        });
+
+        Console.WriteLine("✅ Firebase Admin SDK initialized");
+    }
+}
+
+// =======================
+// Middleware Pipeline
+// =======================
 app.UseDefaultFiles();
 app.UseStaticFiles();
 
@@ -179,15 +197,13 @@ app.UseSwagger();
 app.UseSwaggerUI();
 
 app.UseHttpsRedirection();
-
 app.UseCors(corsPolicyName);
 
-// 🔐 ORDER IS CRITICAL
-app.UseAuthentication();   // FIRST
-app.UseAuthorization();    // SECOND
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.MapControllers();
-app.MapFallbackToFile("/index.html");
 app.MapHub<ChatHub>("/chatHub");
+app.MapFallbackToFile("/index.html");
 
 app.Run();
