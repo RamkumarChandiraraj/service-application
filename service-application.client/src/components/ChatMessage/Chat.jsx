@@ -1,5 +1,6 @@
 ﻿import { useEffect, useRef, useState } from "react";
 import { createChatConnection, stopChatConnection } from "../../signalr/chatConnection";
+import "./Chat.css";
 
 const Chat = ({ senderId }) => {
     const connectionRef = useRef(null);
@@ -8,7 +9,13 @@ const Chat = ({ senderId }) => {
     const [messages, setMessages] = useState([]);
     const [activeUsers, setActiveUsers] = useState([]);
     const [selectedUser, setSelectedUser] = useState(null);
-    const [text, setText] = useState("");
+    const [draftMessages, setDraftMessages] = useState({});
+    const [searchText, setSearchText] = useState("");
+
+    // Extract data from senderId (logged-in user)
+    const username = senderId?.split("_")[0];
+    const number = senderId?.split("_")[1];
+    const user = senderId?.split("_")[2]; // V or C
 
     useEffect(() => {
         if (!senderId || initializedRef.current) return;
@@ -17,25 +24,25 @@ const Chat = ({ senderId }) => {
         const connect = async () => {
             const conn = await createChatConnection(senderId);
 
-            // ✅ Receive message
             conn.on("ReceiveMessage", (msg) => {
+                const timestamp = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
                 const message = {
                     senderId: msg.senderId ?? msg.SenderId,
                     receiverId: msg.receiverId ?? msg.ReceiverId,
                     message: msg.message ?? msg.Message,
+                    time: timestamp, // ✅ add timestamp
                 };
 
                 setMessages(prev => [...prev, message]);
 
-                // auto select customer when message comes
                 if (message.senderId !== senderId) {
-                    setSelectedUser(String(message.senderId));
+                    setSelectedUser(message.senderId);
                 }
             });
 
-            // ✅ Receive active users
             conn.on("ReceiveUsers", (users) => {
-                setActiveUsers(users.filter(u => u !== String(senderId)));
+                setActiveUsers(users.filter(u => u !== senderId));
             });
 
             connectionRef.current = conn;
@@ -51,95 +58,136 @@ const Chat = ({ senderId }) => {
         };
     }, [senderId]);
 
-    // ✅ Show only selected user's conversation
     const filteredMessages = messages.filter(m =>
         selectedUser &&
         (
-            (m.senderId === senderId && m.receiverId === Number(selectedUser)) ||
-            (m.senderId === Number(selectedUser) && m.receiverId === senderId)
+            (m.senderId === senderId && m.receiverId === selectedUser) ||
+            (m.senderId === selectedUser && m.receiverId === senderId)
         )
     );
 
+    const filteredUsers = activeUsers.filter(u => {
+        const name = u.split("_")[0].toLowerCase();
+        const mobile = u.split("_")[1];
+        return (
+            name.includes(searchText.toLowerCase()) ||
+            mobile.includes(searchText)
+        );
+    });
+
     const sendMessage = async () => {
-        if (!text.trim() || !selectedUser) return;
+        const messageText = draftMessages[selectedUser]?.trim();
+        if (!messageText || !selectedUser) return;
+
+        const timestamp = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
         await connectionRef.current.invoke(
             "SendMessage",
             senderId,
-            Number(selectedUser),
-            text
+            selectedUser,
+            messageText
         );
 
         setMessages(prev => [
             ...prev,
-            {
-                senderId,
-                receiverId: Number(selectedUser),
-                message: text,
-            },
+            { senderId, receiverId: selectedUser, message: messageText, time: timestamp },
         ]);
 
-        setText("");
+        setDraftMessages(prev => ({
+            ...prev,
+            [selectedUser]: ""
+        }));
     };
 
     return (
-        <div style={{ display: "flex", height: "500px", gap: 20 }}>
+        <div className="chat-container">
 
-            {/* 👥 Active Users */}
-            <div style={{ width: 220, border: "1px solid #ccc", padding: 10 }}>
-                <h4>Active Users</h4>
-                {activeUsers.map(u => (
-                    <div
-                        key={u}
-                        onClick={() => setSelectedUser(u)}
-                        style={{
-                            padding: 8,
-                            cursor: "pointer",
-                            background: selectedUser === u ? "#e0f2ff" : "#fff",
-                            borderBottom: "1px solid #eee"
-                        }}
-                    >
-                        {u}
-                    </div>
-                ))}
+            {/* Logged-in User Header */}
+            <div className="chat-header">
+                <div className="profile-logo">{user}</div>
+                <div className="profile-info">
+                    <h3>Welcome {username}</h3>
+                    <span>{number}</span>
+                </div>
             </div>
 
-            {/* 💬 Chat Window */}
-            <div style={{ flex: 1 }}>
-                <h4>
-                    {selectedUser ? `Chat with ${selectedUser}` : "Select a user"}
-                </h4>
+            <div className="chat-body">
 
-                <div style={{
-                    height: 350,
-                    overflowY: "auto",
-                    border: "1px solid #ccc",
-                    padding: 10
-                }}>
-                    {filteredMessages.map((m, i) => (
+                {/* Users Panel */}
+                <div className="users-panel">
+
+                    {/* Search */}
+                    <div className="search-box">
+                        <span className="search-icon">🔍</span>
+                        <input
+                            type="text"
+                            placeholder="Search "
+                            value={searchText}
+                            onChange={e => setSearchText(e.target.value)}
+                        />
+                    </div>
+
+                    {filteredUsers.map(u => (
                         <div
-                            key={i}
-                            style={{
-                                textAlign: m.senderId === senderId ? "right" : "left",
-                                marginBottom: 6
-                            }}
+                            key={u}
+                            className={`user-item ${selectedUser === u ? "active" : ""}`}
+                            onClick={() => setSelectedUser(u)}
                         >
-                            <b>{m.senderId === senderId ? "Me" : selectedUser}</b>: {m.message}
+                            <div className="user-logo">{u.split("_")[2]}</div>
+                            <div>
+                                <strong>{u.split("_")[0]}</strong>
+                                <p>{u.split("_")[1]}</p>
+                            </div>
                         </div>
                     ))}
                 </div>
 
-                {selectedUser && (
-                    <div style={{ marginTop: 10 }}>
-                        <input
-                            value={text}
-                            onChange={e => setText(e.target.value)}
-                            placeholder="Type message"
-                            style={{ width: "80%" }}
-                        />
-                        <button onClick={sendMessage}>Send</button>
+                {/* Chat Panel */}
+                <div className="chat-panel">
+
+                    {/* Selected User Header */}
+                    {selectedUser && (
+                        <div className="chat-user-header">
+                            <div className="chat-user-logo">{selectedUser.split("_")[2]}</div>
+                            <div className="chat-user-info">
+                                <h4>{selectedUser.split("_")[0]}</h4>
+                                <span>{selectedUser.split("_")[1]}</span>
+                            </div>
+                        </div>
+                    )}
+
+                    <div className="messages">
+                        {filteredMessages.map((m, i) => (
+                            <div
+                                key={i}
+                                className={`message ${m.senderId === senderId ? "sent" : "received"}`}
+                            >
+                                <span className="message-text">{m.message}</span>
+                                <span className="message-time">{m.time}</span>
+                            </div>
+                        ))}
                     </div>
-                )}
+
+                    {selectedUser && (
+                        <div className="message-input">
+                            <input
+                                value={draftMessages[selectedUser] || ""}
+                                onChange={e => setDraftMessages(prev => ({
+                                    ...prev,
+                                    [selectedUser]: e.target.value
+                                }))}
+                                placeholder="Type a message"
+                                onKeyDown={e => {
+                                    if (e.key === "Enter") {
+                                        e.preventDefault();
+                                        sendMessage();
+                                    }
+                                }}
+                            />
+                            <button onClick={sendMessage}>➤</button>
+                        </div>
+                    )}
+                </div>
             </div>
         </div>
     );

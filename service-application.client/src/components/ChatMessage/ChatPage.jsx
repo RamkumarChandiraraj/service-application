@@ -1,89 +1,110 @@
-﻿import { useParams } from "react-router-dom";
-import { useState, useEffect } from "react";
+﻿import { useState, useEffect } from "react";
 import Chat from "./Chat";
+import "./ChatPage.css";
 
 const ChatPage = () => {
-    // Receiver (Vendor Mobile) from URL
-    const { receiverId } = useParams();
+    // ✅ Receiver (Vendor Mobile) – now from input (not URL)
+    const [receiverId, setReceiverId] = useState("");
 
     useEffect(() => {
         console.log("ChatPage - Vendor Mobile (receiverId):", receiverId);
-
-        
     }, [receiverId]);
 
-    // Sender (Customer Mobile)
+    // Sender inputs
     const [customerMobile, setCustomerMobile] = useState("");
+    const [username, setUsername] = useState("");
+    const [userType, setUserType] = useState(""); // V or C
     const [startChat, setStartChat] = useState(false);
     const [error, setError] = useState("");
 
     // ✅ Validate 10-digit mobile number
     const isValidMobile = /^[0-9]{10}$/.test(customerMobile);
 
-    const isValid = receiverId && isValidMobile;
+    const isValid =
+        isValidMobile &&
+        username.trim() !== "" &&
+        userType !== "";
 
     const handleStartChat = () => {
         if (!isValidMobile) {
             setError("Please enter a valid 10-digit mobile number");
             return;
         }
+        if (!username.trim()) {
+            setError("Please enter username");
+            return;
+        }
+        if (!userType) {
+            setError("Please select V or C");
+            return;
+        }
         setError("");
         setStartChat(true);
     };
 
-    // ❌ If vendor mobile missing
-    if (!receiverId) {
-        return (
-            <div style={{ padding: "20px" }}>
-                <h3>Invalid vendor</h3>
-                <p>Vendor mobile number not found in URL.</p>
-            </div>
-        );
-    }
+    // ✅ CONCATENATED SENDER ID
+    const senderId = `${username}_${customerMobile}_${userType}`;
 
     return (
-        <div style={{ padding: "20px" }}>
-            <h2>Chat with Vendor</h2>
-
-            <p>
-                <b>Vendor Mobile:</b> {receiverId}
-            </p>
-
-            {/* Step 1: Ask customer mobile */}
+        <div className="chat-page">
+            {/* ✅ Hide Login title once chat starts */}
             {!startChat && (
-                <div style={{ marginTop: "20px" }}>
+                <div className="chat-card">
+                    <h2>Login Chat</h2>
+
+                    {/* Customer Mobile */}
                     <input
                         type="text"
                         placeholder="Enter 10-digit mobile number"
                         value={customerMobile}
                         maxLength={10}
-                        onChange={(e) => {
-                            // allow only numbers
-                            const value = e.target.value.replace(/\D/g, "");
-                            setCustomerMobile(value);
-                        }}
-                        style={{
-                            padding: "8px",
-                            width: "250px",
-                            marginRight: "10px",
-                            border: error ? "1px solid red" : "1px solid #ccc"
-                        }}
+                        onChange={(e) =>
+                            setCustomerMobile(e.target.value.replace(/\D/g, ""))
+                        }
                     />
+
+                    {/* Username */}
+                    <input
+                        type="text"
+                        placeholder="Enter username"
+                        value={username}
+                        onChange={(e) => setUsername(e.target.value)}
+                    />
+
+                    {/* Radio Buttons */}
+                    <div className="user-type">
+                        <label>
+                            <input
+                                type="radio"
+                                name="userType"
+                                value="V"
+                                checked={userType === "V"}
+                                onChange={(e) => setUserType(e.target.value)}
+                            />
+                            Vendor
+                        </label>
+
+                        <label>
+                            <input
+                                type="radio"
+                                name="userType"
+                                value="C"
+                                checked={userType === "C"}
+                                onChange={(e) => setUserType(e.target.value)}
+                            />
+                            Customer
+                        </label>
+                    </div>
 
                     <button
                         onClick={handleStartChat}
                         disabled={!isValid}
-                        style={{
-                            padding: "8px 16px",
-                            opacity: !isValid ? 0.5 : 1,
-                            cursor: !isValid ? "not-allowed" : "pointer"
-                        }}
                     >
                         Start Chat
                     </button>
 
                     {error && (
-                        <div style={{ color: "red", marginTop: "8px" }}>
+                        <div className="chat-error">
                             {error}
                         </div>
                     )}
@@ -92,13 +113,10 @@ const ChatPage = () => {
 
             {/* Step 2: Start Chat */}
             {startChat && (
-                
-                <Chat
-                    senderId={Number(customerMobile)}
-                    receiverId={Number(receiverId)}
-                />
+                <div className="chat-wrapper">
+                    <Chat senderId={senderId} />
+                </div>
             )}
-            {/*<Chat senderId={Number(customerMobile)} />*/}
         </div>
     );
 };

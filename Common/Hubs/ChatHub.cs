@@ -44,7 +44,7 @@ namespace service_application.Server.Hubs
         }
 
         // 💬 Send private message
-        public async Task SendMessage(long senderId, long receiverId, string message)
+        public async Task SendMessage(string senderId, string receiverId, string message)
         {
             await Clients.User(receiverId.ToString())
                 .SendAsync("ReceiveMessage", new
