@@ -96,7 +96,7 @@ const Vendors = ({ searchPayload }) => {
                   className="btn btn-sm btn-primary"
                   onClick={() => {
                     console.log("FULL VENDOR OBJECT:", vendor);
-                    navigate(`/chat/${vendor.phoneNumber}`);
+                    navigate(`/chat`);
                   }}
                 >
                   💬 Chat Now

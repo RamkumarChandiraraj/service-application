@@ -1,4 +1,5 @@
 ﻿using Common.Base;
+using Common.Settings;
 using Data.Base;
 using Data.Context;
 using Data.Entities;
@@ -13,6 +14,7 @@ using service_application.Server.Providers;
 using Services.Impl;
 using Services.Interface;
 using Services.Mappings;
+using System.Configuration;
 using System.Text;
 
 var corsPolicyName = "AllowAll";
@@ -47,6 +49,12 @@ builder.Services.AddScoped<IUserSearchService, UserSearchService>();
 builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
 builder.Services.AddScoped<IForgotPasswordService, ForgotPasswordService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
+
+//In memory caching settings
+var cacheSettings = builder.Configuration
+    .GetSection("CacheSettings")
+    .Get<CacheSettings>();
+builder.Services.AddSingleton<ICacheSettings>(cacheSettings);
 
 // 🔑 REGISTER CustomUserIdProvider
 builder.Services.AddSingleton<IUserIdProvider, CustomUserIdProvider>();
@@ -166,7 +174,7 @@ builder.Services.AddCors(options =>
               ;
     });
 });
-
+builder.Services.AddMemoryCache();
 // =======================
 // Build App
 // =======================
