@@ -6,6 +6,7 @@ import React, {
   useMemo,
 } from "react";
 import { createPortal } from "react-dom";
+import "bootstrap-icons/font/bootstrap-icons.css";
 import "./MultiSelect.css";
 
 const MultiSelect = ({
@@ -13,7 +14,7 @@ const MultiSelect = ({
   options = [],
   value = [],
   onChange,
-  placeholder = "Select",
+  placeholder = "Select options",
   disabled = false,
 }) => {
   const controlRef = useRef(null);
@@ -37,17 +38,17 @@ const MultiSelect = ({
     if (!open || !controlRef.current) return;
 
     const rect = controlRef.current.getBoundingClientRect();
-    const dropdownHeight = Math.min(260, filteredOptions.length * 38);
+    const dropdownHeight = Math.min(280, filteredOptions.length * 42);
     const spaceBelow = window.innerHeight - rect.bottom;
-    const openUp = spaceBelow < dropdownHeight + 10;
+    const openUp = spaceBelow < dropdownHeight + 12;
 
     setStyle({
+      position: "fixed",
       left: rect.left,
       width: rect.width,
-      top: openUp ? undefined : rect.bottom + 6,
-      bottom: openUp ? window.innerHeight - rect.top + 6 : undefined,
-      position: "fixed",
-      zIndex: 10000,
+      top: openUp ? undefined : rect.bottom + 8,
+      bottom: openUp ? window.innerHeight - rect.top + 8 : undefined,
+      zIndex: 1050,
     });
   }, [open, filteredOptions.length]);
 
@@ -65,7 +66,7 @@ const MultiSelect = ({
     return () => document.removeEventListener("mousedown", handler);
   }, []);
 
-  /* ---------- TOGGLE ---------- */
+  /* ---------- HANDLERS ---------- */
   const toggle = (id) => {
     if (value.includes(id)) {
       onChange(value.filter(v => v !== id));
@@ -98,12 +99,18 @@ const MultiSelect = ({
             {selected.map(o => (
               <span key={o.id} className="tag">
                 {o.label}
-                <button onClick={(e) => removeTag(o.id, e)}>×</button>
+                <i
+                  className="bi bi-x tag-close"
+                  onClick={(e) => removeTag(o.id, e)}
+                />
               </span>
             ))}
           </div>
         )}
-        <span className="arrow">▾</span>
+
+        <i
+          className={`bi bi-chevron-down arrow ${open ? "rotate" : ""}`}
+        />
       </div>
 
       {/* ---------- DROPDOWN ---------- */}
@@ -118,7 +125,7 @@ const MultiSelect = ({
               className="multiselect-search"
               placeholder="Search..."
               value={search}
-              onChange={e => setSearch(e.target.value)}
+              onChange={(e) => setSearch(e.target.value)}
               autoFocus
             />
 
@@ -138,11 +145,11 @@ const MultiSelect = ({
                       checked={value.includes(o.id)}
                       readOnly
                     />
-                    {o.label}
+                    <span>{o.label}</span>
                   </li>
                 ))
               ) : (
-                <li className="empty">No options</li>
+                <li className="empty">No options found</li>
               )}
             </ul>
           </div>,
