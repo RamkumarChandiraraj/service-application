@@ -1,0 +1,163 @@
+@import url("https://fonts.googleapis.com/css?family=Montserrat:400,600,800");
+
+:root {
+    --primary-color: #124265;
+    --secondary-color: #2487ce;
+    --white: #ffffff;
+    --gray-bg: #f6f5f7;
+    --error-color: #e74c3c;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: "Montserrat", sans-serif;
+    background: var(--gray-bg);
+}
+
+/* ================= CHAT PAGE CONTAINER ================= */
+
+.chat-page {
+    min-height: 80vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.chat-card {
+    background: var(--white);
+    width: 420px;
+    max-width: 90%;
+    padding: 30px 35px;
+    border-radius: 10px;
+    box-shadow: 0 0 28px rgba(0, 0, 0, 0.18);
+    animation: slideFade 0.4s ease;
+}
+
+    .chat-card h2 {
+        margin-bottom: 20px;
+        font-weight: 700;
+        color: var(--primary-color);
+        text-align: center;
+    }
+
+    /* ================= INPUTS ================= */
+
+    .chat-card input[type="text"] {
+        width: 100%;
+        padding: 12px;
+        margin-bottom: 10px;
+        border-radius: 5px;
+        border: none;
+        background: #eee;
+        font-family: "Montserrat", sans-serif;
+        font-size: 14px;
+    }
+
+    .chat-card input:focus {
+        outline: none;
+        box-shadow: 0 0 0 2px rgba(36, 135, 206, 0.3);
+    }
+
+/* ================= RADIO BUTTONS ================= */
+
+.user-type {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    margin: 10px 0 20px;
+}
+
+    .user-type label {
+        font-size: 14px;
+        font-weight: 600;
+        color: #333;
+        cursor: pointer;
+    }
+
+    .user-type input {
+        margin-right: 6px;
+    }
+
+/* ================= BUTTON ================= */
+
+.chat-card button {
+    width: 100%;
+    border-radius: 20px;
+    border: none;
+    background: var(--primary-color);
+    color: #fff;
+    padding: 12px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+    .chat-card button:hover:not(:disabled) {
+        background: var(--secondary-color);
+    }
+
+    .chat-card button:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+/* ================= ERROR ================= */
+
+.chat-error {
+    margin-top: 10px;
+    font-size: 14px;
+    color: var(--error-color);
+    text-align: center;
+}
+
+/* ================= CHAT VIEW ================= */
+
+.chat-wrapper {
+    width: 100%;
+    height: 100vh;
+    background: var(--white);
+}
+
+/* ================= ANIMATION ================= */
+
+@keyframes slideFade {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ================= MOBILE ================= */
+
+@media (max-width: 600px) {
+    .chat-page {
+        min-height: 50vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .chat-card {
+        width: 100%;
+        height: 30vh;
+        border-radius: 0;
+        box-shadow: none;
+        padding: 25px 20px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+
+        .chat-card h2 {
+            font-size: 22px;
+        }
+}

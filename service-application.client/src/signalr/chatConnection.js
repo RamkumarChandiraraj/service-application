@@ -11,7 +11,7 @@ export const createChatConnection = async (userId) => {
             import.meta.env.VITE_API_CHAT_BASE_URL ||
             `${window.location.origin}`;
 
-        alert(BASE_URL);
+        //alert(BASE_URL);
 
         const connection = new signalR.HubConnectionBuilder()
             .withUrl(`${BASE_URL}/chatHub?userId=${userId}`, {
