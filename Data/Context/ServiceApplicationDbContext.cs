@@ -17,6 +17,8 @@ namespace Data.Context
         public DbSet<Registration> Registrations { get; set; }
         public DbSet<Attachment> Attachments { get; set; }
         public DbSet<Otp> Otp { get; set; } = null!;
+        public DbSet<UserDevice> UserDevices { get; set; }
+
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

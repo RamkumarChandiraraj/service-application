@@ -23,6 +23,12 @@
 .sp-header-center h2 {
   font-size: clamp(24px, 4vw, 34px);
   font-weight: 700;
+  margin-bottom: 10px;
+}
+
+.sp-divider {
+  display: flex;
+  justify-content: center;
 }
 
 .sp-divider span {
@@ -34,7 +40,7 @@
 }
 
 /* =========================
-   SEARCH BAR — DESKTOP (UNCHANGED)
+   SEARCH BAR — DESKTOP
 ========================= */
 .sp-bar {
   background: #fff;
@@ -56,6 +62,7 @@
   font-weight: 600;
   margin-bottom: 6px;
   display: block;
+  color: #111827;
 }
 
 /* =========================
@@ -77,6 +84,18 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.sp-location-inline button i {
+  font-size: 18px;
+}
+
+.sp-location-inline button:hover {
+  background: #eef2ff;
+  border-color: #2563eb;
+  color: #2563eb;
 }
 
 .sp-location-inline button.active {
@@ -116,7 +135,8 @@
 }
 
 /* keep close button aligned */
-.sp-col .multiselect .tag button {
+.sp-col .multiselect .tag button,
+.sp-col .multiselect .tag i {
   flex-shrink: 0;
   line-height: 1;
   margin-left: 4px;
@@ -137,7 +157,28 @@
   color: #fff;
   border: none;
   font-weight: 600;
+  font-size: 15px;
   cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.sp-search-btn:hover:not(:disabled) {
+  background: #1d6fb3;
+}
+
+.sp-search-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* =========================
+   ERROR TEXT
+========================= */
+.error {
+  font-size: 12px;
+  color: #dc2626;
+  margin-top: 4px;
+  display: block;
 }
 
 /* =========================
@@ -155,7 +196,6 @@
 
 /* =========================
    MOBILE (≤768px)
-   STACK ONE BY ONE
 ========================= */
 @media (max-width: 768px) {
   .sp-page {
@@ -175,6 +215,7 @@
 
   .sp-location-inline {
     justify-content: flex-start;
+    flex-wrap: wrap;
   }
 
   .sp-search-btn {

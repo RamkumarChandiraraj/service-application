@@ -30,6 +30,21 @@ import "glightbox/dist/css/glightbox.min.css";
 // Initialize AOS
 AOS.init({ duration: 800, easing: "ease-in-out", once: true });
 
+
+
+/* 🔔 Register Firebase Service Worker */
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker
+    .register("/firebase-messaging-sw.js")
+    .then((reg) => {
+      console.log("✅ Firebase SW registered:", reg);
+    })
+    .catch((err) => {
+      console.error("❌ Firebase SW registration failed:", err);
+    });
+}
+
+
 createRoot(document.getElementById("root")).render(
   //<StrictMode>
     <BrowserRouter>

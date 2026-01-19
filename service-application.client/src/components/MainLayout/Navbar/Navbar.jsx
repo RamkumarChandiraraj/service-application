@@ -99,7 +99,13 @@ const Navbar = () => {
               <NavLink to="/searchvendors" onClick={handleLinkClick}>
                 Search
               </NavLink>
-            </li>
+                      </li>
+                      {/* Chat */}
+                      <li>
+                          <NavLink to="/chat/1234567890" onClick={handleLinkClick}>
+                              Chat
+                          </NavLink>
+                      </li>
             {/* CONTENT MANAGEMENT – ONLY AFTER LOGIN */}
             {auth && (
               <li className={`dropdown ${openDropdowns.main ? "active" : ""}`}>
