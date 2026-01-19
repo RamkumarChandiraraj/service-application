@@ -12,7 +12,7 @@ using Services.Interface;
 
 namespace service_application.Server.Controllers
 {
-    [Authorize]
+    //[Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class UserController(IUserService user, IApiMessage<IApiResponse> apiResponse,ILogger<UserController> logger) : ControllerBase
@@ -26,41 +26,70 @@ namespace service_application.Server.Controllers
         //    _Logger = logger;
         //}
 
+      
         [HttpPost]
         public async ValueTask<IActionResult> CreateUser(UserRequestDto dto)
         {
             try
             {
-                _logger.LogDebug("");
-
+                // ✅ INFORMATION LOG (Request start)
+                _logger.LogInformation(
+                    "CreateUser request started. Email: {Email}, UserName: {UserName}",
+                    dto.Email,
+                    dto.UserName
+                );
 
                 if (string.IsNullOrEmpty(dto.UserName))
                     return _apiResponse.BadRequest("Name is required");
 
-
-                var isDuplicate = await _User.IsDuplicateAsync(dto.Email,dto.UserName, dto.MobileNumber);
-
-
+                var isDuplicate = await _User.IsDuplicateAsync(
+                    dto.Email,
+                    dto.UserName,
+                    dto.MobileNumber
+                );
 
                 if (isDuplicate)
                 {
-                    return _apiResponse.BadRequest("Email, UserName, or Mobile number already exists");
+                    //  WARNING (NOT ERROR)
+                    _logger.LogWarning(
+                        "Duplicate user creation attempt. Email: {Email}, UserName: {UserName}, Mobile: {Mobile}",
+                        dto.Email,
+                        dto.UserName,
+                        dto.MobileNumber
+                    );
+
+                    return _apiResponse.BadRequest(
+                        "Email, UserName, or Mobile number already exists"
+                    );
                 }
 
-                // No duplicates, create user
                 await _User.CreateUserAsync(dto);
+
+                // INFORMATION LOG (Success)
+                _logger.LogInformation(
+                    "User created successfully. Email: {Email}, UserName: {UserName}",
+                    dto.Email,
+                    dto.UserName
+                );
+
                 return _apiResponse.Ok("User created successfully");
             }
             catch (Exception ex)
             {
-               
-              _logger.LogError(ex.Message);
-               return _apiResponse.InternalServerError(ex.Message);
-            }
+                //  ERROR (Only real exceptions)
+                _logger.LogError(
+                    ex,
+                    "Exception occurred while creating user. Email: {Email}, UserName: {UserName}",
+                    dto.Email,
+                    dto.UserName
+                );
 
+                return _apiResponse.InternalServerError(ex.Message);
+            }
         }
 
 
+        //[Authorize]
         [HttpGet("{id}")]
         public async ValueTask<IActionResult> GetUserById(long id)
         {
@@ -75,41 +104,84 @@ namespace service_application.Server.Controllers
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Error occurred in GetUserById. Id: {Id}", id);
                 return _apiResponse.InternalServerError(ex.Message);
             }
         }
-        [Authorize]
-        [HttpPut("{id}")]
 
+        [HttpPut]
         public async ValueTask<IActionResult> UpdateUser(int id, [FromBody] UserRequestDto dto)
         {
             try
             {
-                if (dto.ID != id || string.IsNullOrEmpty(dto.UserName) )
-                    return _apiResponse.BadRequest("Fields are required or ID mismatch");
+                //  INFORMATION: request start
+                _logger.LogInformation(
+                    "UpdateUser request started. Id: {Id}, Email: {Email}, UserName: {UserName}",
+                    id,
+                    dto.Email,
+                    dto.UserName
+                );
 
-                
+                if (dto.ID != id || string.IsNullOrEmpty(dto.UserName))
+                {
+                    _logger.LogWarning(
+                        "UpdateUser validation failed. RouteId: {RouteId}, BodyId: {BodyId}",
+                        id,
+                        dto.ID
+                    );
+
+                    return _apiResponse.BadRequest("Fields are required or ID mismatch");
+                }
+
                 var isDuplicate = await _User.IsDuplicateAsync(
                     dto.Email,
                     dto.UserName,
                     dto.MobileNumber,
-                    (int?)dto.ID 
+                    (int?)dto.ID
                 );
 
                 if (isDuplicate)
-                    return _apiResponse.BadRequest("Email, UserName or Mobile number already exists");
+                {
+                    //  WARNING (business rule)
+                    _logger.LogWarning(
+                        "Duplicate user update attempt. Id: {Id}, Email: {Email}, UserName: {UserName}",
+                        id,
+                        dto.Email,
+                        dto.UserName
+                    );
+
+                    return _apiResponse.BadRequest(
+                        "Email, UserName or Mobile number already exists"
+                    );
+                }
 
                 await _User.UpdateUserByIdAsync(dto);
+
+                //  INFORMATION: success
+                _logger.LogInformation(
+                    "User updated successfully. Id: {Id}, Email: {Email}",
+                    id,
+                    dto.Email
+                );
 
                 return _apiResponse.Ok("User updated successfully");
             }
             catch (Exception ex)
             {
-                return _apiResponse.InternalServerError(ex.Message);
-            }
-            }
+                //  ERROR: unexpected exception
+                _logger.LogError(
+                    ex,
+                    "Exception occurred while updating user. Id: {Id}, Email: {Email}",
+                    id,
+                    dto.Email
+                );
 
-        [Authorize]
+                return _apiResponse.InternalServerError("Internal server error");
+            }
+        }
+
+
+        //[Authorize]
         [HttpDelete("{id}")]
         public async ValueTask<IActionResult> DeleteUser(long id)
         {
@@ -125,10 +197,11 @@ namespace service_application.Server.Controllers
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Error occurred in DeleteUser. Id: {Id}", id);
                 return _apiResponse.InternalServerError(ex.Message);
             }
         }
-        [Authorize]
+        //[Authorize]
         [HttpGet("list")]
         public async ValueTask<IActionResult> GetAllUser(string? searchkeyword)
         {
@@ -151,7 +224,7 @@ namespace service_application.Server.Controllers
             }
             catch (Exception ex)
             {
-                 _logger.LogError(ex.Message);
+                _logger.LogError(ex, "Error occurred in GetAllUser");
                 return _apiResponse.Ok();
             }
         }

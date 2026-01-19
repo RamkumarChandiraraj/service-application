@@ -149,6 +149,9 @@ builder.Services.AddSwaggerGen(c =>
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 
+//SignalR for live chat
+builder.Services.AddSignalR();
+
 // =======================
 // CORS
 // =======================
@@ -158,7 +161,8 @@ builder.Services.AddCors(options =>
     {
         policy.AllowAnyOrigin()
               .AllowAnyHeader()
-              .AllowAnyMethod();
+              .AllowAnyMethod()
+              .SetIsOriginAllowed(origin => true);
     });
 });
 
@@ -212,12 +216,12 @@ app.MapControllers();
 app.MapHub<ChatHub>("/chatHub");
 app.MapFallbackToFile("/index.html");
 
-if (app.Environment.IsDevelopment())
-{
-    app.UseSpa(spa =>
-    {
-        spa.UseProxyToSpaDevelopmentServer("http://localhost:5173");
-    });
-}
+//if (app.Environment.IsDevelopment())
+//{
+//    app.UseSpa(spa =>
+//    {
+//        spa.UseProxyToSpaDevelopmentServer("http://localhost:5173");
+//    });
+//}
 
 app.Run();
