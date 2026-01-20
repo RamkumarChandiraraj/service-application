@@ -4,22 +4,25 @@ using Data.Base;
 using Data.Entities;
 using Microsoft.EntityFrameworkCore;
 using Services.Interface;
+using System.Linq;
 
 namespace Services.Impl
 {
     public class UserSearchService(
         IRepositary<Registration> registrationRepo,
-        IRepositary<Service> serviceRepo
+        IServiceService service
     ) : IUserSearchService
     {
         private readonly IRepositary<Registration> _registrationRepo = registrationRepo;
-        private readonly IRepositary<Service> _serviceRepo = serviceRepo;
+        private readonly IServiceService _service = service;
         public async ValueTask<List<UserSearchResponseDto>> SearchUsersAsync(UserSearchRequestDto request)
         {
+            var servicelist =await _service.GetAllService();
             // Step 1: Filter Services
-            var serviceQuery = _serviceRepo.FindByCondition(x=> request.CategoryIds.Contains(x.CategoryId)  && request.ServiceIds.Contains(x.ID));
-
-            var services = await serviceQuery.Include(s => s.Category).ToListAsync();
+            var services = servicelist
+                .Where(x => request.CategoryIds.Contains(x.CategoryId)
+                && request.ServiceIds.Contains(x.ID))
+                .ToList();
 
             if (!services.Any())
                 return new List<UserSearchResponseDto>();

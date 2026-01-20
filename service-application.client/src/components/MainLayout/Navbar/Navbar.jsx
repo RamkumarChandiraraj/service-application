@@ -102,7 +102,7 @@ const Navbar = () => {
                       </li>
                       {/* Chat */}
                       <li>
-                          <NavLink to="/chat/1234567890" onClick={handleLinkClick}>
+                          <NavLink to="/chat" onClick={handleLinkClick}>
                               Chat
                           </NavLink>
                       </li>
