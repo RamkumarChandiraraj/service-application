@@ -82,8 +82,7 @@ function App() {
         <Route path="/forgot-password" element={<ForgotPasswordModal />} />
         <Route path="/verify-otp" element={<VerifyOtpModal />} />
         <Route path="/unauthorized" element={<Unauthorized />} />
-        <Route path="/chat/:receiverId" element={<ChatPage />} />
-
+        <Route path="/chat" element={<ChatPage />} />
         <Route element={<RequireAuth />}>
           <Route path="/dashboard" element={<Dashboard />} />
         </Route>

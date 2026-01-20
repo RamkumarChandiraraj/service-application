@@ -1,14 +1,21 @@
-﻿using Common.Extension;
+﻿using Common;
+using Common.Extension;
 using Common.RequestDto;
+using Common.Settings;
 using Data.Base;
 using Data.Entities;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 using Services.Interface;
 
 namespace Services.Impl
 {
-    public class LocationService(IRepositary<Location> locationRepository) : ILocationService
+    public class LocationService(IRepositary<Location> locationRepository, IMemoryCache memoryCache,
+        ICacheSettings cacheSettings) : ILocationService
     {
         private readonly IRepositary<Location> _locationRepository = locationRepository;
+        private readonly IMemoryCache _cache = memoryCache;
+        private readonly ICacheSettings _cacheSettings = cacheSettings;
 
         public async ValueTask<Location> CreateLocationAsync(LocationRequestDto req)
         {
@@ -18,6 +25,8 @@ namespace Services.Impl
 
                 entity.GenerateCreateHistory(1);
                 await _locationRepository.CreateAsync(entity);
+                // 🔥 Invalidate cache
+                _cache.Remove(CacheKeys.LocationAll);
 
                 return entity;
             }
@@ -31,22 +40,39 @@ namespace Services.Impl
         {
             try
             {
-                var location = await ValueTask.FromResult(
-                    _locationRepository.FindByCondition(x => x.ID == id).FirstOrDefault()
-                );
-
-                if (location == null)
+                List<Location> locations;
+                // 1️⃣ Try to get all locations from cache
+                if (!_cache.TryGetValue(CacheKeys.LocationAll, out locations))
                 {
-                    throw new InvalidDataException($"Id '{id}' not exists.");
+                    // 2️⃣ Cache miss → fetch from DB
+                    locations = await _locationRepository.FindAll().ToListAsync();
+
+                    // 3️⃣ Store in cache
+                    _cache.Set(
+                        CacheKeys.LocationAll,
+                        locations,
+                        new MemoryCacheEntryOptions
+                        {
+                            AbsoluteExpirationRelativeToNow =
+                                TimeSpan.FromMinutes(_cacheSettings.AbsoluteExpirationMinutes),
+                            SlidingExpiration =
+                                TimeSpan.FromMinutes(_cacheSettings.SlidingExpirationMinutes)
+                        });
                 }
+
+                // 4️⃣ Find location by ID
+                var location = locations.FirstOrDefault(l => l.ID == id);
+                if (location == null)
+                    throw new InvalidDataException($"Id '{id}' not exists.");
 
                 return location;
             }
-            catch (Exception)
+            catch
             {
                 throw;
             }
         }
+
 
         public async ValueTask UpdateLocationByIdAsync(LocationRequestDto req)
         {
@@ -64,6 +90,8 @@ namespace Services.Impl
 
                 oldEntity.GenerateModifyHistory(1);
                 await _locationRepository.UpdateAsync(oldEntity);
+                // 🔥 Invalidate cache
+                _cache.Remove(CacheKeys.LocationAll);
             }
             catch (Exception)
             {
@@ -79,6 +107,8 @@ namespace Services.Impl
 
                 oldEntity.GenerateDeleteHistory(1);
                 await _locationRepository.DeleteAsync(oldEntity);
+                // 🔥 Invalidate cache
+                _cache.Remove(CacheKeys.LocationAll);
             }
             catch (Exception)
             {
@@ -90,13 +120,29 @@ namespace Services.Impl
         {
             try
             {
-                var locations = await ValueTask.FromResult(
-                    _locationRepository.FindAll().ToList()
-                );
+                if (_cache.TryGetValue(CacheKeys.LocationAll, out List<Location> cachedLocations))
+                {
+                    return cachedLocations; // CACHE HIT
+                }
+
+                var locations = await _locationRepository
+                    .FindAll()
+                    .ToListAsync();
+
+                _cache.Set(
+                    CacheKeys.LocationAll,
+                    locations,
+                    new MemoryCacheEntryOptions
+                    {
+                        AbsoluteExpirationRelativeToNow =
+                            TimeSpan.FromMinutes(_cacheSettings.AbsoluteExpirationMinutes),
+                        SlidingExpiration =
+                            TimeSpan.FromMinutes(_cacheSettings.SlidingExpirationMinutes)
+                    });
 
                 return locations;
             }
-            catch (Exception)
+            catch
             {
                 throw;
             }
