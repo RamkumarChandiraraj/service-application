@@ -25,7 +25,7 @@ export const createUser = async (payload) => {
 // UPDATE USER
 export const updateUser = async (id, payload) => {
     try {
-        const { data } = await api.put(`/api/User/${id}`, payload);
+        const { data } = await api.put(`/api/User?id=${id}`, payload);
         return data;
     } catch (error) {
         console.error("Error updating user:", error.response || error.message);

@@ -120,6 +120,8 @@ public async Task<bool> IsDuplicateAsync(string email,string username, long mobi
                 await _userRepository.UpdateAsync(oldEntity);
                 
 
+
+
             }
             catch (Exception ex)
             {

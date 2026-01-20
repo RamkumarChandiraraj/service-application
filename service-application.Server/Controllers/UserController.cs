@@ -41,6 +41,12 @@ namespace service_application.Server.Controllers
 
                 if (string.IsNullOrEmpty(dto.UserName))
                     return _apiResponse.BadRequest("Name is required");
+                
+           
+                if (dto.ProfileId == 0)
+                {
+                    dto.ProfileId = null;
+                }
 
                 var isDuplicate = await _User.IsDuplicateAsync(
                     dto.Email,
@@ -93,21 +99,30 @@ namespace service_application.Server.Controllers
         [HttpGet("{id}")]
         public async ValueTask<IActionResult> GetUserById(long id)
         {
-            
             try
-            { 
-                
-                var entity = await _User
-                    .GetUserById(id);
+            {
+                _logger.LogInformation("GetUserById request started. Id: {Id}", id);
+
+                var entity = await _User.GetUserById(id);
+                if (entity == null)
+                {
+                    _logger.LogWarning("GetUserById not found. Id: {Id}", id);
+                    return _apiResponse.NotFound($"User with Id {id} not found");
+                }
+
                 var dto = entity.ToMap<User, UserResponseDto>();
+
+                _logger.LogInformation("GetUserById successful. Id: {Id}", id);
+
                 return _apiResponse.Ok(dto);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error occurred in GetUserById. Id: {Id}", id);
+                _logger.LogError(ex, "Exception occurred in GetUserById. Id: {Id}", id);
                 return _apiResponse.InternalServerError(ex.Message);
             }
         }
+
 
         [HttpPut]
         public async ValueTask<IActionResult> UpdateUser(int id, [FromBody] UserRequestDto dto)
@@ -176,7 +191,7 @@ namespace service_application.Server.Controllers
                     dto.Email
                 );
 
-                return _apiResponse.InternalServerError("Internal server error");
+                return _apiResponse.InternalServerError(ex.Message);
             }
         }
 
@@ -187,45 +202,57 @@ namespace service_application.Server.Controllers
         {
             try
             {
+                _logger.LogInformation("DeleteUser request started. Id: {Id}", id);
+
                 if (id < 0)
                 {
+                    _logger.LogWarning("DeleteUser validation failed. Invalid Id: {Id}", id);
                     return _apiResponse.BadRequest("Id is mandatory");
                 }
+
                 await _User.DeleteUserById(id);
+
+                _logger.LogInformation("DeleteUser successful. Id: {Id}", id);
 
                 return _apiResponse.Ok(true);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error occurred in DeleteUser. Id: {Id}", id);
+                _logger.LogError(ex, "Exception occurred in DeleteUser. Id: {Id}", id);
                 return _apiResponse.InternalServerError(ex.Message);
             }
         }
+
         //[Authorize]
         [HttpGet("list")]
         public async ValueTask<IActionResult> GetAllUser(string? searchkeyword)
         {
             try
             {
-                
+                _logger.LogInformation("GetAllUser request started. SearchKeyword: {Keyword}", searchkeyword);
+
                 var results = await _User.GetAllUser();
 
                 if (!string.IsNullOrEmpty(searchkeyword))
                 {
                     searchkeyword = searchkeyword.ToLower();
-                    results = results.Where(x => x.UserName.ToLower().Contains(searchkeyword) ||
-                    x.Email.ToLower().Contains(searchkeyword) || x.MobileNumber.ToString().Contains(searchkeyword)
+                    results = results.Where(x =>
+                        x.UserName.ToLower().Contains(searchkeyword) ||
+                        x.Email.ToLower().Contains(searchkeyword) ||
+                        x.MobileNumber.ToString().Contains(searchkeyword)
                     ).ToList();
                 }
 
                 var dtos = results.ToMap<List<User>, List<UserResponseDto>>();
 
+                _logger.LogInformation("GetAllUser successful. Total users: {Count}", dtos.Count);
+
                 return _apiResponse.Ok(dtos);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error occurred in GetAllUser");
-                return _apiResponse.Ok();
+                _logger.LogError(ex, "Exception occurred in GetAllUser");
+                return _apiResponse.InternalServerError(ex.Message);
             }
         }
 
