@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using Serilog;
 using service_application.Server.Hubs;
 using service_application.Server.Providers;
 using Services.Impl;
@@ -21,6 +22,11 @@ using Google.Apis.Auth.OAuth2;
 
 var corsPolicyName = "AllowAll";
 var builder = WebApplication.CreateBuilder(args);
+
+//Serilog configuration
+
+builder.Host.UseSerilog((context, configuration) =>
+    configuration.ReadFrom.Configuration(context.Configuration));
 
 // =======================
 // Database (MySQL)
@@ -154,6 +160,9 @@ builder.Services.AddSwaggerGen(c =>
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 
+//SignalR for live chat
+builder.Services.AddSignalR();
+
 // =======================
 // CORS
 // =======================
@@ -163,7 +172,8 @@ builder.Services.AddCors(options =>
     {
         policy.AllowAnyOrigin()
               .AllowAnyHeader()
-              .AllowAnyMethod();
+              .AllowAnyMethod()
+              .SetIsOriginAllowed(origin => true);
     });
 });
 builder.Services.AddMemoryCache();
@@ -216,5 +226,13 @@ app.UseAuthorization();
 app.MapControllers();
 app.MapHub<ChatHub>("/chatHub");
 app.MapFallbackToFile("/index.html");
+
+//if (app.Environment.IsDevelopment())
+//{
+//    app.UseSpa(spa =>
+//    {
+//        spa.UseProxyToSpaDevelopmentServer("http://localhost:5173");
+//    });
+//}
 
 app.Run();
