@@ -15,7 +15,7 @@ function CreateCategoryManagement() {
             isEditMode={!!id}
             cancelPath="/categorylist"
             initialData={{
-                name: "",
+                name: "", 
                 description: "",
                 icon: "",
                 link: ""

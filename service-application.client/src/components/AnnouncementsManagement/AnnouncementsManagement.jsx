@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import DataTable from "../../components/Common/DataTable";
+import DataTable from "../Common/DataTable";
 import {
     getAllAnnouncements,
     createAnnouncement,

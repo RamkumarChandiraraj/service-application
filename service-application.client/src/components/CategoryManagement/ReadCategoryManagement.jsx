@@ -19,7 +19,7 @@ function ReadCategoryManagement() {
     return (
         <View
             title="Category Details"
-            data={category}
+            data={category} 
             fields={[
                 { name: "id", label: "ID" },
                 { name: "name", label: "Name" },

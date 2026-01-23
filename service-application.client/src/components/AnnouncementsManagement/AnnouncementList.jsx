@@ -1,15 +1,17 @@
-﻿import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import DataTable from "../../components/Common/DataTable";
 import AlertToast from "../../components/Common/AlertToast";
-import { getAllCategories, deleteCategory } from "../../api/categoryApi";
+import {
+    getAllAnnouncements,
+    deleteAnnouncement
+} from "../../api/announcementApi";
 
-function CategoryList() {
+function AnnouncementList() {
     const [data, setData] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
-    // ✅ TOAST STATE
     const [toast, setToast] = useState({
         show: false,
         message: "",
@@ -19,48 +21,45 @@ function CategoryList() {
     const navigate = useNavigate();
 
     useEffect(() => {
-        fetchCategories();
+        fetchAnnouncements();
     }, []);
-     
-    const fetchCategories = async () => {
+
+    const fetchAnnouncements = async () => {
         try {
-            const res = await getAllCategories();
+            const res = await getAllAnnouncements();
             setData(res.data || res || []);
         } catch (err) {
-            setError(err.message || "Failed to load categories");
+            setError(err.message || "Failed to load announcements");
         } finally {
             setLoading(false);
         }
     };
 
-    /* 🔴 DELETE HANDLER WITH RED SUCCESS TOAST */
     const handleDelete = async (id) => {
-        if (!window.confirm("Delete this category?")) return;
+        if (!window.confirm("Delete this announcement?")) return;
 
         try {
-            await deleteCategory(id);
-
+            await deleteAnnouncement(id);
             setData((prev) => prev.filter((x) => x.id !== id));
 
             setToast({
                 show: true,
-                message: "Category deleted successfully!",
-                type: "success", // ✅ GREEN
+                message: "Announcement deleted successfully!",
+                type: "success",
             });
         } catch {
             setToast({
                 show: true,
-                message: "Failed to delete category",
-                type: "error", // ✅ RED
+                message: "Failed to delete announcement",
+                type: "error",
             });
         }
     };
 
-
     const columns = useMemo(
         () => [
             { header: "ID", field: "id" },
-            { header: "Name", field: "name" },
+            { header: "Title", field: "title" },
             { header: "Description", field: "description" },
             {
                 header: "Actions",
@@ -69,14 +68,14 @@ function CategoryList() {
                 body: (row) => (
                     <div className="d-flex gap-2 flex-wrap">
                         <Link
-                            to={`/readcategory/${row.id}`}
+                            to={`/readannouncement/${row.id}`}
                             className="btn btn-info btn-sm"
                         >
                             View
                         </Link>
 
                         <Link
-                            to={`/createcategorymanagement/${row.id}`}
+                            to={`/createannouncement/${row.id}`}
                             className="btn btn-primary btn-sm"
                         >
                             Edit
@@ -95,23 +94,21 @@ function CategoryList() {
         []
     );
 
-    if (loading) return <p className="text-center mt-5">Loading categories...</p>;
-    if (error)
-        return <p className="text-center mt-5 text-danger">{error}</p>;
+    if (loading) return <p className="text-center mt-5">Loading announcements...</p>;
+    if (error) return <p className="text-center mt-5 text-danger">{error}</p>;
 
     return (
         <>
             <div className="container py-4">
                 <DataTable
-                    title="Categories"
+                    title="Announcements"
                     data={data}
                     columns={columns}
-                    searchFields={["name", "description"]}
-                    onAdd={() => navigate("/createcategorymanagement")}
+                    searchFields={["title", "description"]}
+                    onAdd={() => navigate("/createannouncement")}
                 />
             </div>
 
-            {/* ✅ TOAST */}
             <AlertToast
                 show={toast.show}
                 message={toast.message}
@@ -122,4 +119,4 @@ function CategoryList() {
     );
 }
 
-export default CategoryList;
+export default AnnouncementList;

@@ -42,8 +42,13 @@ import SearchVendors from "./components/Pages/SearchVendorsPage";
 //ForgotPassWord
 import ForgotPasswordModal from "./components/ForgotPasswordManagement/ForgotPasswordModal";
 import VerifyOtpModal from "./components/ForgotPasswordManagement/VerifyOtpModal";
+
+
 //Annoucements Management
-import AnnouncementsManagement from "./components/AnnouncementsManagement/AnnouncementsManagement";
+//import AnnouncementsManagement from "./components/AnnouncementsManagement/AnnouncementsManagement";
+import AnnouncementList from "./announcements/AnnouncementList";
+import CreateAnnouncement from "./announcements/CreateAnnouncement";
+import ReadAnnouncement from "./announcements/ReadAnnouncement";
 
 function App() {
   return (
@@ -122,9 +127,26 @@ function App() {
 
 
               {/* Announcements Management */}
-              <Route path="/announcements" element={<AnnouncementsManagement />} />
-              <Route path="/announcement/view/:id" element={<ViewAnnouncement />} />
-              <Route path="/announcement/edit/:id" element={<AnnouncementsManagement />} />
+               {/*<Route path="/announcements" element={<AnnouncementsManagement />} />*/}
+
+              <Route path="/announcementlist" element={<AnnouncementList />} />
+
+              <Route
+                  path="/createannouncementmanagement"
+                  element={<CreateAnnouncement />}
+              />
+
+              <Route
+                  path="/createannouncementmanagement/:id"
+                  element={<CreateAnnouncement />}
+              />
+
+              <Route
+                  path="/readannouncement/:id"
+                  element={<ReadAnnouncement />}
+              />
+
+
 
 
             </Routes>
