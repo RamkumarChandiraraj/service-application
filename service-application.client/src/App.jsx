@@ -123,6 +123,9 @@ function App() {
 
               {/* Announcements Management */}
               <Route path="/announcements" element={<AnnouncementsManagement />} />
+              <Route path="/announcement/view/:id" element={<ViewAnnouncement />} />
+              <Route path="/announcement/edit/:id" element={<AnnouncementsManagement />} />
+
 
             </Routes>
 
