@@ -46,9 +46,11 @@ import VerifyOtpModal from "./components/ForgotPasswordManagement/VerifyOtpModal
 
 //Annoucements Management
 //import AnnouncementsManagement from "./components/AnnouncementsManagement/AnnouncementsManagement";
-import AnnouncementList from "./announcements/AnnouncementList";
-import CreateAnnouncement from "./announcements/CreateAnnouncement";
-import ReadAnnouncement from "./announcements/ReadAnnouncement";
+// Announcements Management
+import AnnouncementList from "./components/AnnouncementsManagement/AnnouncementList";
+import CreateAnnouncement from "./components/AnnouncementsManagement/CreateAnnouncement";
+import ReadAnnouncement from "./components/AnnouncementsManagement/ReadAnnouncement";
+
 
 function App() {
   return (
@@ -129,17 +131,11 @@ function App() {
               {/* Announcements Management */}
                {/*<Route path="/announcements" element={<AnnouncementsManagement />} />*/}
 
-              <Route path="/announcementlist" element={<AnnouncementList />} />
+              <Route path="/announcements" element={<AnnouncementList />} />
 
-              <Route
-                  path="/createannouncementmanagement"
-                  element={<CreateAnnouncement />}
-              />
+              <Route path="/createannouncement" element={<CreateAnnouncement />} />
 
-              <Route
-                  path="/createannouncementmanagement/:id"
-                  element={<CreateAnnouncement />}
-              />
+              <Route path="/createannouncement/:id" element={<CreateAnnouncement />} />
 
               <Route
                   path="/readannouncement/:id"

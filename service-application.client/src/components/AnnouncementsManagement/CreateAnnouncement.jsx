@@ -4,7 +4,8 @@ import {
     createAnnouncement,
     updateAnnouncement,
     getAnnouncementById
-} from "../../api/announcementApi";
+}from "../../api/AnnouncementsApi";
+
 
 function CreateAnnouncement() {
     const { id } = useParams();

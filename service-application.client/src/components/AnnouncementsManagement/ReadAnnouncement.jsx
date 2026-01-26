@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import View from "../../components/common/View";
-import { getAnnouncementById } from "../../api/announcementApi";
+import { getAnnouncementById } from "../../api/AnnouncementsApi";
 
 function ReadAnnouncement() {
     const { id } = useParams();

@@ -5,7 +5,7 @@ import AlertToast from "../../components/Common/AlertToast";
 import {
     getAllAnnouncements,
     deleteAnnouncement
-} from "../../api/announcementApi";
+} from "../../api/AnnouncementsApi";
 
 function AnnouncementList() {
     const [data, setData] = useState([]);
